@@ -4,8 +4,9 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo"
 	"github.com/spf13/viper"
-	"github.com/szokodiakos/r8m8/leaderboard"
+	"github.com/szokodiakos/r8m8/slack"
 )
 
 func setupConfig() {
@@ -24,9 +25,13 @@ func setupConfig() {
 	}
 }
 
+func setupHTTPServer() {
+	e := echo.New()
+	slack.NewHTTPController(e, slack.NewService())
+	e.Logger.Fatal(e.Start(viper.GetString("port")))
+}
+
 func main() {
 	setupConfig()
-
-	lb := leaderboard.NewService(leaderboard.NewSlackPrinter(viper.GetString("webhook")))
-	lb.GetLeaderboard()
+	setupHTTPServer()
 }
