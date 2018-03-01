@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"github.com/spf13/viper"
 	echoExtensions "github.com/szokodiakos/r8m8/echo"
 )
 
@@ -15,7 +16,6 @@ type HTTPController struct {
 
 func (c *HTTPController) postSlackMatch(context echo.Context) error {
 	body := context.Get("parsedBody").(string)
-
 	match, err := c.slackMatchService.ParseMatch(body)
 	if err != nil {
 		return err
@@ -32,8 +32,8 @@ func NewHTTPController(e *echo.Echo, slackMatchService MatchService) *HTTPContro
 	handler := &HTTPController{
 		slackMatchService: slackMatchService,
 	}
-
-	e.POST("/slack/match", handler.postSlackMatch, echoExtensions.BodyParser())
-
+	verificationToken := viper.GetString("slack_verification_token")
+	slackRoutes := e.Group("/slack", echoExtensions.BodyParser(), echoExtensions.SlackTokenVerifier(verificationToken))
+	slackRoutes.POST("/match", handler.postSlackMatch)
 	return handler
 }
