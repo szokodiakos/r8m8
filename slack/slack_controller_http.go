@@ -21,7 +21,10 @@ func (c *HTTPController) postSlackMatch(context echo.Context) error {
 		return err
 	}
 	fmt.Println(match)
-	return context.JSON(http.StatusOK, nil)
+	slackMessageResponse := MessageResponse{
+		Text: "hello",
+	}
+	return context.JSON(http.StatusOK, slackMessageResponse)
 }
 
 // NewHTTPController creates a HTTPController

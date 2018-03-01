@@ -95,3 +95,44 @@ func (ms *matchService) getLoserPlayers(players []player.Player) []player.Player
 func NewMatchService() MatchService {
 	return &matchService{}
 }
+
+// func (ms *matchService) openDialog(token string, dialog Dialog) error {
+// 	marshalledDialog, _ := json.Marshal(dialog)
+
+// 	client := &http.Client{}
+// 	req, _ := http.NewRequest("POST", "https://slack.com/api/dialog.open", bytes.NewReader(marshalledDialog))
+// 	req.Header.Add("Content-Type", "application/json")
+// 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+// 	_, err := client.Do(req)
+
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// // GetMatchDialog returns a Slack dialog of Match data
+// func (ms *matchService) getMatchDialog(triggerID string, callbackID string) Dialog {
+// 	return Dialog{
+// 		TriggerID: triggerID,
+// 		Dialog: DialogData{
+// 			CallbackID:  callbackID,
+// 			Title:       "Match Details",
+// 			SubmitLabel: "Add",
+// 			Elements: []DialogDataElement{
+// 				DialogDataElement{
+// 					Type:  "text",
+// 					Label: "Winner Team Members",
+// 					Name:  "winner_team_members",
+// 				},
+// 				DialogDataElement{
+// 					Type:  "text",
+// 					Label: "Loser Team Members",
+// 					Name:  "loser_team_members",
+// 				},
+// 			},
+// 		},
+// 	}
+// }
