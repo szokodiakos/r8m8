@@ -1,4 +1,4 @@
-package middleware
+package echo
 
 import (
 	"io/ioutil"

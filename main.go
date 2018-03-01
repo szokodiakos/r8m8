@@ -27,7 +27,7 @@ func setupConfig() {
 
 func setupHTTPServer() {
 	e := echo.New()
-	slack.NewHTTPController(e, slack.NewService())
+	slack.NewHTTPController(e, slack.NewMatchService())
 	e.Logger.Fatal(e.Start(viper.GetString("port")))
 }
 
