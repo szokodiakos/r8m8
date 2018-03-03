@@ -16,8 +16,8 @@ func (mrs *matchRepositorySQL) Create() error {
 	return nil
 }
 
-// NewRepository factory
-func NewRepository(db *sql.DB) Repository {
+// NewRepositorySQL factory
+func NewRepositorySQL(db *sql.DB) Repository {
 	return &matchRepositorySQL{
 		db: db,
 	}

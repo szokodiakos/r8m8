@@ -40,8 +40,16 @@ func (ts *transactionService) Rollback(tr Transaction) error {
 	return nil
 }
 
-// NewService factory
-func NewService(db *sql.DB) Service {
+func (ts *transactionService) CommitOrRollback(tr Transaction) {
+	if r := recover(); r != nil {
+		ts.Rollback(tr)
+	} else {
+		ts.Commit(tr)
+	}
+}
+
+// NewServiceSQL factory
+func NewServiceSQL(db *sql.DB) Service {
 	return &transactionService{
 		db: db,
 	}

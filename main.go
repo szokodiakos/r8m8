@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/szokodiakos/r8m8/transaction"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
 	"github.com/spf13/viper"
@@ -24,8 +26,9 @@ func main() {
 
 	sqlMigrate.Execute(db, sqlDialect)
 
-	matchRepository := match.NewRepository(db)
-	matchService := match.NewService(matchRepository)
+	matchRepository := match.NewRepositorySQL(db)
+	transactionService := transaction.NewServiceSQL(db)
+	matchService := match.NewService(transactionService, matchRepository)
 	matchSlackService := match.NewSlackService(matchService)
 
 	e := echo.New()
