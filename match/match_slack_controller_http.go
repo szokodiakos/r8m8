@@ -3,6 +3,8 @@ package match
 import (
 	"net/http"
 
+	"github.com/szokodiakos/r8m8/slack"
+
 	"github.com/labstack/echo"
 	echoExtensions "github.com/szokodiakos/r8m8/echo"
 )
@@ -22,11 +24,13 @@ func (sch *SlackControllerHTTP) postSlackMatch(context echo.Context) error {
 }
 
 // NewSlackControllerHTTP factory
-func NewSlackControllerHTTP(e *echo.Echo, matchSlackService SlackService, verificationToken string) *SlackControllerHTTP {
+func NewSlackControllerHTTP(e *echo.Echo, matchSlackService SlackService, slackService slack.Service, verificationToken string) *SlackControllerHTTP {
 	handler := &SlackControllerHTTP{
 		matchSlackService: matchSlackService,
 	}
-	slackRoutes := e.Group("/slack", echoExtensions.BodyParser(), echoExtensions.SlackTokenVerifier(verificationToken))
+	bodyParser := echoExtensions.BodyParser()
+	slackTokenVerifier := echoExtensions.SlackTokenVerifier(slackService, verificationToken)
+	slackRoutes := e.Group("/slack", bodyParser, slackTokenVerifier)
 	slackRoutes.POST("/match", handler.postSlackMatch)
 	return handler
 }

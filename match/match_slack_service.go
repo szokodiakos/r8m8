@@ -1,7 +1,7 @@
 package match
 
 import (
-	"net/url"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -17,12 +17,14 @@ type SlackService interface {
 
 type matchSlackService struct {
 	matchService Service
+	slackService slack.Service
 }
 
 func (sms *matchSlackService) AddMatch(values string) (slack.MessageResponse, error) {
+	fmt.Println(values)
 	var messageResponse slack.MessageResponse
-	rawPlayers := sms.parseValues(values)
-	players, err := sms.parsePlayers(rawPlayers)
+	requestValues := sms.slackService.ParseRequestValues(values)
+	players, err := sms.parsePlayers(requestValues)
 	if err != nil {
 		return messageResponse, err
 	}
@@ -39,15 +41,8 @@ func (sms *matchSlackService) AddMatch(values string) (slack.MessageResponse, er
 	return messageResponse, nil
 }
 
-func (sms *matchSlackService) parseValues(values string) []string {
-	parsedValues, _ := url.ParseQuery(values)
-	text := parsedValues.Get("text")
-	decodedText, _ := url.QueryUnescape(text)
-	rawPlayers := strings.Split(decodedText, " ")
-	return rawPlayers
-}
-
-func (sms *matchSlackService) parsePlayers(rawPlayers []string) ([]player.Player, error) {
+func (sms *matchSlackService) parsePlayers(requestValues slack.RequestValues) ([]player.Player, error) {
+	rawPlayers := strings.Split(requestValues.Text, " ")
 	players := make([]player.Player, len(rawPlayers))
 	for i, rawPlayer := range rawPlayers {
 		player, err := sms.parsePlayer(rawPlayer)
@@ -97,8 +92,9 @@ func (sms *matchSlackService) getLoserPlayers(players []player.Player) []player.
 }
 
 // NewSlackService factory
-func NewSlackService(matchService Service) SlackService {
+func NewSlackService(matchService Service, slackService slack.Service) SlackService {
 	return &matchSlackService{
 		matchService: matchService,
+		slackService: slackService,
 	}
 }

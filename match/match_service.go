@@ -19,7 +19,8 @@ func (ms *matchService) AddMatch(match Match) (Match, error) {
 	if err != nil {
 		return createdMatch, err
 	}
-	defer ms.transactionService.CommitOrRollback(tr)
+
+	_ = ms.transactionService.Commit(tr)
 
 	return createdMatch, nil
 }

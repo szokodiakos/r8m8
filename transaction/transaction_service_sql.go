@@ -17,7 +17,7 @@ func (ts *transactionService) Start() (Transaction, error) {
 		return tr, errors.NewTransactionError(err)
 	}
 	tr = Transaction{
-		transaction: &tx,
+		transaction: tx,
 	}
 	return tr, nil
 }
@@ -38,14 +38,6 @@ func (ts *transactionService) Rollback(tr Transaction) error {
 		return errors.NewTransactionError(err)
 	}
 	return nil
-}
-
-func (ts *transactionService) CommitOrRollback(tr Transaction) {
-	if r := recover(); r != nil {
-		ts.Rollback(tr)
-	} else {
-		ts.Commit(tr)
-	}
 }
 
 // NewServiceSQL factory
