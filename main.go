@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/slack"
 
 	"github.com/szokodiakos/r8m8/transaction"
@@ -32,7 +33,12 @@ func main() {
 	transactionService := transaction.NewServiceSQL(db)
 	matchService := match.NewService(transactionService, matchRepository)
 	slackService := slack.NewService()
-	matchSlackService := match.NewSlackService(matchService, slackService)
+	playerSlackRepository := player.NewSlackRepository(db)
+	playerRepository := player.NewRepository(db)
+	playerService := player.NewService(playerRepository)
+	playerSlackParserService := player.NewSlackParserService()
+	playerSlackService := player.NewSlackService(playerSlackRepository, transactionService, playerService, playerSlackParserService)
+	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService)
 
 	e := echo.New()
 	verificationToken := viper.GetString("slack_verification_token")

@@ -2,6 +2,6 @@ package player
 
 // Player representation
 type Player struct {
-	ID   string
-	Name string
+	ID     int64
+	Rating int
 }

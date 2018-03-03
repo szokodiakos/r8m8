@@ -9,7 +9,13 @@ type matchRepositorySQL struct {
 }
 
 func (mrs *matchRepositorySQL) Create() error {
-	_, err := mrs.db.Exec("INSERT INTO matches (created_at) VALUES (utc_timestamp())")
+	query := `
+		INSERT INTO matches
+			(created_at)
+		VALUES
+			(utc_timestamp());
+	`
+	_, err := mrs.db.Exec(query)
 	if err != nil {
 		return err
 	}

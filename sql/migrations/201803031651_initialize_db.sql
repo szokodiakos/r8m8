@@ -10,7 +10,7 @@ CREATE TABLE matches (
 
 CREATE TABLE players (
   id int NOT NULL AUTO_INCREMENT,
-  rating int NOT NULL,
+  rating int DEFAULT 1500,
   PRIMARY KEY (id)
 );
 
@@ -24,8 +24,9 @@ CREATE TABLE match_details (
 
 CREATE TABLE slack_players (
   player_id int NOT NULL,
-  slack_user_id varchar(255) NOT NULL,
-  slack_team_id varchar(255) NOT NULL,
+  user_id varchar(255) NOT NULL,
+  username varchar(255) NOT NULL,
+  team_id varchar(255) NOT NULL,
   FOREIGN KEY (player_id) REFERENCES players(id)
 );
 

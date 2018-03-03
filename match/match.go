@@ -1,9 +1,9 @@
 package match
 
-import "github.com/szokodiakos/r8m8/player"
+import "time"
 
 // Match struct
 type Match struct {
-	WinnerPlayers []player.Player
-	LoserPlayers  []player.Player
+	ID        int64
+	CreatedAt time.Time
 }

@@ -3,6 +3,7 @@ package player
 // Slack representation
 type Slack struct {
 	Player
-	userID string
-	teamID string
+	UserID   string
+	Username string
+	TeamID   string
 }

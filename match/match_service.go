@@ -4,7 +4,7 @@ import "github.com/szokodiakos/r8m8/transaction"
 
 // Service interface
 type Service interface {
-	AddMatch(match Match) (Match, error)
+	AddMatch() (Match, error)
 }
 
 type matchService struct {
@@ -12,7 +12,7 @@ type matchService struct {
 	repository         Repository
 }
 
-func (ms *matchService) AddMatch(match Match) (Match, error) {
+func (ms *matchService) AddMatch() (Match, error) {
 	var createdMatch Match
 
 	tr, err := ms.transactionService.Start()
