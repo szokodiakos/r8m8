@@ -1,0 +1,4 @@
+{
+  "port": ":13337",
+  "sql_dialect": "mysql"
+}
