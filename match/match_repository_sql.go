@@ -8,18 +8,26 @@ type matchRepositorySQL struct {
 	db *sql.DB
 }
 
-func (mrs *matchRepositorySQL) Create() error {
+func (mrs *matchRepositorySQL) Create() (int64, error) {
+	var createdID int64
 	query := `
 		INSERT INTO matches
 			(created_at)
 		VALUES
 			(utc_timestamp());
 	`
-	_, err := mrs.db.Exec(query)
+
+	res, err := mrs.db.Exec(query)
 	if err != nil {
-		return err
+		return createdID, err
 	}
-	return nil
+
+	createdID, err = res.LastInsertId()
+	if err != nil {
+		return createdID, err
+	}
+
+	return createdID, nil
 }
 
 // NewRepositorySQL factory

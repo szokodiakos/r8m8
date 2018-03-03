@@ -2,5 +2,5 @@ package match
 
 // Repository interface
 type Repository interface {
-	Create() error
+	Create() (int64, error)
 }

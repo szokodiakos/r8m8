@@ -29,38 +29,27 @@ func (mss *matchSlackService) AddMatch(values string) (slack.MessageResponse, er
 		return messageResponse, err
 	}
 
-	_, err = mss.playerSlackService.GetOrAddSlackPlayers(text, teamID)
+	slackPlayers, err := mss.playerSlackService.GetOrAddSlackPlayers(text, teamID)
 	if err != nil {
 		mss.transactionService.Rollback(tr)
 		return messageResponse, err
 	}
 
-	// if sms.isSlackPlayerCountUneven(slackPlayers) {
-	// 	return messageResponse, errors.NewUnevenMatchPlayersError()
-	// }
-	// // winnerPlayers := sms.getWinnerPlayers(players)
-	// // loserPlayers := sms.getLoserPlayers(players)
-	// match, err := sms.matchService.AddMatch()
-	// if err != nil {
-	// 	return messageResponse, err
-	// }
+	players := mss.getPlayers(slackPlayers)
+	mss.matchService.Add(players)
 
 	return messageResponse, nil
 }
 
-// func (sms *matchSlackService) isSlackPlayerCountUneven(players []player.Slack) bool {
-// 	return (len(players) % 2) != 0
-// }
+func (mss *matchSlackService) getPlayers(slackPlayers []player.Slack) []player.Player {
+	players := make([]player.Player, len(slackPlayers))
 
-// func (sms *matchSlackService) getWinnerPlayers(players []player.Player) []player.Player {
-// 	lowerhalfPlayers := players[:(len(players) / 2)]
-// 	return lowerhalfPlayers
-// }
+	for i := range slackPlayers {
+		players[i] = slackPlayers[i].Player
+	}
 
-// func (sms *matchSlackService) getLoserPlayers(players []player.Player) []player.Player {
-// 	upperhalfPlayers := players[(len(players) / 2):]
-// 	return upperhalfPlayers
-// }
+	return players
+}
 
 // NewSlackService factory
 func NewSlackService(matchService Service, slackService slack.Service, playerSlackService player.SlackService, transactionService transaction.Service) SlackService {
