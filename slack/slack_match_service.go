@@ -21,17 +21,20 @@ type matchService struct {
 func (ms *matchService) ParseMatch(values string) (match.Match, error) {
 	var parsedMatch match.Match
 	rawPlayers := ms.parseValues(values)
-	if ms.isPlayerCountUneven(rawPlayers) {
+	players, err := ms.parsePlayers(rawPlayers)
+	if err != nil {
+		return parsedMatch, err
+	}
+	if ms.isPlayerCountUneven(players) {
 		return parsedMatch, errors.NewUnevenMatchPlayersError()
 	}
-	players, err := ms.parsePlayers(rawPlayers)
 	winnerPlayers := ms.getWinnerPlayers(players)
 	loserPlayers := ms.getLoserPlayers(players)
 	parsedMatch = match.Match{
 		WinnerPlayers: winnerPlayers,
 		LoserPlayers:  loserPlayers,
 	}
-	return parsedMatch, err
+	return parsedMatch, nil
 }
 
 func (ms *matchService) parseValues(values string) []string {
@@ -40,10 +43,6 @@ func (ms *matchService) parseValues(values string) []string {
 	decodedText, _ := url.QueryUnescape(text)
 	rawPlayers := strings.Split(decodedText, " ")
 	return rawPlayers
-}
-
-func (ms *matchService) isPlayerCountUneven(players []string) bool {
-	return (len(players) % 2) != 0
 }
 
 func (ms *matchService) parsePlayers(rawPlayers []string) ([]player.Player, error) {
@@ -79,6 +78,10 @@ func (ms *matchService) isRawPlayerInvalid(results []string) bool {
 		return true
 	}
 	return false
+}
+
+func (ms *matchService) isPlayerCountUneven(players []player.Player) bool {
+	return (len(players) % 2) != 0
 }
 
 func (ms *matchService) getWinnerPlayers(players []player.Player) []player.Player {
