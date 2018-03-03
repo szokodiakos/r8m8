@@ -96,33 +96,24 @@ func (pss *playerSlackService) addMultiple(playerIDs []int64, slackPlayers []Sla
 
 func (pss *playerSlackService) addMissingSlackPlayers(repositorySlackPlayers []Slack, slackPlayers []Slack) error {
 	missingSlackPlayers := pss.getMissingSlackPlayers(repositorySlackPlayers, slackPlayers)
-	tr, err := pss.transactionService.Start()
-	if err != nil {
-		return err
-	}
-
 	missingSlackPlayerCount := len(missingSlackPlayers)
 	addedPlayerIDs, err := pss.playerService.AddMultiple(missingSlackPlayerCount)
 	if err != nil {
-		pss.transactionService.Rollback(tr)
 		return err
 	}
 
 	err = pss.addMultiple(addedPlayerIDs, missingSlackPlayers)
 	if err != nil {
-		pss.transactionService.Rollback(tr)
 		return err
 	}
 
-	pss.transactionService.Commit(tr)
 	return nil
 }
 
 // NewSlackService factory
-func NewSlackService(playerSlackRepository SlackRepository, transactionService transaction.Service, playerService Service, playerSlackParserService SlackParserService) SlackService {
+func NewSlackService(playerSlackRepository SlackRepository, playerService Service, playerSlackParserService SlackParserService) SlackService {
 	return &playerSlackService{
 		playerSlackRepository:    playerSlackRepository,
-		transactionService:       transactionService,
 		playerService:            playerService,
 		playerSlackParserService: playerSlackParserService,
 	}

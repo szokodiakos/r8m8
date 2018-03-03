@@ -6,7 +6,6 @@ import (
 
 	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/slack"
-
 	"github.com/szokodiakos/r8m8/transaction"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -30,15 +29,15 @@ func main() {
 	sqlMigrate.Execute(db, sqlDialect)
 
 	matchRepository := match.NewRepositorySQL(db)
-	transactionService := transaction.NewServiceSQL(db)
-	matchService := match.NewService(transactionService, matchRepository)
+	matchService := match.NewService(matchRepository)
 	slackService := slack.NewService()
 	playerSlackRepository := player.NewSlackRepository(db)
 	playerRepository := player.NewRepository(db)
 	playerService := player.NewService(playerRepository)
 	playerSlackParserService := player.NewSlackParserService()
-	playerSlackService := player.NewSlackService(playerSlackRepository, transactionService, playerService, playerSlackParserService)
-	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService)
+	playerSlackService := player.NewSlackService(playerSlackRepository, playerService, playerSlackParserService)
+	transactionService := transaction.NewServiceSQL(db)
+	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, transactionService)
 
 	e := echo.New()
 	verificationToken := viper.GetString("slack_verification_token")
