@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-// NewInvalidVerificationTokenError creates an error
+// NewInvalidVerificationTokenError factory
 func NewInvalidVerificationTokenError() error {
 	return echo.NewHTTPError(http.StatusUnauthorized, "Invalid verification token")
 }
