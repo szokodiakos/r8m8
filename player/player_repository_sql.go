@@ -28,6 +28,17 @@ func (prs *playerRepositorySQL) Create() (int64, error) {
 	return createdID, nil
 }
 
+func (prs *playerRepositorySQL) UpdateRatingByID(ID int64, rating int) error {
+	query := `
+		UPDATE players
+		SET rating = ?
+		WHERE id = ?
+	`
+
+	_, err := prs.db.Exec(query, ID, rating)
+	return err
+}
+
 // NewRepository factory
 func NewRepository(db *sql.DB) Repository {
 	return &playerRepositorySQL{

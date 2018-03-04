@@ -3,6 +3,7 @@ package player
 // Service interface
 type Service interface {
 	AddMultiple(count int) ([]int64, error)
+	UpdateRatingsForMultiple(players []Player) error
 }
 
 type playerService struct {
@@ -22,6 +23,16 @@ func (ps *playerService) AddMultiple(count int) ([]int64, error) {
 	}
 
 	return playerIDs, nil
+}
+
+func (ps *playerService) UpdateRatingsForMultiple(players []Player) error {
+	for i := range players {
+		if err := ps.playerRepository.UpdateRatingByID(players[i].ID, players[i].Rating); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // NewService factory

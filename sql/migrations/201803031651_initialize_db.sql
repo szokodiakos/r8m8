@@ -30,6 +30,9 @@ CREATE TABLE slack_players (
   FOREIGN KEY (player_id) REFERENCES players(id)
 );
 
+CREATE INDEX slack_players_user_id_team_id
+ON slack_players (user_id, team_id);
+
 -- +migrate Down
 
 DROP TABLE slack_players;

@@ -22,8 +22,9 @@ func (psrs *playerSlackRepositorySQL) GetMultipleByUserIDs(userIDs []string, tea
 			slack_players sp
 		WHERE
 			sp.user_id IN (?) AND
-			sp.team_id = ?
+			sp.team_id = ?;
 	`
+
 	rows, err := psrs.db.Query(query, userIDs, teamID)
 	if err != nil {
 		return slackPlayers, err

@@ -20,7 +20,11 @@ type matchSlackService struct {
 
 func (mss *matchSlackService) AddMatch(values string) (slack.MessageResponse, error) {
 	var messageResponse slack.MessageResponse
-	requestValues := mss.slackService.ParseRequestValues(values)
+	requestValues, err := mss.slackService.ParseRequestValues(values)
+	if err != nil {
+		return messageResponse, err
+	}
+
 	text := requestValues.Text
 	teamID := requestValues.TeamID
 
@@ -36,9 +40,15 @@ func (mss *matchSlackService) AddMatch(values string) (slack.MessageResponse, er
 	}
 
 	players := mss.getPlayers(slackPlayers)
-	mss.matchService.Add(players)
+	err = mss.matchService.Add(players)
+	if err != nil {
+		mss.transactionService.Rollback(tr)
+		return messageResponse, err
+	}
 
-	return messageResponse, nil
+	err = mss.transactionService.Commit(tr)
+	messageResponse = mss.slackService.CreateMessageResponse("Success")
+	return messageResponse, err
 }
 
 func (mss *matchSlackService) getPlayers(slackPlayers []player.Slack) []player.Player {

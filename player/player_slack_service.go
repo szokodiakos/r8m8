@@ -1,6 +1,8 @@
 package player
 
 import (
+	"fmt"
+
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -23,20 +25,29 @@ func (pss *playerSlackService) GetOrAddSlackPlayers(text string, teamID string) 
 	}
 
 	slackPlayerUserIDs := pss.getSlackPlayersUserIDs(slackPlayers)
+	fmt.Println(1)
 	repositorySlackPlayers, err := pss.playerSlackRepository.GetMultipleByUserIDs(slackPlayerUserIDs, teamID)
 	if err != nil {
+		fmt.Println("thats an error", err)
 		return repositorySlackPlayers, err
 	}
 
+	fmt.Println(2)
 	if pss.isSlackPlayerMissingFromRepository(repositorySlackPlayers, slackPlayers) {
-		pss.addMissingSlackPlayers(repositorySlackPlayers, slackPlayers)
+		missingSlackPlayers := pss.getMissingSlackPlayers(repositorySlackPlayers, slackPlayers)
+		fmt.Println(3)
+		err := pss.addMultiple(missingSlackPlayers)
+		if err != nil {
+			return missingSlackPlayers, err
+		}
 
+		fmt.Println(4)
 		repositorySlackPlayers, err = pss.playerSlackRepository.GetMultipleByUserIDs(slackPlayerUserIDs, teamID)
 		if err != nil {
 			return repositorySlackPlayers, err
 		}
 	}
-
+	fmt.Println(5)
 	return repositorySlackPlayers, nil
 }
 
@@ -79,7 +90,13 @@ func (pss *playerSlackService) getCounterpart(slackPlayer Slack, repositorySlack
 	return foundRepositorySlackPlayer
 }
 
-func (pss *playerSlackService) addMultiple(playerIDs []int64, slackPlayers []Slack) error {
+func (pss *playerSlackService) addMultiple(slackPlayers []Slack) error {
+	slackPlayersCount := len(slackPlayers)
+	playerIDs, err := pss.playerService.AddMultiple(slackPlayersCount)
+	if err != nil {
+		return err
+	}
+
 	for i, slackPlayer := range slackPlayers {
 		slackPlayer.Player = Player{
 			ID: playerIDs[i],
@@ -89,22 +106,6 @@ func (pss *playerSlackService) addMultiple(playerIDs []int64, slackPlayers []Sla
 		if err != nil {
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (pss *playerSlackService) addMissingSlackPlayers(repositorySlackPlayers []Slack, slackPlayers []Slack) error {
-	missingSlackPlayers := pss.getMissingSlackPlayers(repositorySlackPlayers, slackPlayers)
-	missingSlackPlayerCount := len(missingSlackPlayers)
-	addedPlayerIDs, err := pss.playerService.AddMultiple(missingSlackPlayerCount)
-	if err != nil {
-		return err
-	}
-
-	err = pss.addMultiple(addedPlayerIDs, missingSlackPlayers)
-	if err != nil {
-		return err
 	}
 
 	return nil

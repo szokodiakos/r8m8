@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/szokodiakos/r8m8/rating"
+
 	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/slack"
 	"github.com/szokodiakos/r8m8/transaction"
@@ -29,11 +31,14 @@ func main() {
 	sqlMigrate.Execute(db, sqlDialect)
 
 	matchRepository := match.NewRepositorySQL(db)
-	matchService := match.NewService(matchRepository)
-	slackService := slack.NewService()
-	playerSlackRepository := player.NewSlackRepository(db)
+	ratingService := rating.NewService()
+	matchDetailsRepository := match.NewDetailsRepositorySQL(db)
+	matchDetailsService := match.NewDetailsService(matchDetailsRepository)
 	playerRepository := player.NewRepository(db)
 	playerService := player.NewService(playerRepository)
+	matchService := match.NewService(matchRepository, ratingService, playerService, matchDetailsService)
+	slackService := slack.NewService()
+	playerSlackRepository := player.NewSlackRepository(db)
 	playerSlackParserService := player.NewSlackParserService()
 	playerSlackService := player.NewSlackService(playerSlackRepository, playerService, playerSlackParserService)
 	transactionService := transaction.NewServiceSQL(db)
