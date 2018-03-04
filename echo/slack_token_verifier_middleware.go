@@ -11,7 +11,11 @@ func SlackTokenVerifier(slackService slack.Service, verificationToken string) ec
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(context echo.Context) error {
 			values := context.Get("parsedBody").(string)
-			requestValues := slackService.ParseRequestValues(values)
+			requestValues, err := slackService.ParseRequestValues(values)
+			if err != nil {
+				return err
+			}
+
 			token := requestValues.Token
 			if token != verificationToken {
 				return errors.NewInvalidVerificationTokenError()
