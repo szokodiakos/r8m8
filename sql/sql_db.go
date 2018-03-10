@@ -8,8 +8,8 @@ import (
 // DB interface
 type DB interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
+	Query(query string, args ...interface{}) (*sql.Rows, error)
 	QueryRow(query string, args ...interface{}) *sql.Row
-	Prepare(query string) (*sql.Stmt, error)
 	Begin() (Transaction, error)
 }
 
@@ -22,14 +22,14 @@ func (d *db) Exec(query string, args ...interface{}) (sql.Result, error) {
 	return d.db.Exec(query, args...)
 }
 
+func (d *db) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	log.Println(query, args)
+	return d.db.Query(query, args...)
+}
+
 func (d *db) QueryRow(query string, args ...interface{}) *sql.Row {
 	log.Println(query, args)
 	return d.db.QueryRow(query, args...)
-}
-
-func (d *db) Prepare(query string) (*sql.Stmt, error) {
-	log.Println(query)
-	return d.db.Prepare(query)
 }
 
 func (d *db) Begin() (Transaction, error) {
