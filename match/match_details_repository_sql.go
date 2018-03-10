@@ -20,5 +20,7 @@ func (mdrs *matchDetailsRepositorySQL) Create(matchDetails Details) error {
 
 // NewDetailsRepositorySQL factory
 func NewDetailsRepositorySQL(db sql.DB) DetailsRepository {
-	return &matchDetailsRepositorySQL{}
+	return &matchDetailsRepositorySQL{
+		db: db,
+	}
 }
