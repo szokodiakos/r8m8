@@ -1,9 +1,9 @@
 package player
 
-import "database/sql"
+import "github.com/szokodiakos/r8m8/sql"
 
 type playerRepositorySQL struct {
-	db *sql.DB
+	db sql.DB
 }
 
 func (prs *playerRepositorySQL) Create() (int64, error) {
@@ -34,7 +34,7 @@ func (prs *playerRepositorySQL) UpdateRatingByID(ID int64, rating int) error {
 }
 
 // NewRepository factory
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db sql.DB) Repository {
 	return &playerRepositorySQL{
 		db: db,
 	}

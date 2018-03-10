@@ -1,13 +1,13 @@
 package transaction
 
 import (
-	"database/sql"
+	"github.com/szokodiakos/r8m8/sql"
 
 	"github.com/szokodiakos/r8m8/transaction/errors"
 )
 
 type transactionService struct {
-	db *sql.DB
+	db sql.DB
 }
 
 func (ts *transactionService) Start() (Transaction, error) {
@@ -23,7 +23,7 @@ func (ts *transactionService) Start() (Transaction, error) {
 }
 
 func (ts *transactionService) Commit(tr Transaction) error {
-	tx := tr.transaction.(*sql.Tx)
+	tx := tr.transaction.(sql.Transaction)
 	err := tx.Commit()
 	if err != nil {
 		return errors.NewTransactionError(err)
@@ -32,7 +32,7 @@ func (ts *transactionService) Commit(tr Transaction) error {
 }
 
 func (ts *transactionService) Rollback(tr Transaction) error {
-	tx := tr.transaction.(*sql.Tx)
+	tx := tr.transaction.(sql.Transaction)
 	err := tx.Rollback()
 	if err != nil {
 		return errors.NewTransactionError(err)
@@ -41,7 +41,7 @@ func (ts *transactionService) Rollback(tr Transaction) error {
 }
 
 // NewServiceSQL factory
-func NewServiceSQL(db *sql.DB) Service {
+func NewServiceSQL(db sql.DB) Service {
 	return &transactionService{
 		db: db,
 	}

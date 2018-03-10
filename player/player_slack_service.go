@@ -1,8 +1,6 @@
 package player
 
 import (
-	"fmt"
-
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -25,29 +23,23 @@ func (pss *playerSlackService) GetOrAddSlackPlayers(text string, teamID string) 
 	}
 
 	slackPlayerUserIDs := pss.getSlackPlayersUserIDs(slackPlayers)
-	fmt.Println(1)
 	repositorySlackPlayers, err := pss.playerSlackRepository.GetMultipleByUserIDs(slackPlayerUserIDs, teamID)
 	if err != nil {
-		fmt.Println("thats an error", err)
 		return repositorySlackPlayers, err
 	}
 
-	fmt.Println(2)
 	if pss.isSlackPlayerMissingFromRepository(repositorySlackPlayers, slackPlayers) {
 		missingSlackPlayers := pss.getMissingSlackPlayers(repositorySlackPlayers, slackPlayers)
-		fmt.Println(3)
 		err := pss.addMultiple(missingSlackPlayers)
 		if err != nil {
 			return missingSlackPlayers, err
 		}
 
-		fmt.Println(4)
 		repositorySlackPlayers, err = pss.playerSlackRepository.GetMultipleByUserIDs(slackPlayerUserIDs, teamID)
 		if err != nil {
 			return repositorySlackPlayers, err
 		}
 	}
-	fmt.Println(5)
 	return repositorySlackPlayers, nil
 }
 

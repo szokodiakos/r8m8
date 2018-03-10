@@ -1,13 +1,13 @@
 package player
 
 import (
-	"database/sql"
+	"github.com/szokodiakos/r8m8/sql"
 
 	"github.com/lib/pq"
 )
 
 type playerSlackRepositorySQL struct {
-	db *sql.DB
+	db sql.DB
 }
 
 func (psrs *playerSlackRepositorySQL) GetMultipleByUserIDs(userIDs []string, teamID string) ([]Slack, error) {
@@ -77,7 +77,7 @@ func (psrs *playerSlackRepositorySQL) Create(slackPlayer Slack) error {
 }
 
 // NewSlackRepository factory
-func NewSlackRepository(db *sql.DB) SlackRepository {
+func NewSlackRepository(db sql.DB) SlackRepository {
 	return &playerSlackRepositorySQL{
 		db: db,
 	}

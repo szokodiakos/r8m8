@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/szokodiakos/r8m8/config"
 	"github.com/szokodiakos/r8m8/match"
-	sqlMigrate "github.com/szokodiakos/r8m8/sql"
+	sqlDB "github.com/szokodiakos/r8m8/sql"
 )
 
 func main() {
@@ -28,20 +28,21 @@ func main() {
 		log.Fatal("Database connect error: ", err)
 	}
 
-	sqlMigrate.Execute(db, sqlDialect)
+	sqlDB.Execute(db, sqlDialect)
 
-	matchRepository := match.NewRepositorySQL(db)
+	database := sqlDB.NewSQLDB(db)
+	matchRepository := match.NewRepositorySQL(database)
 	ratingService := rating.NewService()
-	matchDetailsRepository := match.NewDetailsRepositorySQL(db)
+	matchDetailsRepository := match.NewDetailsRepositorySQL(database)
 	matchDetailsService := match.NewDetailsService(matchDetailsRepository)
-	playerRepository := player.NewRepository(db)
+	playerRepository := player.NewRepository(database)
 	playerService := player.NewService(playerRepository)
 	matchService := match.NewService(matchRepository, ratingService, playerService, matchDetailsService)
 	slackService := slack.NewService()
-	playerSlackRepository := player.NewSlackRepository(db)
+	playerSlackRepository := player.NewSlackRepository(database)
 	playerSlackParserService := player.NewSlackParserService()
 	playerSlackService := player.NewSlackService(playerSlackRepository, playerService, playerSlackParserService)
-	transactionService := transaction.NewServiceSQL(db)
+	transactionService := transaction.NewServiceSQL(database)
 	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, transactionService)
 
 	e := echo.New()

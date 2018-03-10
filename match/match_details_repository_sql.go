@@ -1,9 +1,9 @@
 package match
 
-import "database/sql"
+import "github.com/szokodiakos/r8m8/sql"
 
 type matchDetailsRepositorySQL struct {
-	db *sql.DB
+	db sql.DB
 }
 
 func (mdrs *matchDetailsRepositorySQL) Create(matchDetails Details) error {
@@ -19,6 +19,6 @@ func (mdrs *matchDetailsRepositorySQL) Create(matchDetails Details) error {
 }
 
 // NewDetailsRepositorySQL factory
-func NewDetailsRepositorySQL(db *sql.DB) DetailsRepository {
+func NewDetailsRepositorySQL(db sql.DB) DetailsRepository {
 	return &matchDetailsRepositorySQL{}
 }
