@@ -27,12 +27,7 @@ func (psrs *playerSlackRepositorySQL) GetMultipleByUserIDs(userIDs []string, tea
 			sp.team_id = $2;
 	`
 
-	stmt, err := psrs.db.Prepare(query)
-	if err != nil {
-		return slackPlayers, err
-	}
-
-	rows, err := stmt.Query(pq.Array(userIDs), teamID)
+	rows, err := psrs.db.Query(query, pq.Array(userIDs), teamID)
 	if err != nil {
 		return slackPlayers, err
 	}
@@ -65,7 +60,7 @@ func (psrs *playerSlackRepositorySQL) Create(slackPlayer Slack) error {
 		INSERT INTO slack_players
 			(player_id, user_id, username, team_id)
 		VALUES
-			(?, ?, ?, ?);
+			($1, $2, $3, $4);
 	`
 
 	_, err := psrs.db.Exec(query, slackPlayer.Player.ID, slackPlayer.UserID, slackPlayer.Username, slackPlayer.TeamID)

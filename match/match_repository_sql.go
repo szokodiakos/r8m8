@@ -12,7 +12,7 @@ func (mrs *matchRepositorySQL) Create() (int64, error) {
 		INSERT INTO matches
 			(created_at)
 		VALUES
-			(utc_timestamp())
+			(current_timestamp)
 		RETURNING id;
 	`
 
