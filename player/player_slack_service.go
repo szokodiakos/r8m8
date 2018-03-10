@@ -6,7 +6,7 @@ import (
 
 // SlackService interface
 type SlackService interface {
-	GetOrAddSlackPlayers(text string, teamID string) ([]Slack, error)
+	GetOrAddSlackPlayers(transaction transaction.Transaction, text string, teamID string) ([]Slack, error)
 }
 
 type playerSlackService struct {
@@ -16,26 +16,26 @@ type playerSlackService struct {
 	playerSlackParserService SlackParserService
 }
 
-func (pss *playerSlackService) GetOrAddSlackPlayers(text string, teamID string) ([]Slack, error) {
+func (pss *playerSlackService) GetOrAddSlackPlayers(transaction transaction.Transaction, text string, teamID string) ([]Slack, error) {
 	slackPlayers, err := pss.playerSlackParserService.Parse(text, teamID)
 	if err != nil {
 		return slackPlayers, err
 	}
 
 	slackPlayerUserIDs := pss.getSlackPlayersUserIDs(slackPlayers)
-	repositorySlackPlayers, err := pss.playerSlackRepository.GetMultipleByUserIDs(slackPlayerUserIDs, teamID)
+	repositorySlackPlayers, err := pss.playerSlackRepository.GetMultipleByUserIDs(transaction, slackPlayerUserIDs, teamID)
 	if err != nil {
 		return repositorySlackPlayers, err
 	}
 
 	if pss.isSlackPlayerMissingFromRepository(repositorySlackPlayers, slackPlayers) {
 		missingSlackPlayers := pss.getMissingSlackPlayers(repositorySlackPlayers, slackPlayers)
-		err := pss.addMultiple(missingSlackPlayers)
+		err := pss.addMultiple(transaction, missingSlackPlayers)
 		if err != nil {
 			return missingSlackPlayers, err
 		}
 
-		repositorySlackPlayers, err = pss.playerSlackRepository.GetMultipleByUserIDs(slackPlayerUserIDs, teamID)
+		repositorySlackPlayers, err = pss.playerSlackRepository.GetMultipleByUserIDs(transaction, slackPlayerUserIDs, teamID)
 		if err != nil {
 			return repositorySlackPlayers, err
 		}
@@ -82,9 +82,9 @@ func (pss *playerSlackService) getCounterpart(slackPlayer Slack, repositorySlack
 	return foundRepositorySlackPlayer
 }
 
-func (pss *playerSlackService) addMultiple(slackPlayers []Slack) error {
+func (pss *playerSlackService) addMultiple(transaction transaction.Transaction, slackPlayers []Slack) error {
 	slackPlayersCount := len(slackPlayers)
-	playerIDs, err := pss.playerService.AddMultiple(slackPlayersCount)
+	playerIDs, err := pss.playerService.AddMultiple(transaction, slackPlayersCount)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (pss *playerSlackService) addMultiple(slackPlayers []Slack) error {
 		slackPlayer.Player = Player{
 			ID: playerIDs[i],
 		}
-		err := pss.playerSlackRepository.Create(slackPlayer)
+		err := pss.playerSlackRepository.Create(transaction, slackPlayer)
 
 		if err != nil {
 			return err

@@ -4,11 +4,12 @@ import (
 	"github.com/szokodiakos/r8m8/match/errors"
 	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/rating"
+	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // Service interface
 type Service interface {
-	Add(players []player.Player) error
+	Add(transaction transaction.Transaction, players []player.Player) error
 }
 
 type matchService struct {
@@ -18,7 +19,7 @@ type matchService struct {
 	matchDetailsService DetailsService
 }
 
-func (ms *matchService) Add(players []player.Player) error {
+func (ms *matchService) Add(transaction transaction.Transaction, players []player.Player) error {
 	if ms.isPlayerCountUneven(players) {
 		return errors.NewUnevenMatchPlayersError()
 	}
@@ -28,16 +29,16 @@ func (ms *matchService) Add(players []player.Player) error {
 	adjustedWinnerPlayers, adjustedLoserPlayers := ms.ratingService.CalculateRating(winnerPlayers, loserPlayers)
 	adjustedPlayers := append(adjustedWinnerPlayers, adjustedLoserPlayers...)
 
-	if err := ms.playerService.UpdateRatingsForMultiple(adjustedPlayers); err != nil {
+	if err := ms.playerService.UpdateRatingsForMultiple(transaction, adjustedPlayers); err != nil {
 		return err
 	}
 
-	matchID, err := ms.matchRepository.Create()
+	matchID, err := ms.matchRepository.Create(transaction)
 	if err != nil {
 		return err
 	}
 
-	err = ms.matchDetailsService.AddMultiple(matchID, players, adjustedPlayers)
+	err = ms.matchDetailsService.AddMultiple(transaction, matchID, players, adjustedPlayers)
 	return err
 }
 

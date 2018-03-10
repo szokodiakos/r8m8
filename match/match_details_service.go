@@ -2,18 +2,19 @@ package match
 
 import (
 	"github.com/szokodiakos/r8m8/player"
+	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // DetailsService interface
 type DetailsService interface {
-	AddMultiple(matchID int64, players []player.Player, adjustedPlayers []player.Player) error
+	AddMultiple(transaction transaction.Transaction, matchID int64, players []player.Player, adjustedPlayers []player.Player) error
 }
 
 type matchDetailsService struct {
 	matchDetailsRepository DetailsRepository
 }
 
-func (mds *matchDetailsService) AddMultiple(matchID int64, players []player.Player, adjustedPlayers []player.Player) error {
+func (mds *matchDetailsService) AddMultiple(transaction transaction.Transaction, matchID int64, players []player.Player, adjustedPlayers []player.Player) error {
 	for i, player := range players {
 		ratingChange := mds.getRatingChange(player, adjustedPlayers[i])
 		matchDetails := Details{
@@ -22,7 +23,7 @@ func (mds *matchDetailsService) AddMultiple(matchID int64, players []player.Play
 			RatingChange: ratingChange,
 		}
 
-		if err := mds.matchDetailsRepository.Create(matchDetails); err != nil {
+		if err := mds.matchDetailsRepository.Create(transaction, matchDetails); err != nil {
 			return err
 		}
 	}

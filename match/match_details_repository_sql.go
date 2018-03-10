@@ -1,12 +1,14 @@
 package match
 
-import "github.com/szokodiakos/r8m8/sql"
+import (
+	"github.com/szokodiakos/r8m8/sql"
+	"github.com/szokodiakos/r8m8/transaction"
+)
 
 type matchDetailsRepositorySQL struct {
-	db sql.DB
 }
 
-func (mdrs *matchDetailsRepositorySQL) Create(matchDetails Details) error {
+func (mdrs *matchDetailsRepositorySQL) Create(transaction transaction.Transaction, matchDetails Details) error {
 	query := `
 		INSERT INTO match_details
 			(player_id, match_id, rating_change)
@@ -14,13 +16,12 @@ func (mdrs *matchDetailsRepositorySQL) Create(matchDetails Details) error {
 			($1, $2, $3);
 	`
 
-	_, err := mdrs.db.Exec(query, matchDetails.PlayerID, matchDetails.MatchID, matchDetails.RatingChange)
+	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	_, err := sqlTransaction.Exec(query, matchDetails.PlayerID, matchDetails.MatchID, matchDetails.RatingChange)
 	return err
 }
 
 // NewDetailsRepositorySQL factory
-func NewDetailsRepositorySQL(db sql.DB) DetailsRepository {
-	return &matchDetailsRepositorySQL{
-		db: db,
-	}
+func NewDetailsRepositorySQL() DetailsRepository {
+	return &matchDetailsRepositorySQL{}
 }

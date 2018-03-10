@@ -1,12 +1,14 @@
 package match
 
-import "github.com/szokodiakos/r8m8/sql"
+import (
+	"github.com/szokodiakos/r8m8/sql"
+	"github.com/szokodiakos/r8m8/transaction"
+)
 
 type matchRepositorySQL struct {
-	db sql.DB
 }
 
-func (mrs *matchRepositorySQL) Create() (int64, error) {
+func (mrs *matchRepositorySQL) Create(transaction transaction.Transaction) (int64, error) {
 	var createdID int64
 	query := `
 		INSERT INTO matches
@@ -16,7 +18,8 @@ func (mrs *matchRepositorySQL) Create() (int64, error) {
 		RETURNING id;
 	`
 
-	res := mrs.db.QueryRow(query)
+	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	res := sqlTransaction.QueryRow(query)
 	err := res.Scan(&createdID)
 	if err != nil {
 		return createdID, err
@@ -26,8 +29,6 @@ func (mrs *matchRepositorySQL) Create() (int64, error) {
 }
 
 // NewRepositorySQL factory
-func NewRepositorySQL(db sql.DB) Repository {
-	return &matchRepositorySQL{
-		db: db,
-	}
+func NewRepositorySQL() Repository {
+	return &matchRepositorySQL{}
 }

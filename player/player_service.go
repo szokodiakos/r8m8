@@ -1,19 +1,21 @@
 package player
 
+import "github.com/szokodiakos/r8m8/transaction"
+
 // Service interface
 type Service interface {
-	AddMultiple(count int) ([]int64, error)
-	UpdateRatingsForMultiple(players []Player) error
+	AddMultiple(transaction transaction.Transaction, count int) ([]int64, error)
+	UpdateRatingsForMultiple(transaction transaction.Transaction, players []Player) error
 }
 
 type playerService struct {
 	playerRepository Repository
 }
 
-func (ps *playerService) AddMultiple(count int) ([]int64, error) {
+func (ps *playerService) AddMultiple(transaction transaction.Transaction, count int) ([]int64, error) {
 	playerIDs := make([]int64, 0, count)
 	for i := 0; i < count; i++ {
-		playerID, err := ps.playerRepository.Create()
+		playerID, err := ps.playerRepository.Create(transaction)
 
 		if err != nil {
 			return playerIDs, err
@@ -25,9 +27,9 @@ func (ps *playerService) AddMultiple(count int) ([]int64, error) {
 	return playerIDs, nil
 }
 
-func (ps *playerService) UpdateRatingsForMultiple(players []Player) error {
+func (ps *playerService) UpdateRatingsForMultiple(transaction transaction.Transaction, players []Player) error {
 	for i := range players {
-		if err := ps.playerRepository.UpdateRatingByID(players[i].ID, players[i].Rating); err != nil {
+		if err := ps.playerRepository.UpdateRatingByID(transaction, players[i].ID, players[i].Rating); err != nil {
 			return err
 		}
 	}

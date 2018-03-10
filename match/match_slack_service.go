@@ -28,25 +28,25 @@ func (mss *matchSlackService) AddMatch(values string) (slack.MessageResponse, er
 	text := requestValues.Text
 	teamID := requestValues.TeamID
 
-	tr, err := mss.transactionService.Start()
+	transaction, err := mss.transactionService.Start()
 	if err != nil {
 		return messageResponse, err
 	}
 
-	slackPlayers, err := mss.playerSlackService.GetOrAddSlackPlayers(text, teamID)
+	slackPlayers, err := mss.playerSlackService.GetOrAddSlackPlayers(transaction, text, teamID)
 	if err != nil {
-		mss.transactionService.Rollback(tr)
+		mss.transactionService.Rollback(transaction)
 		return messageResponse, err
 	}
 
 	players := mss.getPlayers(slackPlayers)
-	err = mss.matchService.Add(players)
+	err = mss.matchService.Add(transaction, players)
 	if err != nil {
-		mss.transactionService.Rollback(tr)
+		mss.transactionService.Rollback(transaction)
 		return messageResponse, err
 	}
 
-	err = mss.transactionService.Commit(tr)
+	err = mss.transactionService.Commit(transaction)
 	messageResponse = mss.slackService.CreateMessageResponse("Success")
 	return messageResponse, err
 }

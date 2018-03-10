@@ -1,6 +1,8 @@
 package match
 
+import "github.com/szokodiakos/r8m8/transaction"
+
 // Repository interface
 type Repository interface {
-	Create() (int64, error)
+	Create(transaction transaction.Transaction) (int64, error)
 }
