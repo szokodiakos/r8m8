@@ -25,8 +25,8 @@ func (prs *playerRepositorySQL) Create() (int64, error) {
 func (prs *playerRepositorySQL) UpdateRatingByID(ID int64, rating int) error {
 	query := `
 		UPDATE players
-		SET rating = ?
-		WHERE id = ?
+		SET rating = $1
+		WHERE id = $2
 	`
 
 	_, err := prs.db.Exec(query, ID, rating)
