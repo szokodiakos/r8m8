@@ -37,7 +37,7 @@ func (psrs *playerSlackRepositorySQL) GetMultipleByUserIDs(userIDs []string, tea
 		var rating int
 		var userID, username, teamID string
 
-		if err := rows.Scan(&id, &rating, userID, username, teamID); err != nil {
+		if err := rows.Scan(&id, &rating, &userID, &username, &teamID); err != nil {
 			return slackPlayers, err
 		}
 
