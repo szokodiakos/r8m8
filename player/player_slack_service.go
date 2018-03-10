@@ -64,7 +64,7 @@ func (pss *playerSlackService) getMissingSlackPlayers(repositorySlackPlayers []S
 		repositorySlackPlayer := pss.getCounterpart(slackPlayer, repositorySlackPlayers)
 
 		if repositorySlackPlayer == (Slack{}) {
-			missingSlackPlayers = append(missingSlackPlayers, repositorySlackPlayer)
+			missingSlackPlayers = append(missingSlackPlayers, slackPlayer)
 		}
 	}
 	return missingSlackPlayers
