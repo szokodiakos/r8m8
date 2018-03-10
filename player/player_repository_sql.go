@@ -1,8 +1,6 @@
 package player
 
-import (
-	"database/sql"
-)
+import "database/sql"
 
 type playerRepositorySQL struct {
 	db *sql.DB
@@ -12,15 +10,11 @@ func (prs *playerRepositorySQL) Create() (int64, error) {
 	var createdID int64
 
 	query := `
-		INSERT INTO players DEFAULT VALUES;
+		INSERT INTO players DEFAULT VALUES RETURNING id;
 	`
 
-	res, err := prs.db.Exec(query)
-	if err != nil {
-		return createdID, err
-	}
-
-	createdID, err = res.LastInsertId()
+	res := prs.db.QueryRow(query)
+	err := res.Scan(&createdID)
 	if err != nil {
 		return createdID, err
 	}

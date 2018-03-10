@@ -101,7 +101,7 @@ func (pss *playerSlackService) addMultiple(slackPlayers []Slack) error {
 		slackPlayer.Player = Player{
 			ID: playerIDs[i],
 		}
-		_, err := pss.playerSlackRepository.Create(slackPlayer)
+		err := pss.playerSlackRepository.Create(slackPlayer)
 
 		if err != nil {
 			return err

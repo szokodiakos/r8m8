@@ -10,8 +10,8 @@ import (
 	"github.com/szokodiakos/r8m8/slack"
 	"github.com/szokodiakos/r8m8/transaction"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"github.com/szokodiakos/r8m8/config"
 	"github.com/szokodiakos/r8m8/match"

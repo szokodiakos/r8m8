@@ -1,33 +1,26 @@
 -- +migrate Up
 
-ALTER DATABASE r8m8 CHARACTER SET utf8 COLLATE utf8_general_ci;
-
 CREATE TABLE matches (
-  id int NOT NULL AUTO_INCREMENT,
-  created_at timestamp NOT NULL,
-  PRIMARY KEY (id)
+  id SERIAL PRIMARY KEY,
+  created_at timestamp NOT NULL
 );
 
 CREATE TABLE players (
-  id int NOT NULL AUTO_INCREMENT,
-  rating int DEFAULT 1500,
-  PRIMARY KEY (id)
+  id SERIAL PRIMARY KEY,
+  rating int DEFAULT 1500
 );
 
 CREATE TABLE match_details (
-  player_id int NOT NULL,
-  match_id int NOT NULL,
-  rating_change int NOT NULL,
-  FOREIGN KEY (player_id) REFERENCES players(id),
-  FOREIGN KEY (match_id) REFERENCES matches(id)
+  player_id int NOT NULL REFERENCES players(id),
+  match_id int NOT NULL REFERENCES matches(id),
+  rating_change int NOT NULL
 );
 
 CREATE TABLE slack_players (
-  player_id int NOT NULL,
+  player_id int NOT NULL REFERENCES players(id),
   user_id varchar(255) NOT NULL,
   username varchar(255) NOT NULL,
-  team_id varchar(255) NOT NULL,
-  FOREIGN KEY (player_id) REFERENCES players(id)
+  team_id varchar(255) NOT NULL
 );
 
 CREATE INDEX slack_players_user_id_team_id

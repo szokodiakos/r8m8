@@ -11,7 +11,7 @@ func (mdrs *matchDetailsRepositorySQL) Create(matchDetails Details) error {
 		INSERT INTO match_details
 			(player_id, match_id, rating_change)
 		VALUES
-			(?, ?, ?)
+			(?, ?, ?);
 	`
 
 	_, err := mdrs.db.Exec(query, matchDetails.PlayerID, matchDetails.MatchID, matchDetails.RatingChange)

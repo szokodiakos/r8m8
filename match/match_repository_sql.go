@@ -1,8 +1,6 @@
 package match
 
-import (
-	"database/sql"
-)
+import "database/sql"
 
 type matchRepositorySQL struct {
 	db *sql.DB
@@ -14,15 +12,12 @@ func (mrs *matchRepositorySQL) Create() (int64, error) {
 		INSERT INTO matches
 			(created_at)
 		VALUES
-			(utc_timestamp());
+			(utc_timestamp())
+		RETURNING id;
 	`
 
-	res, err := mrs.db.Exec(query)
-	if err != nil {
-		return createdID, err
-	}
-
-	createdID, err = res.LastInsertId()
+	res := mrs.db.QueryRow(query)
+	err := res.Scan(&createdID)
 	if err != nil {
 		return createdID, err
 	}

@@ -2,6 +2,8 @@ package player
 
 import (
 	"database/sql"
+
+	"github.com/lib/pq"
 )
 
 type playerSlackRepositorySQL struct {
@@ -21,11 +23,16 @@ func (psrs *playerSlackRepositorySQL) GetMultipleByUserIDs(userIDs []string, tea
 			players p,
 			slack_players sp
 		WHERE
-			sp.user_id IN (?) AND
-			sp.team_id = ?;
+			sp.user_id IN ($1) AND
+			sp.team_id = $2;
 	`
 
-	rows, err := psrs.db.Query(query, userIDs, teamID)
+	stmt, err := psrs.db.Prepare(query)
+	if err != nil {
+		return slackPlayers, err
+	}
+
+	rows, err := stmt.Query(pq.Array(userIDs), teamID)
 	if err != nil {
 		return slackPlayers, err
 	}
@@ -53,8 +60,7 @@ func (psrs *playerSlackRepositorySQL) GetMultipleByUserIDs(userIDs []string, tea
 	return slackPlayers, nil
 }
 
-func (psrs *playerSlackRepositorySQL) Create(slackPlayer Slack) (int64, error) {
-	var createdID int64
+func (psrs *playerSlackRepositorySQL) Create(slackPlayer Slack) error {
 	query := `
 		INSERT INTO slack_players
 			(player_id, user_id, username, team_id)
@@ -62,18 +68,12 @@ func (psrs *playerSlackRepositorySQL) Create(slackPlayer Slack) (int64, error) {
 			(?, ?, ?, ?);
 	`
 
-	res, err := psrs.db.Exec(query, slackPlayer.Player.ID, slackPlayer.UserID, slackPlayer.Username, slackPlayer.TeamID)
+	_, err := psrs.db.Exec(query, slackPlayer.Player.ID, slackPlayer.UserID, slackPlayer.Username, slackPlayer.TeamID)
 	if err != nil {
-		return createdID, err
+		return err
 	}
 
-	lastInsertID, err := res.LastInsertId()
-	if err != nil {
-		return createdID, err
-	}
-
-	createdID = lastInsertID
-	return createdID, nil
+	return nil
 }
 
 // NewSlackRepository factory

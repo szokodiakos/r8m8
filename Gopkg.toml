@@ -42,9 +42,9 @@
   version = "3.2.6"
 
 [[constraint]]
-  name = "github.com/go-sql-driver/mysql"
-  version = "1.3.0"
+  branch = "master"
+  name = "github.com/rubenv/sql-migrate"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/rubenv/sql-migrate"
+  name = "github.com/lib/pq"
