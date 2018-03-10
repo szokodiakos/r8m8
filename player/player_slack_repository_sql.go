@@ -23,6 +23,7 @@ func (psrs *playerSlackRepositorySQL) GetMultipleByUserIDs(userIDs []string, tea
 			players p,
 			slack_players sp
 		WHERE
+			sp.player_id = p.id AND
 			sp.user_id = ANY($1) AND
 			sp.team_id = $2;
 	`
