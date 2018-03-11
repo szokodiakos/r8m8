@@ -1,6 +1,6 @@
 package player
 
-// RepoPlayer representation
+// RepoPlayer struct
 type RepoPlayer struct {
 	ID          int64
 	UniqueName  string
