@@ -28,12 +28,12 @@ func (r *ratingService) UpdateRatings(transaction transaction.Transaction, repoP
 	loserRatings := mapToRatings(loserRepoRatings)
 	adjustedWinnerRatings, adjustedLoserRatings := r.strategy.Calculate(winnerRatings, loserRatings)
 
-	err = r.adjustRatings(transaction, winnerRepoRatings, adjustedWinnerRatings, matchID)
+	err = r.adjustRatings(transaction, winnerRepoRatings, adjustedWinnerRatings, matchID, true)
 	if err != nil {
 		return err
 	}
 
-	err = r.adjustRatings(transaction, loserRepoRatings, adjustedLoserRatings, matchID)
+	err = r.adjustRatings(transaction, loserRepoRatings, adjustedLoserRatings, matchID, false)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func mapToRatings(repoRatings []RepoRating) []int {
 	return ratings
 }
 
-func (r *ratingService) adjustRatings(transaction transaction.Transaction, repoRatings []RepoRating, adjustedRatings []int, matchID int64) error {
+func (r *ratingService) adjustRatings(transaction transaction.Transaction, repoRatings []RepoRating, adjustedRatings []int, matchID int64, hasWon bool) error {
 	for i := range repoRatings {
 		rating := Rating{
 			LeagueID: repoRatings[i].LeagueID,
@@ -87,6 +87,7 @@ func (r *ratingService) adjustRatings(transaction transaction.Transaction, repoR
 			PlayerID:     repoRatings[i].PlayerID,
 			MatchID:      matchID,
 			RatingChange: adjustedRatings[i] - repoRatings[i].Rating,
+			HasWon:       hasWon,
 		}
 		err = r.detailsRepository.Create(transaction, details)
 		if err != nil {

@@ -21,7 +21,8 @@ CREATE TABLE players (
 CREATE TABLE details (
   player_id INT NOT NULL REFERENCES players(id),
   match_id INT NOT NULL REFERENCES matches(id),
-  rating_change INT NOT NULL
+  rating_change INT NOT NULL,
+  has_won BOOLEAN NOT NULL
 );
 
 CREATE TABLE ratings (

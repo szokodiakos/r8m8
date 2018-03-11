@@ -5,4 +5,5 @@ type Details struct {
 	PlayerID     int64
 	MatchID      int64
 	RatingChange int
+	HasWon       bool
 }
