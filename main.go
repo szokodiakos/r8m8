@@ -4,6 +4,10 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/szokodiakos/r8m8/league"
+
+	"github.com/szokodiakos/r8m8/details"
+
 	"github.com/szokodiakos/r8m8/rating"
 
 	"github.com/szokodiakos/r8m8/player"
@@ -32,16 +36,21 @@ func main() {
 
 	database := sqlDB.NewSQLDB(db)
 	matchRepository := match.NewRepositorySQL()
-	ratingService := rating.NewService()
-	matchDetailsRepository := match.NewDetailsRepositorySQL()
-	matchDetailsService := match.NewDetailsService(matchDetailsRepository)
+	ratingStrategyIdentity := rating.NewStrategyIdentity()
+	ratingRepository := rating.NewRepositorySQL()
+	detailsRepository := details.NewRepositorySQL()
+	ratingService := rating.NewService(ratingStrategyIdentity, ratingRepository, detailsRepository)
 	playerRepository := player.NewRepository()
-	playerService := player.NewService(playerRepository)
-	matchService := match.NewService(matchRepository, ratingService, playerService, matchDetailsService)
+	initialRating := 1500
+	playerService := player.NewService(playerRepository, ratingRepository, initialRating)
+	leagueRepository := league.NewRepositorySQL()
+	leagueService := league.NewService(leagueRepository)
+	matchService := match.NewService(matchRepository, ratingService, playerService, leagueService)
 	slackService := slack.NewService()
 	playerSlackService := player.NewSlackService()
 	transactionService := transaction.NewServiceSQL(database)
-	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, transactionService)
+	leagueSlackService := league.NewSlackService()
+	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService)
 
 	e := echo.New()
 	verificationToken := viper.GetString("slack_verification_token")

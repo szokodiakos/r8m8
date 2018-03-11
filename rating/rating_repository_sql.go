@@ -76,7 +76,7 @@ func (r *ratingRepositorySQL) UpdateRating(transaction transaction.Transaction, 
 	return err
 }
 
-// NewRatingRepositorySQL factory
-func NewRatingRepositorySQL() Repository {
+// NewRepositorySQL factory
+func NewRepositorySQL() Repository {
 	return &ratingRepositorySQL{}
 }

@@ -57,7 +57,7 @@ func (p *playerRepositorySQL) Create(transaction transaction.Transaction, player
 	`
 
 	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
-	res := sqlTransaction.QueryRow(query)
+	res := sqlTransaction.QueryRow(query, player.UniqueName, player.DisplayName)
 	err := res.Scan(&createdID)
 	if err != nil {
 		return createdID, err

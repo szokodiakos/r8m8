@@ -1,6 +1,8 @@
 package league
 
 import (
+	_sql "database/sql"
+
 	"github.com/szokodiakos/r8m8/sql"
 	"github.com/szokodiakos/r8m8/transaction"
 )
@@ -13,7 +15,6 @@ func (l *leagueRepositorySQL) GetByUniqueName(transaction transaction.Transactio
 	query := `
 		SELECT
 			l.id,
-			l.unique_name,
 			l.display_name
 		FROM
 			leagues l
@@ -27,6 +28,9 @@ func (l *leagueRepositorySQL) GetByUniqueName(transaction transaction.Transactio
 	var ID int64
 	var displayName string
 	err := res.Scan(&ID, &displayName)
+	if err == _sql.ErrNoRows {
+		return repoLeague, nil
+	}
 	if err != nil {
 		return repoLeague, err
 	}

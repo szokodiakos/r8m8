@@ -1,22 +1,22 @@
 package rating
 
 import (
-	"github.com/szokodiakos/r8m8/match"
+	"github.com/szokodiakos/r8m8/details"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // Service interface
 type Service interface {
-	UpdateRatings(transaction transaction.Transaction, repoPlayerIDs []int64) error
+	UpdateRatings(transaction transaction.Transaction, repoPlayerIDs []int64, matchID int64) error
 }
 
 type ratingService struct {
-	strategy         Strategy
-	ratingRepository Repository
-	matchDetailsRepository match.DetailsRepository
+	strategy          Strategy
+	ratingRepository  Repository
+	detailsRepository details.Repository
 }
 
-func (r *ratingService) UpdateRatings(transaction transaction.Transaction, repoPlayerIDs []int64) error {
+func (r *ratingService) UpdateRatings(transaction transaction.Transaction, repoPlayerIDs []int64, matchID int64) error {
 	repoRatings, err := r.ratingRepository.GetMultipleByPlayerIDs(transaction, repoPlayerIDs)
 	if err != nil {
 		return err
@@ -28,12 +28,12 @@ func (r *ratingService) UpdateRatings(transaction transaction.Transaction, repoP
 	loserRatings := mapToRatings(loserRepoRatings)
 	adjustedWinnerRatings, adjustedLoserRatings := r.strategy.Calculate(winnerRatings, loserRatings)
 
-	err = r.adjustRatings(transaction, winnerRepoRatings, adjustedWinnerRatings)
+	err = r.adjustRatings(transaction, winnerRepoRatings, adjustedWinnerRatings, matchID)
 	if err != nil {
 		return err
 	}
 
-	err = r.adjustRatings(transaction, loserRepoRatings, adjustedLoserRatings)
+	err = r.adjustRatings(transaction, loserRepoRatings, adjustedLoserRatings, matchID)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func mapToRatings(repoRatings []RepoRating) []int {
 	return ratings
 }
 
-func (r *ratingService) adjustRatings(transaction transaction.Transaction, repoRatings []RepoRating, adjustedRatings []int) error {
+func (r *ratingService) adjustRatings(transaction transaction.Transaction, repoRatings []RepoRating, adjustedRatings []int, matchID int64) error {
 	for i := range repoRatings {
 		rating := Rating{
 			LeagueID: repoRatings[i].LeagueID,
@@ -83,19 +83,24 @@ func (r *ratingService) adjustRatings(transaction transaction.Transaction, repoR
 			return err
 		}
 
-		// err = 
+		details := details.Details{
+			PlayerID:     repoRatings[i].PlayerID,
+			MatchID:      matchID,
+			RatingChange: adjustedRatings[i] - repoRatings[i].Rating,
+		}
+		err = r.detailsRepository.Create(transaction, details)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-// err = m.matchDetailsService.AddMultiple(transaction, matchID, repoPlayers, adjustedRepoPlayers)
-// return err
-
 // NewService factory
-func NewService(strategy Strategy, ratingRepository Repository, matchDetailsRepository: match.DetailsRepository) Service {
+func NewService(strategy Strategy, ratingRepository Repository, detailsRepository details.Repository) Service {
 	return &ratingService{
-		strategy:         strategy,
-		ratingRepository: ratingRepository,
-		matchDetailsRepository: matchDetailsRepository,
+		strategy:          strategy,
+		ratingRepository:  ratingRepository,
+		detailsRepository: detailsRepository,
 	}
 }

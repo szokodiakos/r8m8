@@ -36,13 +36,13 @@ func (m *matchService) Add(transaction transaction.Transaction, players []player
 		return err
 	}
 
-	matchID, err := m.matchRepository.Create(transaction, repoLeague.ID)
+	matchID, err := m.matchRepository.Create(transaction, leagueID)
 	if err != nil {
 		return err
 	}
 
 	repoPlayerIDs := mapToIDs(repoPlayers)
-	err = m.ratingService.UpdateRatings(transaction, repoPlayerIDs)
+	err = m.ratingService.UpdateRatings(transaction, repoPlayerIDs, matchID)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package match
+package details
 
 // Details struct
 type Details struct {
