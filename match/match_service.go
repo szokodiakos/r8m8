@@ -24,17 +24,17 @@ func (m *matchService) Add(transaction transaction.Transaction, players []player
 		return errors.NewUnevenMatchPlayersError()
 	}
 
-	dbPlayers, err := m.playerService.GetOrAddPlayers(transaction, players)
+	repoPlayers, err := m.playerService.GetOrAddPlayers(transaction, players)
 	if err != nil {
 		return err
 	}
 
-	winnerDBPlayers := getWinnerDBPlayers(dbPlayers)
-	loserDBPlayers := getLoserDBPlayers(dbPlayers)
-	adjustedWinnerDBPlayers, adjustedLoserDBPlayers := m.ratingService.CalculateRating(winnerDBPlayers, loserDBPlayers)
-	adjustedDBPlayers := append(adjustedWinnerDBPlayers, adjustedLoserDBPlayers...)
+	winnerRepoPlayers := getWinnerRepoPlayers(repoPlayers)
+	loserRepoPlayers := getLoserRepoPlayers(repoPlayers)
+	adjustedWinnerRepoPlayers, adjustedLoserRepoPlayers := m.ratingService.CalculateRating(winnerRepoPlayers, loserRepoPlayers)
+	adjustedRepoPlayers := append(adjustedWinnerRepoPlayers, adjustedLoserRepoPlayers...)
 
-	if err := m.playerService.UpdateRatingsForMultiple(transaction, adjustedDBPlayers); err != nil {
+	if err := m.playerService.UpdateRatingsForMultiple(transaction, adjustedRepoPlayers); err != nil {
 		return err
 	}
 
@@ -43,7 +43,7 @@ func (m *matchService) Add(transaction transaction.Transaction, players []player
 		return err
 	}
 
-	err = m.matchDetailsService.AddMultiple(transaction, matchID, dbPlayers, adjustedDBPlayers)
+	err = m.matchDetailsService.AddMultiple(transaction, matchID, repoPlayers, adjustedRepoPlayers)
 	return err
 }
 
@@ -51,12 +51,12 @@ func isPlayerCountUneven(players []player.Player) bool {
 	return (len(players) % 2) != 0
 }
 
-func getWinnerDBPlayers(players []player.DBPlayer) []player.DBPlayer {
+func getWinnerRepoPlayers(players []player.RepoPlayer) []player.RepoPlayer {
 	lowerhalf := players[:(len(players) / 2)]
 	return lowerhalf
 }
 
-func getLoserDBPlayers(players []player.DBPlayer) []player.DBPlayer {
+func getLoserRepoPlayers(players []player.RepoPlayer) []player.RepoPlayer {
 	upperhalf := players[(len(players) / 2):]
 	return upperhalf
 }

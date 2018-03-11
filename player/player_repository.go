@@ -5,6 +5,6 @@ import "github.com/szokodiakos/r8m8/transaction"
 // Repository interface
 type Repository interface {
 	Create(transaction transaction.Transaction, player Player) error
-	GetMultipleByUniqueName(transaction transaction.Transaction, uniqueNames []string) ([]DBPlayer, error)
+	GetMultipleByUniqueName(transaction transaction.Transaction, uniqueNames []string) ([]RepoPlayer, error)
 	UpdateRatingByID(transaction transaction.Transaction, ID int64, rating int) error
 }

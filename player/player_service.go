@@ -4,35 +4,35 @@ import "github.com/szokodiakos/r8m8/transaction"
 
 // Service interface
 type Service interface {
-	GetOrAddPlayers(transaction transaction.Transaction, players []Player) ([]DBPlayer, error)
-	UpdateRatingsForMultiple(transaction transaction.Transaction, dbPlayers []DBPlayer) error
+	GetOrAddPlayers(transaction transaction.Transaction, players []Player) ([]RepoPlayer, error)
+	UpdateRatingsForMultiple(transaction transaction.Transaction, repoPlayers []RepoPlayer) error
 }
 
 type playerService struct {
 	playerRepository Repository
 }
 
-func (p *playerService) GetOrAddPlayers(transaction transaction.Transaction, players []Player) ([]DBPlayer, error) {
+func (p *playerService) GetOrAddPlayers(transaction transaction.Transaction, players []Player) ([]RepoPlayer, error) {
 	uniqueNames := mapPlayersUniqueNames(players)
 
-	dbPlayers, err := p.playerRepository.GetMultipleByUniqueName(transaction, uniqueNames)
+	repoPlayers, err := p.playerRepository.GetMultipleByUniqueName(transaction, uniqueNames)
 	if err != nil {
-		return dbPlayers, err
+		return repoPlayers, err
 	}
 
-	if isPlayerMissingFromRepository(players, dbPlayers) {
-		missingPlayers := getMissingPlayers(players, dbPlayers)
+	if isPlayerMissingFromRepository(players, repoPlayers) {
+		missingPlayers := getMissingPlayers(players, repoPlayers)
 		err := p.addMultiple(transaction, missingPlayers)
 		if err != nil {
-			return dbPlayers, err
+			return repoPlayers, err
 		}
 
-		dbPlayers, err = p.playerRepository.GetMultipleByUniqueName(transaction, uniqueNames)
+		repoPlayers, err = p.playerRepository.GetMultipleByUniqueName(transaction, uniqueNames)
 		if err != nil {
-			return dbPlayers, err
+			return repoPlayers, err
 		}
 	}
-	return dbPlayers, nil
+	return repoPlayers, nil
 }
 
 func mapPlayersUniqueNames(players []Player) []string {
@@ -43,33 +43,33 @@ func mapPlayersUniqueNames(players []Player) []string {
 	return uniqueNames
 }
 
-func isPlayerMissingFromRepository(players []Player, dbPlayers []DBPlayer) bool {
-	return (len(players) != len(dbPlayers))
+func isPlayerMissingFromRepository(players []Player, repoPlayers []RepoPlayer) bool {
+	return (len(players) != len(repoPlayers))
 }
 
-func getMissingPlayers(players []Player, dbPlayers []DBPlayer) []Player {
-	missingPlayers := make([]Player, 0, len(dbPlayers))
+func getMissingPlayers(players []Player, repoPlayers []RepoPlayer) []Player {
+	missingPlayers := make([]Player, 0, len(repoPlayers))
 
 	for i := range players {
-		dbPlayer := getDBCounterpart(players[i], dbPlayers)
+		repoPlayer := getDBCounterpart(players[i], repoPlayers)
 
-		if dbPlayer == (DBPlayer{}) {
+		if repoPlayer == (RepoPlayer{}) {
 			missingPlayers = append(missingPlayers, players[i])
 		}
 	}
 	return missingPlayers
 }
 
-func getDBCounterpart(player Player, dbPlayers []DBPlayer) DBPlayer {
-	var dbPlayer DBPlayer
+func getDBCounterpart(player Player, repoPlayers []RepoPlayer) RepoPlayer {
+	var repoPlayer RepoPlayer
 
-	for i := range dbPlayers {
-		if player.UniqueName == dbPlayers[i].UniqueName {
-			dbPlayer = dbPlayers[i]
+	for i := range repoPlayers {
+		if player.UniqueName == repoPlayers[i].UniqueName {
+			repoPlayer = repoPlayers[i]
 		}
 	}
 
-	return dbPlayer
+	return repoPlayer
 }
 
 func (p *playerService) addMultiple(transaction transaction.Transaction, players []Player) error {
@@ -83,9 +83,9 @@ func (p *playerService) addMultiple(transaction transaction.Transaction, players
 	return nil
 }
 
-func (p *playerService) UpdateRatingsForMultiple(transaction transaction.Transaction, dbPlayers []DBPlayer) error {
-	for i := range dbPlayers {
-		if err := p.playerRepository.UpdateRatingByID(transaction, dbPlayers[i].ID, dbPlayers[i].Rating); err != nil {
+func (p *playerService) UpdateRatingsForMultiple(transaction transaction.Transaction, repoPlayers []RepoPlayer) error {
+	for i := range repoPlayers {
+		if err := p.playerRepository.UpdateRatingByID(transaction, repoPlayers[i].ID, repoPlayers[i].Rating); err != nil {
 			return err
 		}
 	}

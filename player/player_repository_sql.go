@@ -9,8 +9,8 @@ import (
 type playerRepositorySQL struct {
 }
 
-func (p *playerRepositorySQL) GetMultipleByUniqueName(transaction transaction.Transaction, uniqueNames []string) ([]DBPlayer, error) {
-	var dbPlayers = make([]DBPlayer, 0, len(uniqueNames))
+func (p *playerRepositorySQL) GetMultipleByUniqueName(transaction transaction.Transaction, uniqueNames []string) ([]RepoPlayer, error) {
+	var repoPlayers = make([]RepoPlayer, 0, len(uniqueNames))
 	query := `
 		SELECT
 			p.id,
@@ -26,7 +26,7 @@ func (p *playerRepositorySQL) GetMultipleByUniqueName(transaction transaction.Tr
 	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
 	rows, err := sqlTransaction.Query(query, pq.Array(uniqueNames))
 	if err != nil {
-		return dbPlayers, err
+		return repoPlayers, err
 	}
 
 	for rows.Next() {
@@ -35,18 +35,18 @@ func (p *playerRepositorySQL) GetMultipleByUniqueName(transaction transaction.Tr
 		var uniqueName, displayName string
 
 		if err := rows.Scan(&id, &rating, &uniqueName, &displayName); err != nil {
-			return dbPlayers, err
+			return repoPlayers, err
 		}
 
-		dbPlayer := DBPlayer{
+		repoPlayer := RepoPlayer{
 			ID:          id,
 			Rating:      rating,
 			UniqueName:  uniqueName,
 			DisplayName: displayName,
 		}
-		dbPlayers = append(dbPlayers, dbPlayer)
+		repoPlayers = append(repoPlayers, repoPlayer)
 	}
-	return dbPlayers, nil
+	return repoPlayers, nil
 }
 
 func (p *playerRepositorySQL) Create(transaction transaction.Transaction, player Player) error {

@@ -7,18 +7,18 @@ import (
 
 // DetailsService interface
 type DetailsService interface {
-	AddMultiple(transaction transaction.Transaction, matchID int64, dbPlayers []player.DBPlayer, adjustedDBPlayers []player.DBPlayer) error
+	AddMultiple(transaction transaction.Transaction, matchID int64, repoPlayers []player.RepoPlayer, adjustedRepoPlayers []player.RepoPlayer) error
 }
 
 type matchDetailsService struct {
 	matchDetailsRepository DetailsRepository
 }
 
-func (m *matchDetailsService) AddMultiple(transaction transaction.Transaction, matchID int64, dbPlayers []player.DBPlayer, adjustedDBPlayers []player.DBPlayer) error {
-	for i := range dbPlayers {
-		ratingChange := getRatingChange(dbPlayers[i], adjustedDBPlayers[i])
+func (m *matchDetailsService) AddMultiple(transaction transaction.Transaction, matchID int64, repoPlayers []player.RepoPlayer, adjustedRepoPlayers []player.RepoPlayer) error {
+	for i := range repoPlayers {
+		ratingChange := getRatingChange(repoPlayers[i], adjustedRepoPlayers[i])
 		matchDetails := Details{
-			PlayerID:     dbPlayers[i].ID,
+			PlayerID:     repoPlayers[i].ID,
 			MatchID:      matchID,
 			RatingChange: ratingChange,
 		}
@@ -31,8 +31,8 @@ func (m *matchDetailsService) AddMultiple(transaction transaction.Transaction, m
 	return nil
 }
 
-func getRatingChange(dbPlayer player.DBPlayer, adjustedDBPlayer player.DBPlayer) int {
-	return adjustedDBPlayer.Rating - dbPlayer.Rating
+func getRatingChange(repoPlayer player.RepoPlayer, adjustedRepoPlayer player.RepoPlayer) int {
+	return adjustedRepoPlayer.Rating - repoPlayer.Rating
 }
 
 // NewDetailsService factory

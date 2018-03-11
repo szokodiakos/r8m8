@@ -1,7 +1,7 @@
 package player
 
-// DBPlayer representation
-type DBPlayer struct {
+// RepoPlayer representation
+type RepoPlayer struct {
 	ID          int64
 	UniqueName  string
 	DisplayName string
