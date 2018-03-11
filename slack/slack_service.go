@@ -11,7 +11,7 @@ type Service interface {
 type slackService struct {
 }
 
-func (ss *slackService) ParseRequestValues(values string) (RequestValues, error) {
+func (s *slackService) ParseRequestValues(values string) (RequestValues, error) {
 	var requestValues RequestValues
 	parsedValues, err := url.ParseQuery(values)
 	if err != nil {
@@ -35,7 +35,7 @@ func (ss *slackService) ParseRequestValues(values string) (RequestValues, error)
 	return requestValues, nil
 }
 
-func (ss *slackService) CreateMessageResponse(text string) MessageResponse {
+func (s *slackService) CreateMessageResponse(text string) MessageResponse {
 	return MessageResponse{
 		Text: text,
 	}

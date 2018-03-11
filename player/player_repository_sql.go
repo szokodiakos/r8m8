@@ -1,6 +1,7 @@
 package player
 
 import (
+	"github.com/lib/pq"
 	"github.com/szokodiakos/r8m8/sql"
 	"github.com/szokodiakos/r8m8/transaction"
 )
@@ -8,24 +9,60 @@ import (
 type playerRepositorySQL struct {
 }
 
-func (prs *playerRepositorySQL) Create(transaction transaction.Transaction) (int64, error) {
-	var createdID int64
-
+func (p *playerRepositorySQL) GetMultipleByUniqueName(transaction transaction.Transaction, uniqueNames []string) ([]DBPlayer, error) {
+	var dbPlayers = make([]DBPlayer, 0, len(uniqueNames))
 	query := `
-		INSERT INTO players DEFAULT VALUES RETURNING id;
+		SELECT
+			p.id,
+			p.rating,
+			p.unique_name,
+			p.display_name
+		FROM
+			players p
+		WHERE
+			p.unique_name = ANY($1);
 	`
 
 	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
-	res := sqlTransaction.QueryRow(query)
-	err := res.Scan(&createdID)
+	rows, err := sqlTransaction.Query(query, pq.Array(uniqueNames))
 	if err != nil {
-		return createdID, err
+		return dbPlayers, err
 	}
 
-	return createdID, nil
+	for rows.Next() {
+		var id int64
+		var rating int
+		var uniqueName, displayName string
+
+		if err := rows.Scan(&id, &rating, &uniqueName, &displayName); err != nil {
+			return dbPlayers, err
+		}
+
+		dbPlayer := DBPlayer{
+			ID:          id,
+			Rating:      rating,
+			UniqueName:  uniqueName,
+			DisplayName: displayName,
+		}
+		dbPlayers = append(dbPlayers, dbPlayer)
+	}
+	return dbPlayers, nil
 }
 
-func (prs *playerRepositorySQL) UpdateRatingByID(transaction transaction.Transaction, ID int64, rating int) error {
+func (p *playerRepositorySQL) Create(transaction transaction.Transaction, player Player) error {
+	query := `
+		INSERT INTO players
+			(unique_name, display_name)
+		VALUES
+			($1, $2);
+	`
+
+	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	_, err := sqlTransaction.Exec(query, player.UniqueName, player.DisplayName)
+	return err
+}
+
+func (p *playerRepositorySQL) UpdateRatingByID(transaction transaction.Transaction, ID int64, rating int) error {
 	query := `
 		UPDATE players
 		SET rating = $1

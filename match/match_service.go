@@ -19,41 +19,46 @@ type matchService struct {
 	matchDetailsService DetailsService
 }
 
-func (ms *matchService) Add(transaction transaction.Transaction, players []player.Player) error {
-	if ms.isPlayerCountUneven(players) {
+func (m *matchService) Add(transaction transaction.Transaction, players []player.Player) error {
+	if isPlayerCountUneven(players) {
 		return errors.NewUnevenMatchPlayersError()
 	}
 
-	winnerPlayers := ms.getWinnerPlayers(players)
-	loserPlayers := ms.getLoserPlayers(players)
-	adjustedWinnerPlayers, adjustedLoserPlayers := ms.ratingService.CalculateRating(winnerPlayers, loserPlayers)
-	adjustedPlayers := append(adjustedWinnerPlayers, adjustedLoserPlayers...)
-
-	if err := ms.playerService.UpdateRatingsForMultiple(transaction, adjustedPlayers); err != nil {
-		return err
-	}
-
-	matchID, err := ms.matchRepository.Create(transaction)
+	dbPlayers, err := m.playerService.GetOrAddPlayers(transaction, players)
 	if err != nil {
 		return err
 	}
 
-	err = ms.matchDetailsService.AddMultiple(transaction, matchID, players, adjustedPlayers)
+	winnerDBPlayers := getWinnerDBPlayers(dbPlayers)
+	loserDBPlayers := getLoserDBPlayers(dbPlayers)
+	adjustedWinnerDBPlayers, adjustedLoserDBPlayers := m.ratingService.CalculateRating(winnerDBPlayers, loserDBPlayers)
+	adjustedDBPlayers := append(adjustedWinnerDBPlayers, adjustedLoserDBPlayers...)
+
+	if err := m.playerService.UpdateRatingsForMultiple(transaction, adjustedDBPlayers); err != nil {
+		return err
+	}
+
+	matchID, err := m.matchRepository.Create(transaction)
+	if err != nil {
+		return err
+	}
+
+	err = m.matchDetailsService.AddMultiple(transaction, matchID, dbPlayers, adjustedDBPlayers)
 	return err
 }
 
-func (ms *matchService) isPlayerCountUneven(players []player.Player) bool {
+func isPlayerCountUneven(players []player.Player) bool {
 	return (len(players) % 2) != 0
 }
 
-func (ms *matchService) getWinnerPlayers(players []player.Player) []player.Player {
-	lowerhalfPlayers := players[:(len(players) / 2)]
-	return lowerhalfPlayers
+func getWinnerDBPlayers(players []player.DBPlayer) []player.DBPlayer {
+	lowerhalf := players[:(len(players) / 2)]
+	return lowerhalf
 }
 
-func (ms *matchService) getLoserPlayers(players []player.Player) []player.Player {
-	upperhalfPlayers := players[(len(players) / 2):]
-	return upperhalfPlayers
+func getLoserDBPlayers(players []player.DBPlayer) []player.DBPlayer {
+	upperhalf := players[(len(players) / 2):]
+	return upperhalf
 }
 
 // NewService creates a service

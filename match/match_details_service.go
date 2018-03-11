@@ -7,23 +7,23 @@ import (
 
 // DetailsService interface
 type DetailsService interface {
-	AddMultiple(transaction transaction.Transaction, matchID int64, players []player.Player, adjustedPlayers []player.Player) error
+	AddMultiple(transaction transaction.Transaction, matchID int64, dbPlayers []player.DBPlayer, adjustedDBPlayers []player.DBPlayer) error
 }
 
 type matchDetailsService struct {
 	matchDetailsRepository DetailsRepository
 }
 
-func (mds *matchDetailsService) AddMultiple(transaction transaction.Transaction, matchID int64, players []player.Player, adjustedPlayers []player.Player) error {
-	for i, player := range players {
-		ratingChange := mds.getRatingChange(player, adjustedPlayers[i])
+func (m *matchDetailsService) AddMultiple(transaction transaction.Transaction, matchID int64, dbPlayers []player.DBPlayer, adjustedDBPlayers []player.DBPlayer) error {
+	for i := range dbPlayers {
+		ratingChange := getRatingChange(dbPlayers[i], adjustedDBPlayers[i])
 		matchDetails := Details{
-			PlayerID:     player.ID,
+			PlayerID:     dbPlayers[i].ID,
 			MatchID:      matchID,
 			RatingChange: ratingChange,
 		}
 
-		if err := mds.matchDetailsRepository.Create(transaction, matchDetails); err != nil {
+		if err := m.matchDetailsRepository.Create(transaction, matchDetails); err != nil {
 			return err
 		}
 	}
@@ -31,8 +31,8 @@ func (mds *matchDetailsService) AddMultiple(transaction transaction.Transaction,
 	return nil
 }
 
-func (mds *matchDetailsService) getRatingChange(player player.Player, adjustedPlayer player.Player) int {
-	return adjustedPlayer.Rating - player.Rating
+func getRatingChange(dbPlayer player.DBPlayer, adjustedDBPlayer player.DBPlayer) int {
+	return adjustedDBPlayer.Rating - dbPlayer.Rating
 }
 
 // NewDetailsService factory

@@ -6,14 +6,14 @@ import (
 
 // Service interface
 type Service interface {
-	CalculateRating(winnerPlayers []player.Player, loserPlayers []player.Player) ([]player.Player, []player.Player)
+	CalculateRating(winnerDBPlayers []player.DBPlayer, loserDBPlayers []player.DBPlayer) ([]player.DBPlayer, []player.DBPlayer)
 }
 
 type ratingService struct {
 }
 
-func (rs *ratingService) CalculateRating(winnerPlayers []player.Player, loserPlayers []player.Player) ([]player.Player, []player.Player) {
-	return winnerPlayers, loserPlayers
+func (r *ratingService) CalculateRating(winnerDBPlayers []player.DBPlayer, loserDBPlayers []player.DBPlayer) ([]player.DBPlayer, []player.DBPlayer) {
+	return winnerDBPlayers, loserDBPlayers
 }
 
 // NewService factory

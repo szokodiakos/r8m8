@@ -18,9 +18,10 @@ type matchSlackService struct {
 	transactionService transaction.Service
 }
 
-func (mss *matchSlackService) AddMatch(values string) (slack.MessageResponse, error) {
+func (m *matchSlackService) AddMatch(values string) (slack.MessageResponse, error) {
 	var messageResponse slack.MessageResponse
-	requestValues, err := mss.slackService.ParseRequestValues(values)
+
+	requestValues, err := m.slackService.ParseRequestValues(values)
 	if err != nil {
 		return messageResponse, err
 	}
@@ -28,37 +29,25 @@ func (mss *matchSlackService) AddMatch(values string) (slack.MessageResponse, er
 	text := requestValues.Text
 	teamID := requestValues.TeamID
 
-	transaction, err := mss.transactionService.Start()
+	players, err := m.playerSlackService.ToPlayers(text, teamID)
 	if err != nil {
 		return messageResponse, err
 	}
 
-	slackPlayers, err := mss.playerSlackService.GetOrAddSlackPlayers(transaction, text, teamID)
+	transaction, err := m.transactionService.Start()
 	if err != nil {
-		mss.transactionService.Rollback(transaction)
 		return messageResponse, err
 	}
 
-	players := mss.getPlayers(slackPlayers)
-	err = mss.matchService.Add(transaction, players)
+	err = m.matchService.Add(transaction, players)
 	if err != nil {
-		mss.transactionService.Rollback(transaction)
+		m.transactionService.Rollback(transaction)
 		return messageResponse, err
 	}
 
-	err = mss.transactionService.Commit(transaction)
-	messageResponse = mss.slackService.CreateMessageResponse("Success")
+	err = m.transactionService.Commit(transaction)
+	messageResponse = m.slackService.CreateMessageResponse("Success")
 	return messageResponse, err
-}
-
-func (mss *matchSlackService) getPlayers(slackPlayers []player.Slack) []player.Player {
-	players := make([]player.Player, len(slackPlayers))
-
-	for i := range slackPlayers {
-		players[i] = slackPlayers[i].Player
-	}
-
-	return players
 }
 
 // NewSlackService factory

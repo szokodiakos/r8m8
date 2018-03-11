@@ -39,9 +39,7 @@ func main() {
 	playerService := player.NewService(playerRepository)
 	matchService := match.NewService(matchRepository, ratingService, playerService, matchDetailsService)
 	slackService := slack.NewService()
-	playerSlackRepository := player.NewSlackRepository()
-	playerSlackParserService := player.NewSlackParserService()
-	playerSlackService := player.NewSlackService(playerSlackRepository, playerService, playerSlackParserService)
+	playerSlackService := player.NewSlackService()
 	transactionService := transaction.NewServiceSQL(database)
 	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, transactionService)
 
