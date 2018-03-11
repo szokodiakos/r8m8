@@ -9,12 +9,11 @@ import (
 type playerRepositorySQL struct {
 }
 
-func (p *playerRepositorySQL) GetMultipleByUniqueName(transaction transaction.Transaction, uniqueNames []string) ([]RepoPlayer, error) {
+func (p *playerRepositorySQL) GetMultipleByUniqueNames(transaction transaction.Transaction, uniqueNames []string) ([]RepoPlayer, error) {
 	var repoPlayers = make([]RepoPlayer, 0, len(uniqueNames))
 	query := `
 		SELECT
 			p.id,
-			p.rating,
 			p.unique_name,
 			p.display_name
 		FROM
@@ -31,16 +30,14 @@ func (p *playerRepositorySQL) GetMultipleByUniqueName(transaction transaction.Tr
 
 	for rows.Next() {
 		var id int64
-		var rating int
 		var uniqueName, displayName string
 
-		if err := rows.Scan(&id, &rating, &uniqueName, &displayName); err != nil {
+		if err := rows.Scan(&id, &uniqueName, &displayName); err != nil {
 			return repoPlayers, err
 		}
 
 		repoPlayer := RepoPlayer{
 			ID:          id,
-			Rating:      rating,
 			UniqueName:  uniqueName,
 			DisplayName: displayName,
 		}
@@ -49,29 +46,24 @@ func (p *playerRepositorySQL) GetMultipleByUniqueName(transaction transaction.Tr
 	return repoPlayers, nil
 }
 
-func (p *playerRepositorySQL) Create(transaction transaction.Transaction, player Player) error {
+func (p *playerRepositorySQL) Create(transaction transaction.Transaction, player Player) (int64, error) {
+	var createdID int64
 	query := `
 		INSERT INTO players
 			(unique_name, display_name)
 		VALUES
-			($1, $2);
+			($1, $2)
+		RETURNING id;
 	`
 
 	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
-	_, err := sqlTransaction.Exec(query, player.UniqueName, player.DisplayName)
-	return err
-}
+	res := sqlTransaction.QueryRow(query)
+	err := res.Scan(&createdID)
+	if err != nil {
+		return createdID, err
+	}
 
-func (p *playerRepositorySQL) UpdateRatingByID(transaction transaction.Transaction, ID int64, rating int) error {
-	query := `
-		UPDATE players
-		SET rating = $1
-		WHERE id = $2
-	`
-
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
-	_, err := sqlTransaction.Exec(query, ID, rating)
-	return err
+	return createdID, nil
 }
 
 // NewRepository factory

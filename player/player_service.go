@@ -1,33 +1,37 @@
 package player
 
-import "github.com/szokodiakos/r8m8/transaction"
+import (
+	"github.com/szokodiakos/r8m8/rating"
+	"github.com/szokodiakos/r8m8/transaction"
+)
 
 // Service interface
 type Service interface {
-	GetOrAddPlayers(transaction transaction.Transaction, players []Player) ([]RepoPlayer, error)
-	UpdateRatingsForMultiple(transaction transaction.Transaction, repoPlayers []RepoPlayer) error
+	GetOrAddPlayers(transaction transaction.Transaction, players []Player, leagueID int64) ([]RepoPlayer, error)
 }
 
 type playerService struct {
 	playerRepository Repository
+	ratingRepository rating.Repository
+	initialRating    int
 }
 
-func (p *playerService) GetOrAddPlayers(transaction transaction.Transaction, players []Player) ([]RepoPlayer, error) {
-	uniqueNames := mapPlayersUniqueNames(players)
+func (p *playerService) GetOrAddPlayers(transaction transaction.Transaction, players []Player, leagueID int64) ([]RepoPlayer, error) {
+	uniqueNames := mapToUniqueNames(players)
 
-	repoPlayers, err := p.playerRepository.GetMultipleByUniqueName(transaction, uniqueNames)
+	repoPlayers, err := p.playerRepository.GetMultipleByUniqueNames(transaction, uniqueNames)
 	if err != nil {
 		return repoPlayers, err
 	}
 
 	if isPlayerMissingFromRepository(players, repoPlayers) {
 		missingPlayers := getMissingPlayers(players, repoPlayers)
-		err := p.addMultiple(transaction, missingPlayers)
+		err := p.addMultiple(transaction, missingPlayers, leagueID)
 		if err != nil {
 			return repoPlayers, err
 		}
 
-		repoPlayers, err = p.playerRepository.GetMultipleByUniqueName(transaction, uniqueNames)
+		repoPlayers, err = p.playerRepository.GetMultipleByUniqueNames(transaction, uniqueNames)
 		if err != nil {
 			return repoPlayers, err
 		}
@@ -35,7 +39,7 @@ func (p *playerService) GetOrAddPlayers(transaction transaction.Transaction, pla
 	return repoPlayers, nil
 }
 
-func mapPlayersUniqueNames(players []Player) []string {
+func mapToUniqueNames(players []Player) []string {
 	uniqueNames := make([]string, len(players))
 	for i := range players {
 		uniqueNames[i] = players[i].UniqueName
@@ -72,9 +76,19 @@ func getRepoCounterpart(player Player, repoPlayers []RepoPlayer) RepoPlayer {
 	return repoPlayer
 }
 
-func (p *playerService) addMultiple(transaction transaction.Transaction, players []Player) error {
+func (p *playerService) addMultiple(transaction transaction.Transaction, players []Player, leagueID int64) error {
 	for i := range players {
-		err := p.playerRepository.Create(transaction, players[i])
+		playerID, err := p.playerRepository.Create(transaction, players[i])
+		if err != nil {
+			return err
+		}
+
+		rating := rating.Rating{
+			PlayerID: playerID,
+			LeagueID: leagueID,
+			Rating:   p.initialRating,
+		}
+		err = p.ratingRepository.Create(transaction, rating)
 		if err != nil {
 			return err
 		}
@@ -83,19 +97,11 @@ func (p *playerService) addMultiple(transaction transaction.Transaction, players
 	return nil
 }
 
-func (p *playerService) UpdateRatingsForMultiple(transaction transaction.Transaction, repoPlayers []RepoPlayer) error {
-	for i := range repoPlayers {
-		if err := p.playerRepository.UpdateRatingByID(transaction, repoPlayers[i].ID, repoPlayers[i].Rating); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // NewService factory
-func NewService(playerRepository Repository) Service {
+func NewService(playerRepository Repository, ratingRepository rating.Repository, initialRating int) Service {
 	return &playerService{
 		playerRepository: playerRepository,
+		ratingRepository: ratingRepository,
+		initialRating:    initialRating,
 	}
 }

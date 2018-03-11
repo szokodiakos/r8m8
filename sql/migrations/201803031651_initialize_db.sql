@@ -1,25 +1,40 @@
 -- +migrate Up
 
+CREATE TABLE leagues {
+  id SERIAL PRIMARY KEY,
+  unique_name TEXT UNIQUE,
+  display_name TEXT NOT NULL
+}
+
 CREATE TABLE matches (
   id SERIAL PRIMARY KEY,
+  league_id INT NOT NULL REFERENCES leagues(id),
   created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE players (
   id SERIAL PRIMARY KEY,
   unique_name TEXT UNIQUE,
-  display_name TEXT NOT NULL,
-  rating INT DEFAULT 1500
+  display_name TEXT NOT NULL
 );
 
-CREATE TABLE match_details (
+CREATE TABLE rating_changes (
   player_id INT NOT NULL REFERENCES players(id),
   match_id INT NOT NULL REFERENCES matches(id),
   rating_change INT NOT NULL
 );
 
+CREATE TABLE ratings {
+  player_id INT NOT NULL REFERENCES players(id),
+  league_id INT NOT NULL REFERENCES leagues(id),
+  rating INT NOT NULL
+  CONSTRAINT ratings_pk PRIMARY KEY (player_id, league_id)
+}
+
 -- +migrate Down
 
+DROP TABLE ratings;
 DROP TABLE match_details;
 DROP TABLE players;
 DROP TABLE matches;
+DROP TABLE leagues;

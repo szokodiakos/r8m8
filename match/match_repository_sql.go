@@ -8,18 +8,18 @@ import (
 type matchRepositorySQL struct {
 }
 
-func (mrs *matchRepositorySQL) Create(transaction transaction.Transaction) (int64, error) {
+func (mrs *matchRepositorySQL) Create(transaction transaction.Transaction, leagueID int64) (int64, error) {
 	var createdID int64
 	query := `
 		INSERT INTO matches
-			(created_at)
+			(league_id, created_at)
 		VALUES
-			(current_timestamp)
+			($1, current_timestamp)
 		RETURNING id;
 	`
 
 	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
-	res := sqlTransaction.QueryRow(query)
+	res := sqlTransaction.QueryRow(query, leagueID)
 	err := res.Scan(&createdID)
 	if err != nil {
 		return createdID, err

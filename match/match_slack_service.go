@@ -1,6 +1,7 @@
 package match
 
 import (
+	"github.com/szokodiakos/r8m8/league"
 	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/slack"
 	"github.com/szokodiakos/r8m8/transaction"
@@ -15,6 +16,7 @@ type matchSlackService struct {
 	matchService       Service
 	slackService       slack.Service
 	playerSlackService player.SlackService
+	leagueSlackService league.SlackService
 	transactionService transaction.Service
 }
 
@@ -39,7 +41,12 @@ func (m *matchSlackService) AddMatch(values string) (slack.MessageResponse, erro
 		return messageResponse, err
 	}
 
-	err = m.matchService.Add(transaction, players)
+	teamDomain := requestValues.TeamDomain
+	channelID := requestValues.ChannelID
+	channelName := requestValues.ChannelName
+	league := m.leagueSlackService.ToLeague(teamID, teamDomain, channelID, channelName)
+
+	err = m.matchService.Add(transaction, players, league)
 	if err != nil {
 		m.transactionService.Rollback(transaction)
 		return messageResponse, err
@@ -51,11 +58,12 @@ func (m *matchSlackService) AddMatch(values string) (slack.MessageResponse, erro
 }
 
 // NewSlackService factory
-func NewSlackService(matchService Service, slackService slack.Service, playerSlackService player.SlackService, transactionService transaction.Service) SlackService {
+func NewSlackService(matchService Service, slackService slack.Service, playerSlackService player.SlackService, leagueSlackService league.SlackService, transactionService transaction.Service) SlackService {
 	return &matchSlackService{
 		matchService:       matchService,
 		slackService:       slackService,
 		playerSlackService: playerSlackService,
+		leagueSlackService: leagueSlackService,
 		transactionService: transactionService,
 	}
 }

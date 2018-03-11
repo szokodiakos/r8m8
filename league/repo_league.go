@@ -1,7 +1,7 @@
-package player
+package league
 
-// RepoPlayer struct
-type RepoPlayer struct {
+// RepoLeague struct
+type RepoLeague struct {
 	ID          int64
 	UniqueName  string
 	DisplayName string
