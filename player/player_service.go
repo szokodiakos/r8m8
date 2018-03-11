@@ -51,7 +51,7 @@ func getMissingPlayers(players []Player, repoPlayers []RepoPlayer) []Player {
 	missingPlayers := make([]Player, 0, len(repoPlayers))
 
 	for i := range players {
-		repoPlayer := getDBCounterpart(players[i], repoPlayers)
+		repoPlayer := getRepoCounterpart(players[i], repoPlayers)
 
 		if repoPlayer == (RepoPlayer{}) {
 			missingPlayers = append(missingPlayers, players[i])
@@ -60,7 +60,7 @@ func getMissingPlayers(players []Player, repoPlayers []RepoPlayer) []Player {
 	return missingPlayers
 }
 
-func getDBCounterpart(player Player, repoPlayers []RepoPlayer) RepoPlayer {
+func getRepoCounterpart(player Player, repoPlayers []RepoPlayer) RepoPlayer {
 	var repoPlayer RepoPlayer
 
 	for i := range repoPlayers {
