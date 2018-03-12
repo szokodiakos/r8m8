@@ -36,10 +36,10 @@ func main() {
 
 	database := sqlDB.NewSQLDB(db)
 	matchRepository := match.NewRepositorySQL()
-	ratingStrategyIdentity := rating.NewStrategyIdentity()
+	ratingStrategyElo := rating.NewStrategyElo()
 	ratingRepository := rating.NewRepositorySQL()
 	detailsRepository := details.NewRepositorySQL()
-	ratingService := rating.NewService(ratingStrategyIdentity, ratingRepository, detailsRepository)
+	ratingService := rating.NewService(ratingStrategyElo, ratingRepository, detailsRepository)
 	playerRepository := player.NewRepository()
 	initialRating := 1500
 	playerService := player.NewService(playerRepository, ratingRepository, initialRating)
