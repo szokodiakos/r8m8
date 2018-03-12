@@ -1,8 +1,9 @@
 package sql
 
 import (
-	"database/sql"
 	"log"
+
+	"github.com/jmoiron/sqlx"
 )
 
 // DB interface
@@ -11,14 +12,14 @@ type DB interface {
 }
 
 type db struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
 func (d *db) Begin() (Transaction, error) {
 	log.Println("Transaction Begin")
 	var transaction Transaction
 
-	tx, err := d.db.Begin()
+	tx, err := d.db.Beginx()
 	if err != nil {
 		return transaction, err
 	}
@@ -28,7 +29,7 @@ func (d *db) Begin() (Transaction, error) {
 }
 
 // NewSQLDB factory
-func NewSQLDB(sqlDB *sql.DB) DB {
+func NewSQLDB(sqlDB *sqlx.DB) DB {
 	return &db{
 		db: sqlDB,
 	}

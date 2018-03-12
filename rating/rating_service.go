@@ -47,7 +47,7 @@ func getWinnerRepoRatings(repoRatings []RepoRating, repoPlayerIDs []int64) []Rep
 }
 
 func getLoserRepoRatings(repoRatings []RepoRating, repoPlayerIDs []int64) []RepoRating {
-	loserRepoPlayerIDs := repoPlayerIDs[:(len(repoPlayerIDs) / 2)]
+	loserRepoPlayerIDs := repoPlayerIDs[(len(repoPlayerIDs) / 2):]
 	return getRepoRatingsByRepoPlayerIDs(repoRatings, loserRepoPlayerIDs)
 }
 

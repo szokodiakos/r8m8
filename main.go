@@ -1,9 +1,9 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/szokodiakos/r8m8/league"
 
 	"github.com/szokodiakos/r8m8/details"
@@ -27,7 +27,7 @@ func main() {
 
 	sqlDialect := viper.GetString("sql_dialect")
 	sqlConnectionString := viper.GetString("sql_connection_string")
-	db, err := sql.Open(sqlDialect, sqlConnectionString)
+	db, err := sqlx.Open(sqlDialect, sqlConnectionString)
 	if err != nil {
 		log.Fatal("Database connect error: ", err)
 	}

@@ -1,20 +1,20 @@
 package sql
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 
+	"github.com/jmoiron/sqlx"
 	migrate "github.com/rubenv/sql-migrate"
 )
 
 // Execute migrate
-func Execute(db *sql.DB, dialect string) {
+func Execute(db *sqlx.DB, dialect string) {
 	migrations := &migrate.FileMigrationSource{
 		Dir: "sql/migrations",
 	}
 
-	n, err := migrate.Exec(db, dialect, migrations, migrate.Up)
+	n, err := migrate.Exec(db.DB, dialect, migrations, migrate.Up)
 
 	if err != nil {
 		log.Fatal("Error during migration: ", err)

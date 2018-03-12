@@ -24,6 +24,15 @@
   revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/jmoiron/sqlx"
+  packages = [
+    ".",
+    "reflectx"
+  ]
+  revision = "cf35089a197953c69420c8d0cecda90809764b1d"
+
+[[projects]]
   name = "github.com/joho/godotenv"
   packages = ["."]
   revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
@@ -180,6 +189,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "da092d3b4816ccdfa7f6464aa1fd8567aa0df20eae39c69508b8b059fe364b2d"
+  inputs-digest = "912892aa0a5f70e896e827c126109f8a053980b6f2442f2d1f63730224c5dd49"
   solver-name = "gps-cdcl"
   solver-version = 1

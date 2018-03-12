@@ -3,19 +3,21 @@ package sql
 import (
 	"database/sql"
 	"log"
+
+	"github.com/jmoiron/sqlx"
 )
 
 // Transaction interface
 type Transaction interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
-	Query(query string, args ...interface{}) (*sql.Rows, error)
-	QueryRow(query string, args ...interface{}) *sql.Row
+	Select(dest interface{}, query string, args ...interface{}) error
+	Get(dest interface{}, query string, args ...interface{}) error
 	Commit() error
 	Rollback() error
 }
 
 type transaction struct {
-	tx *sql.Tx
+	tx *sqlx.Tx
 }
 
 func (t *transaction) Commit() error {
@@ -33,18 +35,18 @@ func (t *transaction) Exec(query string, args ...interface{}) (sql.Result, error
 	return t.tx.Exec(query, args...)
 }
 
-func (t *transaction) Query(query string, args ...interface{}) (*sql.Rows, error) {
+func (t *transaction) Select(dest interface{}, query string, args ...interface{}) error {
 	log.Println(query, args)
-	return t.tx.Query(query, args...)
+	return t.tx.Select(dest, query, args...)
 }
 
-func (t *transaction) QueryRow(query string, args ...interface{}) *sql.Row {
+func (t *transaction) Get(dest interface{}, query string, args ...interface{}) error {
 	log.Println(query, args)
-	return t.tx.QueryRow(query, args...)
+	return t.tx.Get(dest, query, args...)
 }
 
 // NewSQLTransaction factory
-func NewSQLTransaction(tx *sql.Tx) Transaction {
+func NewSQLTransaction(tx *sqlx.Tx) Transaction {
 	return &transaction{
 		tx: tx,
 	}

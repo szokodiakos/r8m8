@@ -10,7 +10,7 @@ import (
 type leagueRepositorySQL struct{}
 
 func (l *leagueRepositorySQL) GetByUniqueName(transaction transaction.Transaction, uniqueName string) (RepoLeague, error) {
-	var repoLeague RepoLeague
+	repoLeague := RepoLeague{}
 
 	query := `
 		SELECT
@@ -23,24 +23,11 @@ func (l *leagueRepositorySQL) GetByUniqueName(transaction transaction.Transactio
 	`
 
 	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
-	res := sqlTransaction.QueryRow(query, uniqueName)
-
-	var ID int64
-	var displayName string
-	err := res.Scan(&ID, &displayName)
+	err := sqlTransaction.Get(&repoLeague, query, uniqueName)
 	if err == _sql.ErrNoRows {
 		return repoLeague, nil
 	}
-	if err != nil {
-		return repoLeague, err
-	}
-
-	repoLeague = RepoLeague{
-		ID:          ID,
-		UniqueName:  uniqueName,
-		DisplayName: displayName,
-	}
-	return repoLeague, nil
+	return repoLeague, err
 }
 
 func (l *leagueRepositorySQL) Create(transaction transaction.Transaction, league League) error {
