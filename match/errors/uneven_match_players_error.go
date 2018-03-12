@@ -1,13 +1,9 @@
 package errors
 
-type unevenMatchPlayersError struct {
+// UnevenMatchPlayersError struct
+type UnevenMatchPlayersError struct {
 }
 
-func (e *unevenMatchPlayersError) Error() string {
+func (e *UnevenMatchPlayersError) Error() string {
 	return "Uneven Match Players"
-}
-
-// NewUnevenMatchPlayersError factory
-func NewUnevenMatchPlayersError() error {
-	return &unevenMatchPlayersError{}
 }

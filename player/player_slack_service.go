@@ -11,6 +11,7 @@ import (
 // SlackService interface
 type SlackService interface {
 	ToPlayers(text string, teamID string) ([]Player, error)
+	ToPlayer(teamID string, userID string, userName string) Player
 }
 
 type playerSlackService struct {
@@ -21,7 +22,7 @@ func (p *playerSlackService) ToPlayers(text string, teamID string) ([]Player, er
 	players := make([]Player, len(slackPlayers))
 
 	for i := range slackPlayers {
-		player, err := toPlayer(slackPlayers[i], teamID)
+		player, err := p.parsePlayer(slackPlayers[i], teamID)
 
 		if err != nil {
 			return nil, err
@@ -32,7 +33,7 @@ func (p *playerSlackService) ToPlayers(text string, teamID string) ([]Player, er
 	return players, nil
 }
 
-func toPlayer(slackPlayer string, teamID string) (Player, error) {
+func (p *playerSlackService) parsePlayer(slackPlayer string, teamID string) (Player, error) {
 	var player Player
 	pattern, _ := regexp.Compile(`<@(.*)\|(.*)>`)
 	results := pattern.FindStringSubmatch(slackPlayer)
@@ -43,17 +44,22 @@ func toPlayer(slackPlayer string, teamID string) (Player, error) {
 
 	userID := results[1]
 	userName := results[2]
-	uniqueName := fmt.Sprintf("slack_%v_%v", teamID, userID)
 
-	player = Player{
-		DisplayName: userName,
-		UniqueName:  uniqueName,
-	}
+	player = p.ToPlayer(teamID, userID, userName)
 	return player, nil
 }
 
 func isSlackPlayerInvalid(results []string) bool {
 	return (len(results) != 3)
+}
+
+func (p *playerSlackService) ToPlayer(teamID string, userID string, userName string) Player {
+	displayName := userName
+	uniqueName := fmt.Sprintf("slack_%v_%v", teamID, userID)
+	return Player{
+		DisplayName: displayName,
+		UniqueName:  uniqueName,
+	}
 }
 
 // NewSlackService factory

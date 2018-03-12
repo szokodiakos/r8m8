@@ -10,7 +10,7 @@ import (
 
 // Service interface
 type Service interface {
-	Add(transaction transaction.Transaction, players []player.Player, league league.League) error
+	Add(transaction transaction.Transaction, players []player.Player, league league.League, reporterPlayer player.Player) error
 }
 
 type matchService struct {
@@ -20,9 +20,13 @@ type matchService struct {
 	leagueService   league.Service
 }
 
-func (m *matchService) Add(transaction transaction.Transaction, players []player.Player, league league.League) error {
+func (m *matchService) Add(transaction transaction.Transaction, players []player.Player, league league.League, reporterPlayer player.Player) error {
 	if isPlayerCountUneven(players) {
-		return errors.NewUnevenMatchPlayersError()
+		return &errors.UnevenMatchPlayersError{}
+	}
+
+	if isReporterPlayerNotInLeague(reporterPlayer, players) {
+		return &errors.ReporterPlayerNotInLeagueError{}
 	}
 
 	repoLeague, err := m.leagueService.GetOrAddLeague(transaction, league)
@@ -36,22 +40,42 @@ func (m *matchService) Add(transaction transaction.Transaction, players []player
 		return err
 	}
 
-	matchID, err := m.matchRepository.Create(transaction, leagueID)
+	reporterRepoPlayer := getReporterRepoPlayer(reporterPlayer, repoPlayers)
+	reporterRepoPlayerID := reporterRepoPlayer.ID
+	matchID, err := m.matchRepository.Create(transaction, leagueID, reporterRepoPlayerID)
 	if err != nil {
 		return err
 	}
 
 	repoPlayerIDs := mapToIDs(repoPlayers)
 	err = m.ratingService.UpdateRatings(transaction, repoPlayerIDs, matchID)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func isPlayerCountUneven(players []player.Player) bool {
 	return (len(players) % 2) != 0
+}
+
+func isReporterPlayerNotInLeague(reporterPlayer player.Player, players []player.Player) bool {
+	missingFromLeague := true
+	for i := range players {
+		if players[i].UniqueName == reporterPlayer.UniqueName {
+			missingFromLeague = false
+		}
+	}
+	return missingFromLeague
+}
+
+func getReporterRepoPlayer(reporterPlayer player.Player, repoPlayers []player.RepoPlayer) player.RepoPlayer {
+	var reporterRepoPlayer player.RepoPlayer
+
+	for i := range repoPlayers {
+		if repoPlayers[i].UniqueName == reporterPlayer.UniqueName {
+			reporterRepoPlayer = repoPlayers[i]
+		}
+	}
+
+	return reporterRepoPlayer
 }
 
 func mapToIDs(repoPlayers []player.RepoPlayer) []int64 {

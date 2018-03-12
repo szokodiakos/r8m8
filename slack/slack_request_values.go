@@ -8,4 +8,6 @@ type RequestValues struct {
 	TeamDomain  string
 	ChannelID   string
 	ChannelName string
+	UserID      string
+	UserName    string
 }

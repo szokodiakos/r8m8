@@ -8,19 +8,19 @@ import (
 type matchRepositorySQL struct {
 }
 
-func (mrs *matchRepositorySQL) Create(transaction transaction.Transaction, leagueID int64) (int64, error) {
+func (m *matchRepositorySQL) Create(transaction transaction.Transaction, leagueID int64, reporterPlayerID int64) (int64, error) {
 	var createdID int64
 
 	query := `
 		INSERT INTO matches
-			(league_id, created_at)
+			(league_id, reporter_player_id, created_at)
 		VALUES
-			($1, current_timestamp)
+			($1, $2, current_timestamp)
 		RETURNING id;
 	`
 
 	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
-	err := sqlTransaction.Get(&createdID, query, leagueID)
+	err := sqlTransaction.Get(&createdID, query, leagueID, reporterPlayerID)
 	return createdID, err
 }
 

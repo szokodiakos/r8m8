@@ -29,6 +29,8 @@ func (s *slackService) ParseRequestValues(values string) (RequestValues, error) 
 	teamDomain := parsedValues.Get("team_domain")
 	channelID := parsedValues.Get("channel_id")
 	channelName := parsedValues.Get("channel_name")
+	userID := parsedValues.Get("user_id")
+	userName := parsedValues.Get("user_name")
 
 	requestValues = RequestValues{
 		Text:        text,
@@ -37,6 +39,8 @@ func (s *slackService) ParseRequestValues(values string) (RequestValues, error) 
 		TeamDomain:  teamDomain,
 		ChannelID:   channelID,
 		ChannelName: channelName,
+		UserID:      userID,
+		UserName:    userName,
 	}
 	return requestValues, nil
 }

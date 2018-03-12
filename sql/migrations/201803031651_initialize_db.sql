@@ -6,16 +6,17 @@ CREATE TABLE leagues (
   display_name TEXT NOT NULL
 );
 
-CREATE TABLE matches (
-  id SERIAL PRIMARY KEY,
-  league_id INT NOT NULL REFERENCES leagues(id),
-  created_at TIMESTAMP NOT NULL
-);
-
 CREATE TABLE players (
   id SERIAL PRIMARY KEY,
   unique_name TEXT UNIQUE,
   display_name TEXT NOT NULL
+);
+
+CREATE TABLE matches (
+  id SERIAL PRIMARY KEY,
+  league_id INT NOT NULL REFERENCES leagues(id),
+  reporter_player_id INT NOT NULL REFERENCES players(id),
+  created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE details (
@@ -36,6 +37,6 @@ CREATE TABLE ratings (
 
 DROP TABLE ratings;
 DROP TABLE details;
-DROP TABLE players;
 DROP TABLE matches;
+DROP TABLE players;
 DROP TABLE leagues;
