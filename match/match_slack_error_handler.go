@@ -1,6 +1,9 @@
 package match
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/szokodiakos/r8m8/echo"
 	"github.com/szokodiakos/r8m8/match/errors"
 	"github.com/szokodiakos/r8m8/slack"
@@ -9,46 +12,43 @@ import (
 type matchSlackErrorHandler struct {
 }
 
-func (m *matchSlackErrorHandler) HandleError(err error) interface{} {
-	var messageResponse slack.MessageResponse
+func (m *matchSlackErrorHandler) HandleError(err error) (int, interface{}) {
 	switch err.(type) {
 	case *errors.ReporterPlayerNotInLeagueError:
-		messageResponse = getReporterPlayerNotInLeagueResponse()
-		return messageResponse
+		return getReporterPlayerNotInLeagueResponse()
 	case *errors.UnevenMatchPlayersError:
-		messageResponse = getUnevenMatchPlayersResponse()
-		return messageResponse
+		return getUnevenMatchPlayersResponse()
 	default:
-		messageResponse = getDefaultErrorResponse()
-		return messageResponse
+		log.Println(err)
+		return getDefaultErrorResponse()
 	}
 }
 
-func getReporterPlayerNotInLeagueResponse() slack.MessageResponse {
+func getReporterPlayerNotInLeagueResponse() (int, slack.MessageResponse) {
 	text := `
 > Darn! You must be the participant of at least one match (including this one). :hushed:
 > :exclamation: Please play a match before posting! :exclamation:
-	`
-	return slack.MessageResponse{
-		Text: text,
-	}
+`
+	return getResponse(text)
 }
 
-func getUnevenMatchPlayersResponse() slack.MessageResponse {
+func getUnevenMatchPlayersResponse() (int, slack.MessageResponse) {
 	text := `
 > Darn! Reported players are uneven! :hushed:
 > :exclamation: Make sure you report even number of players! :exclamation:
-	`
-	return slack.MessageResponse{
-		Text: text,
-	}
+`
+	return getResponse(text)
 }
 
-func getDefaultErrorResponse() slack.MessageResponse {
+func getDefaultErrorResponse() (int, slack.MessageResponse) {
 	text := `
 > This is embarrassing!
-	`
-	return slack.MessageResponse{
+`
+	return getResponse(text)
+}
+
+func getResponse(text string) (int, slack.MessageResponse) {
+	return http.StatusOK, slack.MessageResponse{
 		Text: text,
 	}
 }

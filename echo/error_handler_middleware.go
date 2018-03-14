@@ -1,8 +1,6 @@
 package echo
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo"
 )
 
@@ -11,8 +9,8 @@ func ErrorHandlerMiddleware(errorHandler ErrorHandler) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(context echo.Context) error {
 			if err := next(context); err != nil {
-				response := errorHandler.HandleError(err)
-				context.JSON(http.StatusOK, response)
+				code, response := errorHandler.HandleError(err)
+				context.JSON(code, response)
 			}
 			return nil
 		}

@@ -30,13 +30,7 @@ func (m *matchSlackService) AddMatch(values string) (slack.MessageResponse, erro
 
 	text := requestValues.Text
 	teamID := requestValues.TeamID
-
 	players, err := m.playerSlackService.ToPlayers(text, teamID)
-	if err != nil {
-		return messageResponse, err
-	}
-
-	transaction, err := m.transactionService.Start()
 	if err != nil {
 		return messageResponse, err
 	}
@@ -49,6 +43,11 @@ func (m *matchSlackService) AddMatch(values string) (slack.MessageResponse, erro
 	userID := requestValues.UserID
 	userName := requestValues.UserName
 	reporterPlayer := m.playerSlackService.ToPlayer(teamID, userID, userName)
+	transaction, err := m.transactionService.Start()
+	if err != nil {
+		return messageResponse, err
+	}
+
 	err = m.matchService.Add(transaction, players, league, reporterPlayer)
 	if err != nil {
 		m.transactionService.Rollback(transaction)
