@@ -1,14 +1,20 @@
 package slack
 
-import "net/url"
+import (
+	"net/url"
+
+	"github.com/szokodiakos/r8m8/slack/errors"
+)
 
 // Service interface
 type Service interface {
 	ParseRequestValues(values string) (RequestValues, error)
 	CreateMessageResponse(text string) MessageResponse
+	VerifyToken(values string) error
 }
 
 type slackService struct {
+	verificationToken string
 }
 
 func (s *slackService) ParseRequestValues(values string) (RequestValues, error) {
@@ -51,7 +57,23 @@ func (s *slackService) CreateMessageResponse(text string) MessageResponse {
 	}
 }
 
+func (s *slackService) VerifyToken(values string) error {
+	requestValues, err := s.ParseRequestValues(values)
+	if err != nil {
+		return err
+	}
+
+	token := requestValues.Token
+	if token != s.verificationToken {
+		return &errors.InvalidVerificationTokenError{}
+	}
+
+	return nil
+}
+
 // NewService factory
-func NewService() Service {
-	return &slackService{}
+func NewService(verificationToken string) Service {
+	return &slackService{
+		verificationToken: verificationToken,
+	}
 }

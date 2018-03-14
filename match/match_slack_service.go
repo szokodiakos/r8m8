@@ -2,7 +2,6 @@ package match
 
 import (
 	"github.com/szokodiakos/r8m8/league"
-	"github.com/szokodiakos/r8m8/match/errors"
 	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/slack"
 	"github.com/szokodiakos/r8m8/transaction"
@@ -53,40 +52,12 @@ func (m *matchSlackService) AddMatch(values string) (slack.MessageResponse, erro
 	err = m.matchService.Add(transaction, players, league, reporterPlayer)
 	if err != nil {
 		m.transactionService.Rollback(transaction)
-		return m.handleMatchAddError(err)
+		return messageResponse, err
 	}
 
 	err = m.transactionService.Commit(transaction)
 	messageResponse = m.slackService.CreateMessageResponse("Success")
 	return messageResponse, err
-}
-
-func (m *matchSlackService) handleMatchAddError(err error) (slack.MessageResponse, error) {
-	var messageResponse slack.MessageResponse
-	switch err.(type) {
-	case *errors.ReporterPlayerNotInLeagueError:
-		messageResponse = m.getReporterPlayerNotInLeagueResponse()
-		return messageResponse, nil
-	case *errors.UnevenMatchPlayersError:
-		messageResponse = m.getUnevenMatchPlayersResponse()
-		return messageResponse, nil
-	default:
-		return messageResponse, err
-	}
-}
-
-func (m *matchSlackService) getReporterPlayerNotInLeagueResponse() slack.MessageResponse {
-	return m.slackService.CreateMessageResponse(`
-> Darn! You must be the participant of at least one match (including this one). :hushed:
-> :exclamation: Please play a match before posting! :exclamation:
-	`)
-}
-
-func (m *matchSlackService) getUnevenMatchPlayersResponse() slack.MessageResponse {
-	return m.slackService.CreateMessageResponse(`
-> Darn! Reported players are uneven! :hushed:
-> :exclamation: Make sure you report even number of players! :exclamation:
-	`)
 }
 
 // NewSlackService factory

@@ -46,15 +46,15 @@ func main() {
 	leagueRepository := league.NewRepositorySQL()
 	leagueService := league.NewService(leagueRepository)
 	matchService := match.NewService(matchRepository, ratingService, playerService, leagueService)
-	slackService := slack.NewService()
+	verificationToken := viper.GetString("slack_verification_token")
+	slackService := slack.NewService(verificationToken)
 	playerSlackService := player.NewSlackService()
 	transactionService := transaction.NewServiceSQL(database)
 	leagueSlackService := league.NewSlackService()
 	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService)
 
 	e := echo.New()
-	verificationToken := viper.GetString("slack_verification_token")
-	match.NewSlackControllerHTTP(e, matchSlackService, slackService, verificationToken)
+	match.NewSlackControllerHTTP(e, matchSlackService, slackService)
 
 	port := viper.GetString("port")
 	e.Logger.Fatal(e.Start(port))

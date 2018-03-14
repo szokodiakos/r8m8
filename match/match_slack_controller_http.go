@@ -24,13 +24,14 @@ func (sch *SlackControllerHTTP) postSlackMatch(context echo.Context) error {
 }
 
 // NewSlackControllerHTTP factory
-func NewSlackControllerHTTP(e *echo.Echo, matchSlackService SlackService, slackService slack.Service, verificationToken string) *SlackControllerHTTP {
+func NewSlackControllerHTTP(e *echo.Echo, matchSlackService SlackService, slackService slack.Service) *SlackControllerHTTP {
 	handler := &SlackControllerHTTP{
 		matchSlackService: matchSlackService,
 	}
 	bodyParser := echoExtensions.BodyParser()
-	slackTokenVerifier := echoExtensions.SlackTokenVerifier(slackService, verificationToken)
-	slackRoutes := e.Group("/slack", bodyParser, slackTokenVerifier)
+	slackTokenVerifier := slack.TokenVerifier(slackService)
+	slackHTTPErrorHandler := echoExtensions.SlackHTTPErrorHandlerMiddleware(slackService)
+	slackRoutes := e.Group("/slack", bodyParser, slackTokenVerifier, slackHTTPErrorHandler)
 	slackRoutes.POST("/match", handler.postSlackMatch)
 	return handler
 }
