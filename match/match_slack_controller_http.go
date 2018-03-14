@@ -30,8 +30,8 @@ func NewSlackControllerHTTP(e *echo.Echo, matchSlackService SlackService, slackS
 	}
 	bodyParser := echoExtensions.BodyParser()
 	slackTokenVerifier := slack.TokenVerifier(slackService)
-	slackHTTPErrorHandler := echoExtensions.SlackHTTPErrorHandlerMiddleware(slackService)
-	slackRoutes := e.Group("/slack", bodyParser, slackTokenVerifier, slackHTTPErrorHandler)
+	httpErrorHandler := echoExtensions.ErrorHandlerMiddleware(NewSlackErrorHandler())
+	slackRoutes := e.Group("/slack", bodyParser, slackTokenVerifier, httpErrorHandler)
 	slackRoutes.POST("/match", handler.postSlackMatch)
 	return handler
 }

@@ -1,20 +1,21 @@
-package slack
+package match
 
 import (
 	"github.com/szokodiakos/r8m8/echo"
-	matchErrors "github.com/szokodiakos/r8m8/match/errors"
+	"github.com/szokodiakos/r8m8/match/errors"
+	"github.com/szokodiakos/r8m8/slack"
 )
 
-type slackErrorHandler struct {
+type matchSlackErrorHandler struct {
 }
 
-func (s *slackErrorHandler) HandleError(err error) interface{} {
-	var messageResponse MessageResponse
+func (m *matchSlackErrorHandler) HandleError(err error) interface{} {
+	var messageResponse slack.MessageResponse
 	switch err.(type) {
-	case *matchErrors.ReporterPlayerNotInLeagueError:
+	case *errors.ReporterPlayerNotInLeagueError:
 		messageResponse = getReporterPlayerNotInLeagueResponse()
 		return messageResponse
-	case *matchErrors.UnevenMatchPlayersError:
+	case *errors.UnevenMatchPlayersError:
 		messageResponse = getUnevenMatchPlayersResponse()
 		return messageResponse
 	default:
@@ -23,36 +24,36 @@ func (s *slackErrorHandler) HandleError(err error) interface{} {
 	}
 }
 
-func getReporterPlayerNotInLeagueResponse() MessageResponse {
+func getReporterPlayerNotInLeagueResponse() slack.MessageResponse {
 	text := `
 > Darn! You must be the participant of at least one match (including this one). :hushed:
 > :exclamation: Please play a match before posting! :exclamation:
 	`
-	return MessageResponse{
+	return slack.MessageResponse{
 		Text: text,
 	}
 }
 
-func getUnevenMatchPlayersResponse() MessageResponse {
+func getUnevenMatchPlayersResponse() slack.MessageResponse {
 	text := `
 > Darn! Reported players are uneven! :hushed:
 > :exclamation: Make sure you report even number of players! :exclamation:
 	`
-	return MessageResponse{
+	return slack.MessageResponse{
 		Text: text,
 	}
 }
 
-func getDefaultErrorResponse() MessageResponse {
+func getDefaultErrorResponse() slack.MessageResponse {
 	text := `
 > This is embarrassing!
 	`
-	return MessageResponse{
+	return slack.MessageResponse{
 		Text: text,
 	}
 }
 
-// NewErrorHandler factory
-func NewErrorHandler() echo.ErrorHandler {
-	return &slackErrorHandler{}
+// NewSlackErrorHandler factory
+func NewSlackErrorHandler() echo.ErrorHandler {
+	return &matchSlackErrorHandler{}
 }
