@@ -2,14 +2,13 @@ package rating
 
 import (
 	"github.com/lib/pq"
-	"github.com/szokodiakos/r8m8/sql"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type ratingRepositorySQL struct {
 }
 
-func (r *ratingRepositorySQL) Create(transaction transaction.Transaction, rating Rating) error {
+func (r *ratingRepositorySQL) Create(tr transaction.Transaction, rating Rating) error {
 	query := `
 		INSERT INTO ratings
 			(player_id, league_id, rating)
@@ -17,12 +16,12 @@ func (r *ratingRepositorySQL) Create(transaction transaction.Transaction, rating
 			($1, $2, $3);
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	_, err := sqlTransaction.Exec(query, rating.PlayerID, rating.LeagueID, rating.Rating)
 	return err
 }
 
-func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(transaction transaction.Transaction, playerIDs []int64) ([]RepoRating, error) {
+func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(tr transaction.Transaction, playerIDs []int64) ([]RepoRating, error) {
 	repoRatings := []RepoRating{}
 
 	query := `
@@ -36,13 +35,13 @@ func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(transaction transaction.Tra
 			r.player_id = ANY($1);
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Select(&repoRatings, query, pq.Array(playerIDs))
 
 	return repoRatings, err
 }
 
-func (r *ratingRepositorySQL) UpdateRating(transaction transaction.Transaction, rating Rating) error {
+func (r *ratingRepositorySQL) UpdateRating(tr transaction.Transaction, rating Rating) error {
 	query := `
 		UPDATE ratings
 		SET
@@ -52,7 +51,7 @@ func (r *ratingRepositorySQL) UpdateRating(transaction transaction.Transaction, 
 			league_id = $3;
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	_, err := sqlTransaction.Exec(query, rating.Rating, rating.PlayerID, rating.LeagueID)
 	return err
 }

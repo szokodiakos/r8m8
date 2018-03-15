@@ -7,7 +7,7 @@ import (
 
 // Service interface
 type Service interface {
-	UpdateRatings(transaction transaction.Transaction, repoPlayerIDs []int64, matchID int64) error
+	UpdateRatings(tr transaction.Transaction, repoPlayerIDs []int64, matchID int64) error
 }
 
 type ratingService struct {
@@ -16,8 +16,8 @@ type ratingService struct {
 	detailsRepository details.Repository
 }
 
-func (r *ratingService) UpdateRatings(transaction transaction.Transaction, repoPlayerIDs []int64, matchID int64) error {
-	repoRatings, err := r.ratingRepository.GetMultipleByPlayerIDs(transaction, repoPlayerIDs)
+func (r *ratingService) UpdateRatings(tr transaction.Transaction, repoPlayerIDs []int64, matchID int64) error {
+	repoRatings, err := r.ratingRepository.GetMultipleByPlayerIDs(tr, repoPlayerIDs)
 	if err != nil {
 		return err
 	}
@@ -28,12 +28,12 @@ func (r *ratingService) UpdateRatings(transaction transaction.Transaction, repoP
 	loserRatings := mapToRatings(loserRepoRatings)
 	adjustedWinnerRatings, adjustedLoserRatings := r.strategy.Calculate(winnerRatings, loserRatings)
 
-	err = r.adjustRatings(transaction, winnerRepoRatings, adjustedWinnerRatings, matchID, true)
+	err = r.adjustRatings(tr, winnerRepoRatings, adjustedWinnerRatings, matchID, true)
 	if err != nil {
 		return err
 	}
 
-	err = r.adjustRatings(transaction, loserRepoRatings, adjustedLoserRatings, matchID, false)
+	err = r.adjustRatings(tr, loserRepoRatings, adjustedLoserRatings, matchID, false)
 	if err != nil {
 		return err
 	}
@@ -71,14 +71,14 @@ func mapToRatings(repoRatings []RepoRating) []int {
 	return ratings
 }
 
-func (r *ratingService) adjustRatings(transaction transaction.Transaction, repoRatings []RepoRating, adjustedRatings []int, matchID int64, hasWon bool) error {
+func (r *ratingService) adjustRatings(tr transaction.Transaction, repoRatings []RepoRating, adjustedRatings []int, matchID int64, hasWon bool) error {
 	for i := range repoRatings {
 		rating := Rating{
 			LeagueID: repoRatings[i].LeagueID,
 			PlayerID: repoRatings[i].PlayerID,
 			Rating:   adjustedRatings[i],
 		}
-		err := r.ratingRepository.UpdateRating(transaction, rating)
+		err := r.ratingRepository.UpdateRating(tr, rating)
 		if err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func (r *ratingService) adjustRatings(transaction transaction.Transaction, repoR
 			RatingChange: adjustedRatings[i] - repoRatings[i].Rating,
 			HasWon:       hasWon,
 		}
-		err = r.detailsRepository.Create(transaction, details)
+		err = r.detailsRepository.Create(tr, details)
 		if err != nil {
 			return err
 		}

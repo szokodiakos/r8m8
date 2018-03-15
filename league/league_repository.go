@@ -6,6 +6,6 @@ import (
 
 // Repository interface
 type Repository interface {
-	GetByUniqueName(transaction transaction.Transaction, uniqueName string) (RepoLeague, error)
-	Create(transaction transaction.Transaction, league League) error
+	GetByUniqueName(tr transaction.Transaction, uniqueName string) (RepoLeague, error)
+	Create(tr transaction.Transaction, league League) error
 }

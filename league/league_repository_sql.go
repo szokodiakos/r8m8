@@ -3,13 +3,12 @@ package league
 import (
 	_sql "database/sql"
 
-	"github.com/szokodiakos/r8m8/sql"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type leagueRepositorySQL struct{}
 
-func (l *leagueRepositorySQL) GetByUniqueName(transaction transaction.Transaction, uniqueName string) (RepoLeague, error) {
+func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, uniqueName string) (RepoLeague, error) {
 	repoLeague := RepoLeague{}
 
 	query := `
@@ -22,7 +21,7 @@ func (l *leagueRepositorySQL) GetByUniqueName(transaction transaction.Transactio
 			l.unique_name = $1;
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Get(&repoLeague, query, uniqueName)
 	if err == _sql.ErrNoRows {
 		return repoLeague, nil
@@ -30,7 +29,7 @@ func (l *leagueRepositorySQL) GetByUniqueName(transaction transaction.Transactio
 	return repoLeague, err
 }
 
-func (l *leagueRepositorySQL) Create(transaction transaction.Transaction, league League) error {
+func (l *leagueRepositorySQL) Create(tr transaction.Transaction, league League) error {
 	query := `
 		INSERT INTO leagues
 			(unique_name, display_name)
@@ -38,7 +37,7 @@ func (l *leagueRepositorySQL) Create(transaction transaction.Transaction, league
 			($1, $2);
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	_, err := sqlTransaction.Exec(query, league.UniqueName, league.DisplayName)
 	return err
 }

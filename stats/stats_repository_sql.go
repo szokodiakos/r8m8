@@ -1,13 +1,12 @@
 package stats
 
 import (
-	"github.com/szokodiakos/r8m8/sql"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type statsRepositorySQL struct{}
 
-func (s *statsRepositorySQL) GetLeaderboardPlayersByLeagueUniqueName(transaction transaction.Transaction, uniqueName string) ([]LeaderboardPlayer, error) {
+func (s *statsRepositorySQL) GetLeaderboardPlayersByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]LeaderboardPlayer, error) {
 	leaderboardPlayers := []LeaderboardPlayer{}
 
 	query := `
@@ -36,7 +35,7 @@ func (s *statsRepositorySQL) GetLeaderboardPlayersByLeagueUniqueName(transaction
 			r.rating DESC;
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Select(&leaderboardPlayers, query, uniqueName)
 
 	return leaderboardPlayers, err

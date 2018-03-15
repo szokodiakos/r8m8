@@ -1,14 +1,13 @@
 package match
 
 import (
-	"github.com/szokodiakos/r8m8/sql"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type matchRepositorySQL struct {
 }
 
-func (m *matchRepositorySQL) Create(transaction transaction.Transaction, leagueID int64, reporterPlayerID int64) (int64, error) {
+func (m *matchRepositorySQL) Create(tr transaction.Transaction, leagueID int64, reporterPlayerID int64) (int64, error) {
 	var createdID int64
 
 	query := `
@@ -19,7 +18,7 @@ func (m *matchRepositorySQL) Create(transaction transaction.Transaction, leagueI
 		RETURNING id;
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Get(&createdID, query, leagueID, reporterPlayerID)
 	return createdID, err
 }

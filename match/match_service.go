@@ -10,7 +10,7 @@ import (
 
 // Service interface
 type Service interface {
-	Add(transaction transaction.Transaction, players []player.Player, league league.League, reporterPlayer player.Player) error
+	Add(tr transaction.Transaction, players []player.Player, league league.League, reporterPlayer player.Player) error
 }
 
 type matchService struct {
@@ -20,7 +20,7 @@ type matchService struct {
 	leagueService   league.Service
 }
 
-func (m *matchService) Add(transaction transaction.Transaction, players []player.Player, league league.League, reporterPlayer player.Player) error {
+func (m *matchService) Add(tr transaction.Transaction, players []player.Player, league league.League, reporterPlayer player.Player) error {
 	if isPlayerCountUneven(players) {
 		return &errors.UnevenMatchPlayersError{}
 	}
@@ -29,26 +29,26 @@ func (m *matchService) Add(transaction transaction.Transaction, players []player
 		return &errors.ReporterPlayerNotInLeagueError{}
 	}
 
-	repoLeague, err := m.leagueService.GetOrAddLeague(transaction, league)
+	repoLeague, err := m.leagueService.GetOrAddLeague(tr, league)
 	if err != nil {
 		return err
 	}
 
 	leagueID := repoLeague.ID
-	repoPlayers, err := m.playerService.GetOrAddPlayers(transaction, players, leagueID)
+	repoPlayers, err := m.playerService.GetOrAddPlayers(tr, players, leagueID)
 	if err != nil {
 		return err
 	}
 
 	reporterRepoPlayer := getReporterRepoPlayer(reporterPlayer, repoPlayers)
 	reporterRepoPlayerID := reporterRepoPlayer.ID
-	matchID, err := m.matchRepository.Create(transaction, leagueID, reporterRepoPlayerID)
+	matchID, err := m.matchRepository.Create(tr, leagueID, reporterRepoPlayerID)
 	if err != nil {
 		return err
 	}
 
 	repoPlayerIDs := mapToIDs(repoPlayers)
-	err = m.ratingService.UpdateRatings(transaction, repoPlayerIDs, matchID)
+	err = m.ratingService.UpdateRatings(tr, repoPlayerIDs, matchID)
 	return err
 }
 

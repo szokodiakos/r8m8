@@ -7,19 +7,19 @@ import (
 
 // Service interface
 type Service interface {
-	GetLeaderboard(transaction transaction.Transaction, league league.League) (Leaderboard, error)
+	GetLeaderboard(tr transaction.Transaction, league league.League) (Leaderboard, error)
 }
 
 type statsService struct {
 	statsRepository Repository
 }
 
-func (s *statsService) GetLeaderboard(transaction transaction.Transaction, league league.League) (Leaderboard, error) {
+func (s *statsService) GetLeaderboard(tr transaction.Transaction, league league.League) (Leaderboard, error) {
 	leaderboard := Leaderboard{
 		DisplayName: league.DisplayName,
 	}
 
-	leaderboardPlayers, err := s.statsRepository.GetLeaderboardPlayersByLeagueUniqueName(transaction, league.UniqueName)
+	leaderboardPlayers, err := s.statsRepository.GetLeaderboardPlayersByLeagueUniqueName(tr, league.UniqueName)
 	if err != nil {
 		return leaderboard, err
 	}

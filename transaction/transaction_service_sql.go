@@ -15,18 +15,18 @@ func (ts *transactionService) Start() (Transaction, error) {
 		return transaction, err
 	}
 	transaction = Transaction{
-		ConcreteTransaction: sqlTransaction,
+		concreteTransaction: sqlTransaction,
 	}
 	return transaction, nil
 }
 
 func (ts *transactionService) Commit(transaction Transaction) error {
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := GetSQLTransaction(transaction)
 	return sqlTransaction.Commit()
 }
 
 func (ts *transactionService) Rollback(transaction Transaction) error {
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := GetSQLTransaction(transaction)
 	return sqlTransaction.Rollback()
 }
 

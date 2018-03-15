@@ -2,14 +2,13 @@ package player
 
 import (
 	"github.com/lib/pq"
-	"github.com/szokodiakos/r8m8/sql"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type playerRepositorySQL struct {
 }
 
-func (p *playerRepositorySQL) GetMultipleByUniqueNames(transaction transaction.Transaction, uniqueNames []string) ([]RepoPlayer, error) {
+func (p *playerRepositorySQL) GetMultipleByUniqueNames(tr transaction.Transaction, uniqueNames []string) ([]RepoPlayer, error) {
 	repoPlayers := []RepoPlayer{}
 
 	query := `
@@ -23,12 +22,12 @@ func (p *playerRepositorySQL) GetMultipleByUniqueNames(transaction transaction.T
 			p.unique_name = ANY($1);
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Select(&repoPlayers, query, pq.Array(uniqueNames))
 	return repoPlayers, err
 }
 
-func (p *playerRepositorySQL) Create(transaction transaction.Transaction, player Player) (int64, error) {
+func (p *playerRepositorySQL) Create(tr transaction.Transaction, player Player) (int64, error) {
 	var createdID int64
 
 	query := `
@@ -39,7 +38,7 @@ func (p *playerRepositorySQL) Create(transaction transaction.Transaction, player
 		RETURNING id;
 	`
 
-	sqlTransaction := transaction.ConcreteTransaction.(sql.Transaction)
+	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Get(&createdID, query, player.UniqueName, player.DisplayName)
 	return createdID, err
 }
