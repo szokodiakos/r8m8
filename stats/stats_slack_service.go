@@ -57,9 +57,7 @@ func getSuccessMessageResponse(leaderboard Leaderboard) slack.MessageResponse {
 
 %v
 	`, leaderboard.DisplayName, getLeaderboardPlayersText(leaderboard.Players, 10))
-	return slack.MessageResponse{
-		Text: text,
-	}
+	return slack.CreateChannelResponse(text)
 }
 
 func getLeaderboardPlayersText(leaderboardPlayers []LeaderboardPlayer, c int) string {

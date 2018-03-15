@@ -47,9 +47,7 @@ func getDefaultErrorResponse() (int, MessageResponse) {
 }
 
 func getResponse(text string) (int, MessageResponse) {
-	return http.StatusOK, MessageResponse{
-		Text: text,
-	}
+	return http.StatusOK, CreateDirectResponse(text)
 }
 
 // NewErrorHandler factory

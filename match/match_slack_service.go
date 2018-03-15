@@ -61,9 +61,7 @@ func (m *matchSlackService) Add(values string) (slack.MessageResponse, error) {
 }
 
 func getSuccessMessageResponse() slack.MessageResponse {
-	return slack.MessageResponse{
-		Text: "Success",
-	}
+	return slack.CreateChannelResponse("Success")
 }
 
 // NewSlackService factory
