@@ -50,8 +50,7 @@ func (m *matchSlackService) Add(values string) (slack.MessageResponse, error) {
 
 	err = m.matchService.Add(transaction, players, league, reporterPlayer)
 	if err != nil {
-		m.transactionService.Rollback(transaction)
-		return messageResponse, err
+		return messageResponse, m.transactionService.Rollback(transaction, err)
 	}
 
 	err = m.transactionService.Commit(transaction)

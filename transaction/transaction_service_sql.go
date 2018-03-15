@@ -25,9 +25,13 @@ func (ts *transactionService) Commit(transaction Transaction) error {
 	return sqlTransaction.Commit()
 }
 
-func (ts *transactionService) Rollback(transaction Transaction) error {
+func (ts *transactionService) Rollback(transaction Transaction, err error) error {
 	sqlTransaction := GetSQLTransaction(transaction)
-	return sqlTransaction.Rollback()
+	trErr := sqlTransaction.Rollback()
+	if trErr != nil {
+		return trErr
+	}
+	return err
 }
 
 // NewServiceSQL factory

@@ -41,8 +41,7 @@ func (s *statsSlackService) GetLeaderboard(values string) (slack.MessageResponse
 	league := s.leagueSlackService.ToLeague(teamID, teamDomain, channelID, channelName)
 	leaderboard, err := s.statsService.GetLeaderboard(transaction, league)
 	if err != nil {
-		s.transactionService.Rollback(transaction)
-		return messageResponse, err
+		return messageResponse, s.transactionService.Rollback(transaction, err)
 	}
 
 	err = s.transactionService.Commit(transaction)

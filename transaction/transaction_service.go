@@ -4,5 +4,5 @@ package transaction
 type Service interface {
 	Start() (Transaction, error)
 	Commit(transaction Transaction) error
-	Rollback(transaction Transaction) error
+	Rollback(transaction Transaction, err error) error
 }
