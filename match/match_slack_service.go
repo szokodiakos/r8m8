@@ -9,7 +9,7 @@ import (
 
 // SlackService interface
 type SlackService interface {
-	AddMatch(values string) (slack.MessageResponse, error)
+	Add(values string) (slack.MessageResponse, error)
 }
 
 type matchSlackService struct {
@@ -20,7 +20,7 @@ type matchSlackService struct {
 	transactionService transaction.Service
 }
 
-func (m *matchSlackService) AddMatch(values string) (slack.MessageResponse, error) {
+func (m *matchSlackService) Add(values string) (slack.MessageResponse, error) {
 	var messageResponse slack.MessageResponse
 
 	requestValues, err := m.slackService.ParseRequestValues(values)
@@ -55,8 +55,13 @@ func (m *matchSlackService) AddMatch(values string) (slack.MessageResponse, erro
 	}
 
 	err = m.transactionService.Commit(transaction)
-	messageResponse = m.slackService.CreateMessageResponse("Success")
+
+	messageResponse = m.getSuccessMessageResponse()
 	return messageResponse, err
+}
+
+func (m *matchSlackService) getSuccessMessageResponse() slack.MessageResponse {
+	return m.slackService.CreateMessageResponse("Success")
 }
 
 // NewSlackService factory

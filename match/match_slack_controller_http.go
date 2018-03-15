@@ -13,9 +13,9 @@ type SlackControllerHTTP struct {
 	matchSlackService SlackService
 }
 
-func (sch *SlackControllerHTTP) postSlackMatch(context echo.Context) error {
+func (s *SlackControllerHTTP) postMatch(context echo.Context) error {
 	body := context.Get("parsedBody").(string)
-	response, err := sch.matchSlackService.AddMatch(body)
+	response, err := s.matchSlackService.Add(body)
 	if err != nil {
 		return err
 	}
@@ -27,6 +27,6 @@ func NewSlackControllerHTTP(slackGroup *echo.Group, matchSlackService SlackServi
 	handler := &SlackControllerHTTP{
 		matchSlackService: matchSlackService,
 	}
-	slackGroup.POST("/match", handler.postSlackMatch)
+	slackGroup.POST("/match", handler.postMatch)
 	return handler
 }
