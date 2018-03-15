@@ -1,4 +1,4 @@
-package match
+package slack
 
 import (
 	"log"
@@ -6,13 +6,12 @@ import (
 
 	"github.com/szokodiakos/r8m8/echo"
 	"github.com/szokodiakos/r8m8/match/errors"
-	"github.com/szokodiakos/r8m8/slack"
 )
 
-type matchSlackErrorHandler struct {
+type slackErrorHandler struct {
 }
 
-func (m *matchSlackErrorHandler) HandleError(err error) (int, interface{}) {
+func (s *slackErrorHandler) HandleError(err error) (int, interface{}) {
 	switch err.(type) {
 	case *errors.ReporterPlayerNotInLeagueError:
 		return getReporterPlayerNotInLeagueResponse()
@@ -24,7 +23,7 @@ func (m *matchSlackErrorHandler) HandleError(err error) (int, interface{}) {
 	}
 }
 
-func getReporterPlayerNotInLeagueResponse() (int, slack.MessageResponse) {
+func getReporterPlayerNotInLeagueResponse() (int, MessageResponse) {
 	text := `
 > Darn! You must be the participant of at least one match (including this one). :hushed:
 > :exclamation: Please play a match before posting! :exclamation:
@@ -32,7 +31,7 @@ func getReporterPlayerNotInLeagueResponse() (int, slack.MessageResponse) {
 	return getResponse(text)
 }
 
-func getUnevenMatchPlayersResponse() (int, slack.MessageResponse) {
+func getUnevenMatchPlayersResponse() (int, MessageResponse) {
 	text := `
 > Darn! Reported players are uneven! :hushed:
 > :exclamation: Make sure you report even number of players! :exclamation:
@@ -40,20 +39,20 @@ func getUnevenMatchPlayersResponse() (int, slack.MessageResponse) {
 	return getResponse(text)
 }
 
-func getDefaultErrorResponse() (int, slack.MessageResponse) {
+func getDefaultErrorResponse() (int, MessageResponse) {
 	text := `
 > This is embarrassing!
 `
 	return getResponse(text)
 }
 
-func getResponse(text string) (int, slack.MessageResponse) {
-	return http.StatusOK, slack.MessageResponse{
+func getResponse(text string) (int, MessageResponse) {
+	return http.StatusOK, MessageResponse{
 		Text: text,
 	}
 }
 
-// NewSlackErrorHandler factory
-func NewSlackErrorHandler() echo.ErrorHandler {
-	return &matchSlackErrorHandler{}
+// NewErrorHandler factory
+func NewErrorHandler() echo.HTTPErrorHandler {
+	return &slackErrorHandler{}
 }

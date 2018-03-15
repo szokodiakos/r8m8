@@ -10,6 +10,7 @@ import (
 
 	"github.com/szokodiakos/r8m8/rating"
 
+	echoExtensions "github.com/szokodiakos/r8m8/echo"
 	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/slack"
 	"github.com/szokodiakos/r8m8/transaction"
@@ -52,9 +53,13 @@ func main() {
 	transactionService := transaction.NewServiceSQL(database)
 	leagueSlackService := league.NewSlackService()
 	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService)
-
 	e := echo.New()
-	match.NewSlackControllerHTTP(e, matchSlackService, slackService)
+	bodyParser := echoExtensions.BodyParser()
+	slackTokenVerifier := slack.TokenVerifier(slackService)
+	slackErrorHandler := slack.NewErrorHandler()
+	httpErrorHandler := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
+	slackGroup := e.Group("/slack", bodyParser, slackTokenVerifier, httpErrorHandler)
+	match.NewSlackControllerHTTP(slackGroup, matchSlackService, slackService)
 
 	port := viper.GetString("port")
 	e.Logger.Fatal(e.Start(port))

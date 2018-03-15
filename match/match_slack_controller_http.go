@@ -6,7 +6,6 @@ import (
 	"github.com/szokodiakos/r8m8/slack"
 
 	"github.com/labstack/echo"
-	echoExtensions "github.com/szokodiakos/r8m8/echo"
 )
 
 // SlackControllerHTTP struct
@@ -24,14 +23,10 @@ func (sch *SlackControllerHTTP) postSlackMatch(context echo.Context) error {
 }
 
 // NewSlackControllerHTTP factory
-func NewSlackControllerHTTP(e *echo.Echo, matchSlackService SlackService, slackService slack.Service) *SlackControllerHTTP {
+func NewSlackControllerHTTP(slackGroup *echo.Group, matchSlackService SlackService, slackService slack.Service) *SlackControllerHTTP {
 	handler := &SlackControllerHTTP{
 		matchSlackService: matchSlackService,
 	}
-	bodyParser := echoExtensions.BodyParser()
-	slackTokenVerifier := slack.TokenVerifier(slackService)
-	httpErrorHandler := echoExtensions.ErrorHandlerMiddleware(NewSlackErrorHandler())
-	slackRoutes := e.Group("/slack", bodyParser, slackTokenVerifier, httpErrorHandler)
-	slackRoutes.POST("/match", handler.postSlackMatch)
+	slackGroup.POST("/match", handler.postSlackMatch)
 	return handler
 }
