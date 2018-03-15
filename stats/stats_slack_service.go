@@ -53,39 +53,59 @@ func (s *statsSlackService) GetLeaderboard(values string) (slack.MessageResponse
 
 func getSuccessMessageResponse(leaderboard Leaderboard) slack.MessageResponse {
 	text := fmt.Sprintf(`
-Leaderboard for %v: *Player* @ *Rating* _(win/loss)_
+:fire: TOP 10 Leaderboard for *%v* :fire:
+
 %v
-	`, leaderboard.DisplayName, getLeaderboardPlayersText(leaderboard.Players))
+	`, leaderboard.DisplayName, getLeaderboardPlayersText(leaderboard.Players, 10))
 	return slack.MessageResponse{
 		Text: text,
 	}
 }
 
-func getLeaderboardPlayersText(leaderboardPlayers []LeaderboardPlayer) string {
-	playerText := make([]string, len(leaderboardPlayers))
-	for i := range leaderboardPlayers {
+func getLeaderboardPlayersText(leaderboardPlayers []LeaderboardPlayer, c int) string {
+	count := len(leaderboardPlayers)
+	if c < count {
+		count = c
+	}
+
+	playerText := make([]string, count)
+	for i := 0; i < count; i++ {
+		icon := getIcon(i + 1)
 		displayName := leaderboardPlayers[i].DisplayName
 		rating := leaderboardPlayers[i].Rating
 		winCount := leaderboardPlayers[i].WinCount
 		matchCount := leaderboardPlayers[i].MatchCount
 		lossCount := matchCount - winCount
-		icon := getIcon(i + 1)
-		playerText[i] = fmt.Sprintf("> *%v* %v *%v* (%v/%v)", displayName, icon, rating, winCount, lossCount)
+		playerText[i] = fmt.Sprintf("> *%v*	%v	*%v*	(%v Win / %v Loss)", icon, displayName, rating, winCount, lossCount)
 	}
 	return strings.Join(playerText, "\n")
 }
 
 func getIcon(place int) string {
-	if place == 1 {
+	switch place {
+	case 1:
 		return ":first_place_medal:"
-	}
-	if place == 2 {
+	case 2:
 		return ":second_place_medal:"
-	}
-	if place == 3 {
+	case 3:
 		return ":third_place_medal:"
+	case 4:
+		return ":four:"
+	case 5:
+		return ":five:"
+	case 6:
+		return ":six:"
+	case 7:
+		return ":seven:"
+	case 8:
+		return ":eight:"
+	case 9:
+		return ":nine:"
+	case 10:
+		return ":keycap_ten:"
+	default:
+		return ""
 	}
-	return "@"
 }
 
 // NewSlackService factory
