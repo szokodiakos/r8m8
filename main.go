@@ -5,6 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/szokodiakos/r8m8/league"
+	"github.com/szokodiakos/r8m8/stats"
 
 	"github.com/szokodiakos/r8m8/details"
 
@@ -36,30 +37,42 @@ func main() {
 	sqlDB.Execute(db, sqlDialect)
 
 	database := sqlDB.NewSQLDB(db)
-	matchRepository := match.NewRepositorySQL()
-	ratingStrategyElo := rating.NewStrategyElo()
-	ratingRepository := rating.NewRepositorySQL()
+	transactionService := transaction.NewServiceSQL(database)
+
 	detailsRepository := details.NewRepositorySQL()
+
+	ratingRepository := rating.NewRepositorySQL()
+	ratingStrategyElo := rating.NewStrategyElo()
 	ratingService := rating.NewService(ratingStrategyElo, ratingRepository, detailsRepository)
-	playerRepository := player.NewRepository()
+
 	initialRating := 1500
+	playerRepository := player.NewRepository()
 	playerService := player.NewService(playerRepository, ratingRepository, initialRating)
+	playerSlackService := player.NewSlackService()
+
 	leagueRepository := league.NewRepositorySQL()
 	leagueService := league.NewService(leagueRepository)
-	matchService := match.NewService(matchRepository, ratingService, playerService, leagueService)
+	leagueSlackService := league.NewSlackService()
+
 	verificationToken := viper.GetString("slack_verification_token")
 	slackService := slack.NewService(verificationToken)
-	playerSlackService := player.NewSlackService()
-	transactionService := transaction.NewServiceSQL(database)
-	leagueSlackService := league.NewSlackService()
-	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService)
+
 	e := echo.New()
 	bodyParser := echoExtensions.BodyParser()
 	slackTokenVerifier := slack.TokenVerifier(slackService)
 	slackErrorHandler := slack.NewErrorHandler()
 	httpErrorHandler := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
 	slackGroup := e.Group("/slack", bodyParser, slackTokenVerifier, httpErrorHandler)
+
+	matchRepository := match.NewRepositorySQL()
+	matchService := match.NewService(matchRepository, ratingService, playerService, leagueService)
+	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService)
 	match.NewSlackControllerHTTP(slackGroup, matchSlackService, slackService)
+
+	statsRepository := stats.NewRepositorySQL()
+	statsService := stats.NewService(statsRepository)
+	statsSlackService := stats.NewSlackService(statsService, leagueSlackService, slackService, transactionService)
+	stats.NewSlackControllerHTTP(slackGroup, statsSlackService, slackService)
 
 	port := viper.GetString("port")
 	e.Logger.Fatal(e.Start(port))

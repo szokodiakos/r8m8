@@ -9,7 +9,6 @@ import (
 // Service interface
 type Service interface {
 	ParseRequestValues(values string) (RequestValues, error)
-	CreateMessageResponse(text string) MessageResponse
 	VerifyToken(values string) error
 }
 
@@ -49,12 +48,6 @@ func (s *slackService) ParseRequestValues(values string) (RequestValues, error) 
 		UserName:    userName,
 	}
 	return requestValues, nil
-}
-
-func (s *slackService) CreateMessageResponse(text string) MessageResponse {
-	return MessageResponse{
-		Text: text,
-	}
 }
 
 func (s *slackService) VerifyToken(values string) error {

@@ -56,12 +56,14 @@ func (m *matchSlackService) Add(values string) (slack.MessageResponse, error) {
 
 	err = m.transactionService.Commit(transaction)
 
-	messageResponse = m.getSuccessMessageResponse()
+	messageResponse = getSuccessMessageResponse()
 	return messageResponse, err
 }
 
-func (m *matchSlackService) getSuccessMessageResponse() slack.MessageResponse {
-	return m.slackService.CreateMessageResponse("Success")
+func getSuccessMessageResponse() slack.MessageResponse {
+	return slack.MessageResponse{
+		Text: "Success",
+	}
 }
 
 // NewSlackService factory

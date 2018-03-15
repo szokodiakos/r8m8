@@ -1,6 +1,7 @@
 package player
 
 import (
+	"github.com/szokodiakos/r8m8/player/errors"
 	"github.com/szokodiakos/r8m8/rating"
 	"github.com/szokodiakos/r8m8/transaction"
 )
@@ -36,7 +37,9 @@ func (p *playerService) GetOrAddPlayers(transaction transaction.Transaction, pla
 			return repoPlayers, err
 		}
 	}
-	return repoPlayers, nil
+
+	repoPlayers, err = sortRepoPlayersByUniqueNames(repoPlayers, uniqueNames)
+	return repoPlayers, err
 }
 
 func mapToUniqueNames(players []Player) []string {
@@ -95,6 +98,29 @@ func (p *playerService) addMultiple(transaction transaction.Transaction, players
 	}
 
 	return nil
+}
+
+func sortRepoPlayersByUniqueNames(repoPlayers []RepoPlayer, uniqueNames []string) ([]RepoPlayer, error) {
+	orderedRepoPlayers := make([]RepoPlayer, len(repoPlayers))
+	for i := range uniqueNames {
+		repoPlayer, err := getRepoPlayerByUniqueName(repoPlayers, uniqueNames[i])
+		if err != nil {
+			return orderedRepoPlayers, err
+		}
+		orderedRepoPlayers[i] = repoPlayer
+	}
+	return orderedRepoPlayers, nil
+}
+
+func getRepoPlayerByUniqueName(repoPlayers []RepoPlayer, uniqueName string) (RepoPlayer, error) {
+	for i := range repoPlayers {
+		if repoPlayers[i].UniqueName == uniqueName {
+			return repoPlayers[i], nil
+		}
+	}
+	return RepoPlayer{}, &errors.RepoPlayerNotFoundByUniqueNameError{
+		UniqueName: uniqueName,
+	}
 }
 
 // NewService factory

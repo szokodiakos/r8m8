@@ -2,29 +2,35 @@ package stats
 
 import (
 	"github.com/szokodiakos/r8m8/league"
+	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // Service interface
 type Service interface {
-	GetLeaderboard(league league.League) (Leaderboard, error)
+	GetLeaderboard(transaction transaction.Transaction, league league.League) (Leaderboard, error)
 }
 
 type statsService struct {
-	leagueRepository league.Repository
+	statsRepository Repository
 }
 
-func (s *statsService) GetLeaderboard(league league.League) (Leaderboard, error) {
+func (s *statsService) GetLeaderboard(transaction transaction.Transaction, league league.League) (Leaderboard, error) {
 	leaderboard := Leaderboard{
 		DisplayName: league.DisplayName,
 	}
 
-	// repoLeague, err := s.leagueRepository.GetByUniqueName(league.UniqueName)
+	leaderboardPlayers, err := s.statsRepository.GetLeaderboardPlayersByLeagueUniqueName(transaction, league.UniqueName)
+	if err != nil {
+		return leaderboard, err
+	}
+
+	leaderboard.Players = leaderboardPlayers
 	return leaderboard, nil
 }
 
 // NewService factory
-func NewService(leagueRepository league.Repository) Service {
+func NewService(statsRepository Repository) Service {
 	return &statsService{
-		leagueRepository: leagueRepository,
+		statsRepository: statsRepository,
 	}
 }
