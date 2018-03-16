@@ -1,6 +1,6 @@
 # Setup
 
-1. Create MYSQL database called `r8m8`
+1. Fire up a PostgreSQL DB
 
 2. Set the following environment variables
   - `R8M8_SLACK_VERIFICATION_TOKEN`
