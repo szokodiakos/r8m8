@@ -12,7 +12,7 @@ import (
 
 // Service interface
 type Service interface {
-	Add(tr transaction.Transaction, players []playerModel.Player, league leagueModel.League, reporterPlayer playerModel.Player) error
+	Add(tr transaction.Transaction, players []playerModel.Player, league leagueModel.League, reporterPlayer playerModel.Player) (int64, error)
 }
 
 type matchService struct {
@@ -22,36 +22,36 @@ type matchService struct {
 	leagueService   league.Service
 }
 
-func (m *matchService) Add(tr transaction.Transaction, players []playerModel.Player, league leagueModel.League, reporterPlayer playerModel.Player) error {
+func (m *matchService) Add(tr transaction.Transaction, players []playerModel.Player, league leagueModel.League, reporterPlayer playerModel.Player) (int64, error) {
 	if isPlayerCountUneven(players) {
-		return &errors.UnevenMatchPlayersError{}
+		return 0, &errors.UnevenMatchPlayersError{}
 	}
 
 	if isReporterPlayerNotInLeague(reporterPlayer, players) {
-		return &errors.ReporterPlayerNotInLeagueError{}
+		return 0, &errors.ReporterPlayerNotInLeagueError{}
 	}
 
 	repoLeague, err := m.leagueService.GetOrAddLeague(tr, league)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	leagueID := repoLeague.ID
 	repoPlayers, err := m.playerService.GetOrAddPlayers(tr, players, leagueID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	reporterRepoPlayer := getReporterRepoPlayer(reporterPlayer, repoPlayers)
 	reporterRepoPlayerID := reporterRepoPlayer.ID
 	matchID, err := m.matchRepository.Create(tr, leagueID, reporterRepoPlayerID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	repoPlayerIDs := mapToIDs(repoPlayers)
 	err = m.ratingService.UpdateRatings(tr, repoPlayerIDs, matchID)
-	return err
+	return matchID, err
 }
 
 func isPlayerCountUneven(players []playerModel.Player) bool {

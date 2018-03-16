@@ -53,8 +53,8 @@ func (p *playerRepositorySQL) GetReporterPlayerByMatchID(tr transaction.Transact
 			p.unique_name,
 			p.display_name
 		FROM
-			p players,
-			m matches
+			players p,
+			matches m
 		WHERE
 			m.id = $1 AND
 			m.reporter_player_id = p.id;
@@ -63,35 +63,6 @@ func (p *playerRepositorySQL) GetReporterPlayerByMatchID(tr transaction.Transact
 	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Get(&repoPlayer, query, matchID)
 	return repoPlayer, err
-}
-
-func (p *playerRepositorySQL) GetMultipleByMatchID(tr transaction.Transaction, matchID int64) ([]model.Player, error) {
-	players := []model.Player{}
-
-	query := `
-		SELECT
-			p.id,
-			p.unique_name,
-			p.display_name,
-			r.rating AS "rating.rating",
-			d.rating_change AS "details.rating_change"
-		FROM
-			p players,
-			r ratings,
-			d details,
-			l leagues
-		WHERE
-			m.id = $1 AND
-			d.match_id = m.id AND
-			d.player_id = p.id AND
-			r.player_id = p.id AND
-			r.league_id = l.id AND
-			m.league_id = l.id;
-	`
-
-	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Select(&players, query, matchID)
-	return players, err
 }
 
 // NewRepositorySQL factory

@@ -8,7 +8,7 @@ import (
 type detailsRepositorySQL struct {
 }
 
-func (mdrs *detailsRepositorySQL) Create(tr transaction.Transaction, details model.Details) error {
+func (d *detailsRepositorySQL) Create(tr transaction.Transaction, details model.Details) error {
 	query := `
 		INSERT INTO details
 			(player_id, match_id, rating_change, has_won)

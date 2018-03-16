@@ -7,8 +7,8 @@ import (
 
 // PlayerStats struct
 type PlayerStats struct {
-	playerModel.Player `db:"player"`
-	ratingModel.Rating `db:"rating"`
-	WinCount           int `db:"won_match_count"`
-	MatchCount         int `db:"total_match_count"`
+	Player     playerModel.Player `db:"player"`
+	Rating     ratingModel.Rating `db:"rating"`
+	WinCount   int                `db:"won_match_count"`
+	MatchCount int                `db:"total_match_count"`
 }

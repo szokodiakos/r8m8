@@ -64,15 +64,16 @@ func main() {
 	httpErrorHandler := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
 	slackGroup := e.Group("/slack", bodyParser, slackTokenVerifier, httpErrorHandler)
 
-	matchRepository := match.NewRepositorySQL()
-	matchService := match.NewService(matchRepository, ratingService, playerService, leagueService)
-	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService)
-	match.NewSlackControllerHTTP(slackGroup, matchSlackService, slackService)
-
+	matchPlayerStatsRepository := stats.NewMatchPlayerStatsRepositorySQL()
 	playerStatsRepository := stats.NewPlayerRepositorySQL()
-	statsService := stats.NewService(playerStatsRepository, playerRepository)
+	statsService := stats.NewService(playerStatsRepository, playerRepository, matchPlayerStatsRepository)
 	statsSlackService := stats.NewSlackService(statsService, leagueSlackService, slackService, transactionService)
 	stats.NewSlackControllerHTTP(slackGroup, statsSlackService, slackService)
+
+	matchRepository := match.NewRepositorySQL()
+	matchService := match.NewService(matchRepository, ratingService, playerService, leagueService)
+	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService, statsService)
+	match.NewSlackControllerHTTP(slackGroup, matchSlackService, slackService)
 
 	port := viper.GetString("port")
 	e.Logger.Fatal(e.Start(port))

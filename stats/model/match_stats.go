@@ -1,8 +1,12 @@
 package model
 
+import (
+	playerModel "github.com/szokodiakos/r8m8/player/model"
+)
+
 // MatchStats struct
 type MatchStats struct {
-	ReporterDisplayName    string
-	WinnerMatchPlayerStats []MatchPlayerStats
-	LoserMatchPlayerStats  []MatchPlayerStats
+	ReporterPlayer          playerModel.Player
+	WinnerMatchPlayersStats []MatchPlayerStats
+	LoserMatchPlayersStats  []MatchPlayerStats
 }

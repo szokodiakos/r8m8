@@ -10,5 +10,4 @@ type Repository interface {
 	Create(tr transaction.Transaction, player model.Player) (int64, error)
 	GetMultipleByUniqueNames(tr transaction.Transaction, uniqueNames []string) ([]model.Player, error)
 	GetReporterPlayerByMatchID(tr transaction.Transaction, matchID int64) (model.Player, error)
-	GetMultipleByMatchID(tr transaction.Transaction, matchID int64) ([]model.Player, error)
 }
