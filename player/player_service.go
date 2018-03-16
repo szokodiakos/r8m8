@@ -118,7 +118,7 @@ func getPlayerByUniqueName(players []Player, uniqueName string) (Player, error) 
 			return players[i], nil
 		}
 	}
-	return Player{}, &errors.PlayerNotFoundByUniqueNameError{
+	return Player{}, &errors.PlayerNotFoundError{
 		UniqueName: uniqueName,
 	}
 }

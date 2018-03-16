@@ -59,8 +59,8 @@ func getSuccessMessageResponse(leaderboard Leaderboard) slack.MessageResponse {
 	return slack.CreateChannelResponse(text)
 }
 
-func getPlayersStatsTexts(repoPlayersStats []RepoPlayerStats, c int) string {
-	count := len(repoPlayersStats)
+func getPlayersStatsTexts(playersStats []PlayerStats, c int) string {
+	count := len(playersStats)
 	if c < count {
 		count = c
 	}
@@ -68,10 +68,10 @@ func getPlayersStatsTexts(repoPlayersStats []RepoPlayerStats, c int) string {
 	playerText := make([]string, count)
 	for i := 0; i < count; i++ {
 		icon := getIcon(i + 1)
-		displayName := repoPlayersStats[i].DisplayName
-		rating := repoPlayersStats[i].Rating
-		winCount := repoPlayersStats[i].WinCount
-		matchCount := repoPlayersStats[i].MatchCount
+		displayName := playersStats[i].Player.DisplayName
+		rating := playersStats[i].Rating.Rating
+		winCount := playersStats[i].WinCount
+		matchCount := playersStats[i].MatchCount
 		lossCount := matchCount - winCount
 		playerText[i] = fmt.Sprintf("> *%v*	%v	*%v*	(%v Win / %v Loss)", icon, displayName, rating, winCount, lossCount)
 	}

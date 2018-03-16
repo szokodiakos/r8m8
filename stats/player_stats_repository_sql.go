@@ -6,13 +6,13 @@ import (
 
 type playerStatsRepositorySQL struct{}
 
-func (s *playerStatsRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]RepoPlayerStats, error) {
-	repoPlayersStats := []RepoPlayerStats{}
+func (s *playerStatsRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]PlayerStats, error) {
+	playersStats := []PlayerStats{}
 
 	query := `
 		SELECT
-			p.display_name,
-			r.rating,
+			p.display_name AS "player.display_name",
+			r.rating AS "rating.rating",
 			COUNT(CASE WHEN d.has_won THEN 1 END) AS won_match_count,
 			COUNT(*) AS total_match_count
 		FROM
@@ -36,9 +36,9 @@ func (s *playerStatsRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Select(&repoPlayersStats, query, uniqueName)
+	err := sqlTransaction.Select(&playersStats, query, uniqueName)
 
-	return repoPlayersStats, err
+	return playersStats, err
 }
 
 // NewPlayerRepositorySQL factory

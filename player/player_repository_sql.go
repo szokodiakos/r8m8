@@ -72,8 +72,8 @@ func (p *playerRepositorySQL) GetMultipleByMatchID(tr transaction.Transaction, m
 			p.id,
 			p.unique_name,
 			p.display_name,
-			r.rating AS 'rating.rating',
-			d.rating_change AS 'details.rating_change'
+			r.rating AS "rating.rating",
+			d.rating_change AS "details.rating_change"
 		FROM
 			p players,
 			r ratings,
