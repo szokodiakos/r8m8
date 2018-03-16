@@ -4,10 +4,10 @@ import (
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
-type statsRepositorySQL struct{}
+type playerStatsRepositorySQL struct{}
 
-func (s *statsRepositorySQL) GetPlayersStatsByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]PlayerStats, error) {
-	playersStats := []PlayerStats{}
+func (s *playerStatsRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]RepoPlayerStats, error) {
+	repoPlayersStats := []RepoPlayerStats{}
 
 	query := `
 		SELECT
@@ -36,12 +36,12 @@ func (s *statsRepositorySQL) GetPlayersStatsByLeagueUniqueName(tr transaction.Tr
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Select(&playersStats, query, uniqueName)
+	err := sqlTransaction.Select(&repoPlayersStats, query, uniqueName)
 
-	return playersStats, err
+	return repoPlayersStats, err
 }
 
-// NewRepositorySQL factory
-func NewRepositorySQL() Repository {
-	return &statsRepositorySQL{}
+// NewPlayerRepositorySQL factory
+func NewPlayerRepositorySQL() PlayerRepository {
+	return &playerStatsRepositorySQL{}
 }

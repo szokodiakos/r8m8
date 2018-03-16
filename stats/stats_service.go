@@ -8,10 +8,11 @@ import (
 // Service interface
 type Service interface {
 	GetLeaderboard(tr transaction.Transaction, league league.League) (Leaderboard, error)
+	GetMatchStats(tr transaction.Transaction, matchID int64) (MatchStats, error)
 }
 
 type statsService struct {
-	statsRepository Repository
+	playerStatsRepository PlayerRepository
 }
 
 func (s *statsService) GetLeaderboard(tr transaction.Transaction, league league.League) (Leaderboard, error) {
@@ -19,18 +20,22 @@ func (s *statsService) GetLeaderboard(tr transaction.Transaction, league league.
 		DisplayName: league.DisplayName,
 	}
 
-	playersStats, err := s.statsRepository.GetPlayersStatsByLeagueUniqueName(tr, league.UniqueName)
+	repoPlayersStats, err := s.playerStatsRepository.GetMultipleByLeagueUniqueName(tr, league.UniqueName)
 	if err != nil {
 		return leaderboard, err
 	}
 
-	leaderboard.Players = playersStats
+	leaderboard.PlayersStats = repoPlayersStats
 	return leaderboard, nil
 }
 
+func (s *statsService) GetMatchStats(tr transaction.Transaction, matchID int64) (MatchStats, error) {
+	return MatchStats{}, nil
+}
+
 // NewService factory
-func NewService(statsRepository Repository) Service {
+func NewService(playerStatsRepository PlayerRepository) Service {
 	return &statsService{
-		statsRepository: statsRepository,
+		playerStatsRepository: playerStatsRepository,
 	}
 }

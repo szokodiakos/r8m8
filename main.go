@@ -46,7 +46,7 @@ func main() {
 	ratingService := rating.NewService(ratingStrategyElo, ratingRepository, detailsRepository)
 
 	initialRating := 1500
-	playerRepository := player.NewRepository()
+	playerRepository := player.NewRepositorySQL()
 	playerService := player.NewService(playerRepository, ratingRepository, initialRating)
 	playerSlackService := player.NewSlackService()
 
@@ -69,8 +69,8 @@ func main() {
 	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService)
 	match.NewSlackControllerHTTP(slackGroup, matchSlackService, slackService)
 
-	statsRepository := stats.NewRepositorySQL()
-	statsService := stats.NewService(statsRepository)
+	playerStatsRepository := stats.NewPlayerRepositorySQL()
+	statsService := stats.NewService(playerStatsRepository)
 	statsSlackService := stats.NewSlackService(statsService, leagueSlackService, slackService, transactionService)
 	stats.NewSlackControllerHTTP(slackGroup, statsSlackService, slackService)
 

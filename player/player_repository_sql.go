@@ -43,7 +43,7 @@ func (p *playerRepositorySQL) Create(tr transaction.Transaction, player Player) 
 	return createdID, err
 }
 
-// NewRepository factory
-func NewRepository() Repository {
+// NewRepositorySQL factory
+func NewRepositorySQL() Repository {
 	return &playerRepositorySQL{}
 }
