@@ -2,14 +2,15 @@ package player
 
 import (
 	"github.com/lib/pq"
+	"github.com/szokodiakos/r8m8/player/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type playerRepositorySQL struct {
 }
 
-func (p *playerRepositorySQL) GetMultipleByUniqueNames(tr transaction.Transaction, uniqueNames []string) ([]Player, error) {
-	players := []Player{}
+func (p *playerRepositorySQL) GetMultipleByUniqueNames(tr transaction.Transaction, uniqueNames []string) ([]model.Player, error) {
+	players := []model.Player{}
 
 	query := `
 		SELECT
@@ -27,7 +28,7 @@ func (p *playerRepositorySQL) GetMultipleByUniqueNames(tr transaction.Transactio
 	return players, err
 }
 
-func (p *playerRepositorySQL) Create(tr transaction.Transaction, player Player) (int64, error) {
+func (p *playerRepositorySQL) Create(tr transaction.Transaction, player model.Player) (int64, error) {
 	var createdID int64
 
 	query := `
@@ -43,8 +44,8 @@ func (p *playerRepositorySQL) Create(tr transaction.Transaction, player Player) 
 	return createdID, err
 }
 
-func (p *playerRepositorySQL) GetReporterPlayerByMatchID(tr transaction.Transaction, matchID int64) (Player, error) {
-	repoPlayer := Player{}
+func (p *playerRepositorySQL) GetReporterPlayerByMatchID(tr transaction.Transaction, matchID int64) (model.Player, error) {
+	repoPlayer := model.Player{}
 
 	query := `
 		SELECT 
@@ -64,8 +65,8 @@ func (p *playerRepositorySQL) GetReporterPlayerByMatchID(tr transaction.Transact
 	return repoPlayer, err
 }
 
-func (p *playerRepositorySQL) GetMultipleByMatchID(tr transaction.Transaction, matchID int64) ([]Player, error) {
-	players := []Player{}
+func (p *playerRepositorySQL) GetMultipleByMatchID(tr transaction.Transaction, matchID int64) ([]model.Player, error) {
+	players := []model.Player{}
 
 	query := `
 		SELECT

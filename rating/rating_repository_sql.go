@@ -2,13 +2,14 @@ package rating
 
 import (
 	"github.com/lib/pq"
+	"github.com/szokodiakos/r8m8/rating/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type ratingRepositorySQL struct {
 }
 
-func (r *ratingRepositorySQL) Create(tr transaction.Transaction, rating Rating) error {
+func (r *ratingRepositorySQL) Create(tr transaction.Transaction, rating model.Rating) error {
 	query := `
 		INSERT INTO ratings
 			(player_id, league_id, rating)
@@ -21,8 +22,8 @@ func (r *ratingRepositorySQL) Create(tr transaction.Transaction, rating Rating) 
 	return err
 }
 
-func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(tr transaction.Transaction, playerIDs []int64) ([]Rating, error) {
-	ratings := []Rating{}
+func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(tr transaction.Transaction, playerIDs []int64) ([]model.Rating, error) {
+	ratings := []model.Rating{}
 
 	query := `
 		SELECT
@@ -41,7 +42,7 @@ func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(tr transaction.Transaction,
 	return ratings, err
 }
 
-func (r *ratingRepositorySQL) UpdateRating(tr transaction.Transaction, rating Rating) error {
+func (r *ratingRepositorySQL) UpdateRating(tr transaction.Transaction, rating model.Rating) error {
 	query := `
 		UPDATE ratings
 		SET

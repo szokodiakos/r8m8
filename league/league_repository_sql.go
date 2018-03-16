@@ -4,13 +4,14 @@ import (
 	_sql "database/sql"
 
 	"github.com/szokodiakos/r8m8/league/errors"
+	"github.com/szokodiakos/r8m8/league/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type leagueRepositorySQL struct{}
 
-func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, uniqueName string) (League, error) {
-	league := League{}
+func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, uniqueName string) (model.League, error) {
+	league := model.League{}
 
 	query := `
 		SELECT
@@ -32,7 +33,7 @@ func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, unique
 	return league, err
 }
 
-func (l *leagueRepositorySQL) Create(tr transaction.Transaction, league League) error {
+func (l *leagueRepositorySQL) Create(tr transaction.Transaction, league model.League) error {
 	query := `
 		INSERT INTO leagues
 			(unique_name, display_name)

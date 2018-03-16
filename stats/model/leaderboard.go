@@ -1,4 +1,4 @@
-package stats
+package model
 
 // Leaderboard struct
 type Leaderboard struct {

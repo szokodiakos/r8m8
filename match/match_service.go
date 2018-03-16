@@ -2,15 +2,17 @@ package match
 
 import (
 	"github.com/szokodiakos/r8m8/league"
+	leagueModel "github.com/szokodiakos/r8m8/league/model"
 	"github.com/szokodiakos/r8m8/match/errors"
 	"github.com/szokodiakos/r8m8/player"
+	playerModel "github.com/szokodiakos/r8m8/player/model"
 	"github.com/szokodiakos/r8m8/rating"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // Service interface
 type Service interface {
-	Add(tr transaction.Transaction, players []player.Player, league league.League, reporterPlayer player.Player) error
+	Add(tr transaction.Transaction, players []playerModel.Player, league leagueModel.League, reporterPlayer playerModel.Player) error
 }
 
 type matchService struct {
@@ -20,7 +22,7 @@ type matchService struct {
 	leagueService   league.Service
 }
 
-func (m *matchService) Add(tr transaction.Transaction, players []player.Player, league league.League, reporterPlayer player.Player) error {
+func (m *matchService) Add(tr transaction.Transaction, players []playerModel.Player, league leagueModel.League, reporterPlayer playerModel.Player) error {
 	if isPlayerCountUneven(players) {
 		return &errors.UnevenMatchPlayersError{}
 	}
@@ -52,11 +54,11 @@ func (m *matchService) Add(tr transaction.Transaction, players []player.Player, 
 	return err
 }
 
-func isPlayerCountUneven(players []player.Player) bool {
+func isPlayerCountUneven(players []playerModel.Player) bool {
 	return (len(players) % 2) != 0
 }
 
-func isReporterPlayerNotInLeague(reporterPlayer player.Player, players []player.Player) bool {
+func isReporterPlayerNotInLeague(reporterPlayer playerModel.Player, players []playerModel.Player) bool {
 	missingFromLeague := true
 	for i := range players {
 		if players[i].UniqueName == reporterPlayer.UniqueName {
@@ -66,8 +68,8 @@ func isReporterPlayerNotInLeague(reporterPlayer player.Player, players []player.
 	return missingFromLeague
 }
 
-func getReporterRepoPlayer(reporterPlayer player.Player, repoPlayers []player.Player) player.Player {
-	var reporterRepoPlayer player.Player
+func getReporterRepoPlayer(reporterPlayer playerModel.Player, repoPlayers []playerModel.Player) playerModel.Player {
+	var reporterRepoPlayer playerModel.Player
 
 	for i := range repoPlayers {
 		if repoPlayers[i].UniqueName == reporterPlayer.UniqueName {
@@ -78,7 +80,7 @@ func getReporterRepoPlayer(reporterPlayer player.Player, repoPlayers []player.Pl
 	return reporterRepoPlayer
 }
 
-func mapToIDs(players []player.Player) []int64 {
+func mapToIDs(players []playerModel.Player) []int64 {
 	IDs := make([]int64, len(players))
 	for i := range players {
 		IDs[i] = players[i].ID

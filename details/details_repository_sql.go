@@ -1,13 +1,14 @@
 package details
 
 import (
+	"github.com/szokodiakos/r8m8/details/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type detailsRepositorySQL struct {
 }
 
-func (mdrs *detailsRepositorySQL) Create(tr transaction.Transaction, details Details) error {
+func (mdrs *detailsRepositorySQL) Create(tr transaction.Transaction, details model.Details) error {
 	query := `
 		INSERT INTO details
 			(player_id, match_id, rating_change, has_won)

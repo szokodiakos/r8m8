@@ -2,19 +2,20 @@ package league
 
 import (
 	"github.com/szokodiakos/r8m8/league/errors"
+	"github.com/szokodiakos/r8m8/league/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // Service interface
 type Service interface {
-	GetOrAddLeague(tr transaction.Transaction, league League) (League, error)
+	GetOrAddLeague(tr transaction.Transaction, league model.League) (model.League, error)
 }
 
 type leagueService struct {
 	leagueRepository Repository
 }
 
-func (l *leagueService) GetOrAddLeague(tr transaction.Transaction, league League) (League, error) {
+func (l *leagueService) GetOrAddLeague(tr transaction.Transaction, league model.League) (model.League, error) {
 	repoLeague, err := l.leagueRepository.GetByUniqueName(tr, league.UniqueName)
 	if err != nil {
 		switch err.(type) {

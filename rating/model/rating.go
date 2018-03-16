@@ -1,4 +1,4 @@
-package rating
+package model
 
 // Rating struct
 type Rating struct {

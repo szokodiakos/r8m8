@@ -2,6 +2,8 @@ package rating
 
 import (
 	"github.com/szokodiakos/r8m8/details"
+	detailsModel "github.com/szokodiakos/r8m8/details/model"
+	"github.com/szokodiakos/r8m8/rating/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -41,18 +43,18 @@ func (r *ratingService) UpdateRatings(tr transaction.Transaction, playerIDs []in
 	return nil
 }
 
-func getWinnerRatings(ratings []Rating, playerIDs []int64) []Rating {
+func getWinnerRatings(ratings []model.Rating, playerIDs []int64) []model.Rating {
 	winnerPlayerIDs := playerIDs[:(len(playerIDs) / 2)]
 	return getRatingsByPlayerIDs(ratings, winnerPlayerIDs)
 }
 
-func getLoserRatings(ratings []Rating, playerIDs []int64) []Rating {
+func getLoserRatings(ratings []model.Rating, playerIDs []int64) []model.Rating {
 	loserPlayerIDs := playerIDs[(len(playerIDs) / 2):]
 	return getRatingsByPlayerIDs(ratings, loserPlayerIDs)
 }
 
-func getRatingsByPlayerIDs(ratings []Rating, playerIDs []int64) []Rating {
-	requestedRatings := make([]Rating, 0, len(playerIDs))
+func getRatingsByPlayerIDs(ratings []model.Rating, playerIDs []int64) []model.Rating {
+	requestedRatings := make([]model.Rating, 0, len(playerIDs))
 	for _, rating := range ratings {
 		for _, playerID := range playerIDs {
 			if rating.PlayerID == playerID {
@@ -63,7 +65,7 @@ func getRatingsByPlayerIDs(ratings []Rating, playerIDs []int64) []Rating {
 	return requestedRatings
 }
 
-func mapToRatingNumbers(ratings []Rating) []int {
+func mapToRatingNumbers(ratings []model.Rating) []int {
 	ratingNumbers := make([]int, len(ratings))
 	for i := range ratings {
 		ratingNumbers[i] = ratings[i].Rating
@@ -71,9 +73,9 @@ func mapToRatingNumbers(ratings []Rating) []int {
 	return ratingNumbers
 }
 
-func (r *ratingService) adjustRatings(tr transaction.Transaction, ratings []Rating, adjustedRatingNumbers []int, matchID int64, hasWon bool) error {
+func (r *ratingService) adjustRatings(tr transaction.Transaction, ratings []model.Rating, adjustedRatingNumbers []int, matchID int64, hasWon bool) error {
 	for i := range ratings {
-		rating := Rating{
+		rating := model.Rating{
 			LeagueID: ratings[i].LeagueID,
 			PlayerID: ratings[i].PlayerID,
 			Rating:   adjustedRatingNumbers[i],
@@ -83,7 +85,7 @@ func (r *ratingService) adjustRatings(tr transaction.Transaction, ratings []Rati
 			return err
 		}
 
-		details := details.Details{
+		details := detailsModel.Details{
 			PlayerID:     ratings[i].PlayerID,
 			MatchID:      matchID,
 			RatingChange: adjustedRatingNumbers[i] - ratings[i].Rating,

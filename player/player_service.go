@@ -2,13 +2,15 @@ package player
 
 import (
 	"github.com/szokodiakos/r8m8/player/errors"
+	"github.com/szokodiakos/r8m8/player/model"
 	"github.com/szokodiakos/r8m8/rating"
+	ratingModel "github.com/szokodiakos/r8m8/rating/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // Service interface
 type Service interface {
-	GetOrAddPlayers(tr transaction.Transaction, players []Player, leagueID int64) ([]Player, error)
+	GetOrAddPlayers(tr transaction.Transaction, players []model.Player, leagueID int64) ([]model.Player, error)
 }
 
 type playerService struct {
@@ -17,7 +19,7 @@ type playerService struct {
 	initialRating    int
 }
 
-func (p *playerService) GetOrAddPlayers(tr transaction.Transaction, players []Player, leagueID int64) ([]Player, error) {
+func (p *playerService) GetOrAddPlayers(tr transaction.Transaction, players []model.Player, leagueID int64) ([]model.Player, error) {
 	uniqueNames := mapToUniqueNames(players)
 
 	repoPlayers, err := p.playerRepository.GetMultipleByUniqueNames(tr, uniqueNames)
@@ -42,7 +44,7 @@ func (p *playerService) GetOrAddPlayers(tr transaction.Transaction, players []Pl
 	return repoPlayers, err
 }
 
-func mapToUniqueNames(players []Player) []string {
+func mapToUniqueNames(players []model.Player) []string {
 	uniqueNames := make([]string, len(players))
 	for i := range players {
 		uniqueNames[i] = players[i].UniqueName
@@ -50,25 +52,25 @@ func mapToUniqueNames(players []Player) []string {
 	return uniqueNames
 }
 
-func isPlayerMissingFromRepository(players []Player, repoPlayers []Player) bool {
+func isPlayerMissingFromRepository(players []model.Player, repoPlayers []model.Player) bool {
 	return (len(players) != len(repoPlayers))
 }
 
-func getMissingPlayers(players []Player, repoPlayers []Player) []Player {
-	missingPlayers := make([]Player, 0, len(repoPlayers))
+func getMissingPlayers(players []model.Player, repoPlayers []model.Player) []model.Player {
+	missingPlayers := make([]model.Player, 0, len(repoPlayers))
 
 	for i := range players {
 		repoPlayer := getRepoCounterpart(players[i], repoPlayers)
 
-		if repoPlayer == (Player{}) {
+		if repoPlayer == (model.Player{}) {
 			missingPlayers = append(missingPlayers, players[i])
 		}
 	}
 	return missingPlayers
 }
 
-func getRepoCounterpart(player Player, repoPlayers []Player) Player {
-	var repoPlayer Player
+func getRepoCounterpart(player model.Player, repoPlayers []model.Player) model.Player {
+	var repoPlayer model.Player
 
 	for i := range repoPlayers {
 		if player.UniqueName == repoPlayers[i].UniqueName {
@@ -79,14 +81,14 @@ func getRepoCounterpart(player Player, repoPlayers []Player) Player {
 	return repoPlayer
 }
 
-func (p *playerService) addMultiple(tr transaction.Transaction, players []Player, leagueID int64) error {
+func (p *playerService) addMultiple(tr transaction.Transaction, players []model.Player, leagueID int64) error {
 	for i := range players {
 		playerID, err := p.playerRepository.Create(tr, players[i])
 		if err != nil {
 			return err
 		}
 
-		rating := rating.Rating{
+		rating := ratingModel.Rating{
 			PlayerID: playerID,
 			LeagueID: leagueID,
 			Rating:   p.initialRating,
@@ -100,8 +102,8 @@ func (p *playerService) addMultiple(tr transaction.Transaction, players []Player
 	return nil
 }
 
-func sortPlayersByUniqueNames(players []Player, uniqueNames []string) ([]Player, error) {
-	orderedPlayers := make([]Player, len(players))
+func sortPlayersByUniqueNames(players []model.Player, uniqueNames []string) ([]model.Player, error) {
+	orderedPlayers := make([]model.Player, len(players))
 	for i := range uniqueNames {
 		player, err := getPlayerByUniqueName(players, uniqueNames[i])
 		if err != nil {
@@ -112,13 +114,13 @@ func sortPlayersByUniqueNames(players []Player, uniqueNames []string) ([]Player,
 	return orderedPlayers, nil
 }
 
-func getPlayerByUniqueName(players []Player, uniqueName string) (Player, error) {
+func getPlayerByUniqueName(players []model.Player, uniqueName string) (model.Player, error) {
 	for i := range players {
 		if players[i].UniqueName == uniqueName {
 			return players[i], nil
 		}
 	}
-	return Player{}, &errors.PlayerNotFoundError{
+	return model.Player{}, &errors.PlayerNotFoundError{
 		UniqueName: uniqueName,
 	}
 }

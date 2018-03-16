@@ -1,13 +1,14 @@
 package stats
 
 import (
+	"github.com/szokodiakos/r8m8/stats/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type playerStatsRepositorySQL struct{}
 
-func (s *playerStatsRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]PlayerStats, error) {
-	playersStats := []PlayerStats{}
+func (s *playerStatsRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]model.PlayerStats, error) {
+	playersStats := []model.PlayerStats{}
 
 	query := `
 		SELECT

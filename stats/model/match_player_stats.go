@@ -1,4 +1,4 @@
-package stats
+package model
 
 // MatchPlayerStats struct
 type MatchPlayerStats struct {

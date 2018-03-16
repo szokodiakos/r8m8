@@ -6,6 +6,7 @@ import (
 
 	"github.com/szokodiakos/r8m8/league"
 	"github.com/szokodiakos/r8m8/slack"
+	"github.com/szokodiakos/r8m8/stats/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -50,7 +51,7 @@ func (s *statsSlackService) GetLeaderboard(values string) (slack.MessageResponse
 	return messageResponse, nil
 }
 
-func getSuccessMessageResponse(leaderboard Leaderboard) slack.MessageResponse {
+func getSuccessMessageResponse(leaderboard model.Leaderboard) slack.MessageResponse {
 	text := fmt.Sprintf(`
 :fire: TOP 10 Leaderboard for *%v* :fire:
 
@@ -59,7 +60,7 @@ func getSuccessMessageResponse(leaderboard Leaderboard) slack.MessageResponse {
 	return slack.CreateChannelResponse(text)
 }
 
-func getPlayersStatsTexts(playersStats []PlayerStats, c int) string {
+func getPlayersStatsTexts(playersStats []model.PlayerStats, c int) string {
 	count := len(playersStats)
 	if c < count {
 		count = c
