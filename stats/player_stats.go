@@ -1,7 +1,7 @@
 package stats
 
-// LeaderboardPlayer struct
-type LeaderboardPlayer struct {
+// PlayerStats struct
+type PlayerStats struct {
 	DisplayName string `db:"display_name"`
 	Rating      int    `db:"rating"`
 	WinCount    int    `db:"won_match_count"`

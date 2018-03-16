@@ -6,8 +6,8 @@ import (
 
 type statsRepositorySQL struct{}
 
-func (s *statsRepositorySQL) GetLeaderboardPlayersByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]LeaderboardPlayer, error) {
-	leaderboardPlayers := []LeaderboardPlayer{}
+func (s *statsRepositorySQL) GetPlayersStatsByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]PlayerStats, error) {
+	playersStats := []PlayerStats{}
 
 	query := `
 		SELECT
@@ -36,9 +36,9 @@ func (s *statsRepositorySQL) GetLeaderboardPlayersByLeagueUniqueName(tr transact
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Select(&leaderboardPlayers, query, uniqueName)
+	err := sqlTransaction.Select(&playersStats, query, uniqueName)
 
-	return leaderboardPlayers, err
+	return playersStats, err
 }
 
 // NewRepositorySQL factory

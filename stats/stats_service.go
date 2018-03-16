@@ -19,12 +19,12 @@ func (s *statsService) GetLeaderboard(tr transaction.Transaction, league league.
 		DisplayName: league.DisplayName,
 	}
 
-	leaderboardPlayers, err := s.statsRepository.GetLeaderboardPlayersByLeagueUniqueName(tr, league.UniqueName)
+	playersStats, err := s.statsRepository.GetPlayersStatsByLeagueUniqueName(tr, league.UniqueName)
 	if err != nil {
 		return leaderboard, err
 	}
 
-	leaderboard.Players = leaderboardPlayers
+	leaderboard.Players = playersStats
 	return leaderboard, nil
 }
 
