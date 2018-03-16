@@ -6,20 +6,20 @@ import (
 
 // Service interface
 type Service interface {
-	GetOrAddLeague(tr transaction.Transaction, league League) (RepoLeague, error)
+	GetOrAddLeague(tr transaction.Transaction, league League) (League, error)
 }
 
 type leagueService struct {
 	leagueRepository Repository
 }
 
-func (l *leagueService) GetOrAddLeague(tr transaction.Transaction, league League) (RepoLeague, error) {
+func (l *leagueService) GetOrAddLeague(tr transaction.Transaction, league League) (League, error) {
 	repoLeague, err := l.leagueRepository.GetByUniqueName(tr, league.UniqueName)
 	if err != nil {
 		return repoLeague, err
 	}
 
-	if repoLeague == (RepoLeague{}) {
+	if repoLeague == (League{}) {
 		err = l.leagueRepository.Create(tr, league)
 		if err != nil {
 			return repoLeague, err

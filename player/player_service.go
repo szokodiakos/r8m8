@@ -8,7 +8,7 @@ import (
 
 // Service interface
 type Service interface {
-	GetOrAddPlayers(tr transaction.Transaction, players []Player, leagueID int64) ([]RepoPlayer, error)
+	GetOrAddPlayers(tr transaction.Transaction, players []Player, leagueID int64) ([]Player, error)
 }
 
 type playerService struct {
@@ -17,7 +17,7 @@ type playerService struct {
 	initialRating    int
 }
 
-func (p *playerService) GetOrAddPlayers(tr transaction.Transaction, players []Player, leagueID int64) ([]RepoPlayer, error) {
+func (p *playerService) GetOrAddPlayers(tr transaction.Transaction, players []Player, leagueID int64) ([]Player, error) {
 	uniqueNames := mapToUniqueNames(players)
 
 	repoPlayers, err := p.playerRepository.GetMultipleByUniqueNames(tr, uniqueNames)
@@ -38,7 +38,7 @@ func (p *playerService) GetOrAddPlayers(tr transaction.Transaction, players []Pl
 		}
 	}
 
-	repoPlayers, err = sortRepoPlayersByUniqueNames(repoPlayers, uniqueNames)
+	repoPlayers, err = sortPlayersByUniqueNames(repoPlayers, uniqueNames)
 	return repoPlayers, err
 }
 
@@ -50,25 +50,25 @@ func mapToUniqueNames(players []Player) []string {
 	return uniqueNames
 }
 
-func isPlayerMissingFromRepository(players []Player, repoPlayers []RepoPlayer) bool {
+func isPlayerMissingFromRepository(players []Player, repoPlayers []Player) bool {
 	return (len(players) != len(repoPlayers))
 }
 
-func getMissingPlayers(players []Player, repoPlayers []RepoPlayer) []Player {
+func getMissingPlayers(players []Player, repoPlayers []Player) []Player {
 	missingPlayers := make([]Player, 0, len(repoPlayers))
 
 	for i := range players {
 		repoPlayer := getRepoCounterpart(players[i], repoPlayers)
 
-		if repoPlayer == (RepoPlayer{}) {
+		if repoPlayer == (Player{}) {
 			missingPlayers = append(missingPlayers, players[i])
 		}
 	}
 	return missingPlayers
 }
 
-func getRepoCounterpart(player Player, repoPlayers []RepoPlayer) RepoPlayer {
-	var repoPlayer RepoPlayer
+func getRepoCounterpart(player Player, repoPlayers []Player) Player {
+	var repoPlayer Player
 
 	for i := range repoPlayers {
 		if player.UniqueName == repoPlayers[i].UniqueName {
@@ -100,25 +100,25 @@ func (p *playerService) addMultiple(tr transaction.Transaction, players []Player
 	return nil
 }
 
-func sortRepoPlayersByUniqueNames(repoPlayers []RepoPlayer, uniqueNames []string) ([]RepoPlayer, error) {
-	orderedRepoPlayers := make([]RepoPlayer, len(repoPlayers))
+func sortPlayersByUniqueNames(players []Player, uniqueNames []string) ([]Player, error) {
+	orderedPlayers := make([]Player, len(players))
 	for i := range uniqueNames {
-		repoPlayer, err := getRepoPlayerByUniqueName(repoPlayers, uniqueNames[i])
+		player, err := getPlayerByUniqueName(players, uniqueNames[i])
 		if err != nil {
-			return orderedRepoPlayers, err
+			return orderedPlayers, err
 		}
-		orderedRepoPlayers[i] = repoPlayer
+		orderedPlayers[i] = player
 	}
-	return orderedRepoPlayers, nil
+	return orderedPlayers, nil
 }
 
-func getRepoPlayerByUniqueName(repoPlayers []RepoPlayer, uniqueName string) (RepoPlayer, error) {
-	for i := range repoPlayers {
-		if repoPlayers[i].UniqueName == uniqueName {
-			return repoPlayers[i], nil
+func getPlayerByUniqueName(players []Player, uniqueName string) (Player, error) {
+	for i := range players {
+		if players[i].UniqueName == uniqueName {
+			return players[i], nil
 		}
 	}
-	return RepoPlayer{}, &errors.RepoPlayerNotFoundByUniqueNameError{
+	return Player{}, &errors.PlayerNotFoundByUniqueNameError{
 		UniqueName: uniqueName,
 	}
 }

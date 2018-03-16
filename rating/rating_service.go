@@ -7,7 +7,7 @@ import (
 
 // Service interface
 type Service interface {
-	UpdateRatings(tr transaction.Transaction, repoPlayerIDs []int64, matchID int64) error
+	UpdateRatings(tr transaction.Transaction, playerIDs []int64, matchID int64) error
 }
 
 type ratingService struct {
@@ -16,24 +16,24 @@ type ratingService struct {
 	detailsRepository details.Repository
 }
 
-func (r *ratingService) UpdateRatings(tr transaction.Transaction, repoPlayerIDs []int64, matchID int64) error {
-	repoRatings, err := r.ratingRepository.GetMultipleByPlayerIDs(tr, repoPlayerIDs)
+func (r *ratingService) UpdateRatings(tr transaction.Transaction, playerIDs []int64, matchID int64) error {
+	ratings, err := r.ratingRepository.GetMultipleByPlayerIDs(tr, playerIDs)
 	if err != nil {
 		return err
 	}
-	winnerRepoRatings := getWinnerRepoRatings(repoRatings, repoPlayerIDs)
-	loserRepoRatings := getLoserRepoRatings(repoRatings, repoPlayerIDs)
+	winnerRatings := getWinnerRatings(ratings, playerIDs)
+	loserRatings := getLoserRatings(ratings, playerIDs)
 
-	winnerRatings := mapToRatings(winnerRepoRatings)
-	loserRatings := mapToRatings(loserRepoRatings)
-	adjustedWinnerRatings, adjustedLoserRatings := r.strategy.Calculate(winnerRatings, loserRatings)
+	winnerRatingNumbers := mapToRatingNumbers(winnerRatings)
+	loserRatingNumbers := mapToRatingNumbers(loserRatings)
+	adjustedWinnerRatingNumbers, adjustedLoserRatingNumbers := r.strategy.Calculate(winnerRatingNumbers, loserRatingNumbers)
 
-	err = r.adjustRatings(tr, winnerRepoRatings, adjustedWinnerRatings, matchID, true)
+	err = r.adjustRatings(tr, winnerRatings, adjustedWinnerRatingNumbers, matchID, true)
 	if err != nil {
 		return err
 	}
 
-	err = r.adjustRatings(tr, loserRepoRatings, adjustedLoserRatings, matchID, false)
+	err = r.adjustRatings(tr, loserRatings, adjustedLoserRatingNumbers, matchID, false)
 	if err != nil {
 		return err
 	}
@@ -41,42 +41,42 @@ func (r *ratingService) UpdateRatings(tr transaction.Transaction, repoPlayerIDs 
 	return nil
 }
 
-func getWinnerRepoRatings(repoRatings []RepoRating, repoPlayerIDs []int64) []RepoRating {
-	winnerRepoPlayerIDs := repoPlayerIDs[:(len(repoPlayerIDs) / 2)]
-	return getRepoRatingsByRepoPlayerIDs(repoRatings, winnerRepoPlayerIDs)
+func getWinnerRatings(ratings []Rating, playerIDs []int64) []Rating {
+	winnerPlayerIDs := playerIDs[:(len(playerIDs) / 2)]
+	return getRatingsByPlayerIDs(ratings, winnerPlayerIDs)
 }
 
-func getLoserRepoRatings(repoRatings []RepoRating, repoPlayerIDs []int64) []RepoRating {
-	loserRepoPlayerIDs := repoPlayerIDs[(len(repoPlayerIDs) / 2):]
-	return getRepoRatingsByRepoPlayerIDs(repoRatings, loserRepoPlayerIDs)
+func getLoserRatings(ratings []Rating, playerIDs []int64) []Rating {
+	loserPlayerIDs := playerIDs[(len(playerIDs) / 2):]
+	return getRatingsByPlayerIDs(ratings, loserPlayerIDs)
 }
 
-func getRepoRatingsByRepoPlayerIDs(repoRatings []RepoRating, repoPlayerIDs []int64) []RepoRating {
-	requestedRepoRatings := make([]RepoRating, 0, len(repoPlayerIDs))
-	for _, repoRating := range repoRatings {
-		for _, repoPlayerID := range repoPlayerIDs {
-			if repoRating.PlayerID == repoPlayerID {
-				requestedRepoRatings = append(requestedRepoRatings, repoRating)
+func getRatingsByPlayerIDs(ratings []Rating, playerIDs []int64) []Rating {
+	requestedRatings := make([]Rating, 0, len(playerIDs))
+	for _, rating := range ratings {
+		for _, playerID := range playerIDs {
+			if rating.PlayerID == playerID {
+				requestedRatings = append(requestedRatings, rating)
 			}
 		}
 	}
-	return requestedRepoRatings
+	return requestedRatings
 }
 
-func mapToRatings(repoRatings []RepoRating) []int {
-	ratings := make([]int, len(repoRatings))
-	for i := range repoRatings {
-		ratings[i] = repoRatings[i].Rating
+func mapToRatingNumbers(ratings []Rating) []int {
+	ratingNumbers := make([]int, len(ratings))
+	for i := range ratings {
+		ratingNumbers[i] = ratings[i].Rating
 	}
-	return ratings
+	return ratingNumbers
 }
 
-func (r *ratingService) adjustRatings(tr transaction.Transaction, repoRatings []RepoRating, adjustedRatings []int, matchID int64, hasWon bool) error {
-	for i := range repoRatings {
+func (r *ratingService) adjustRatings(tr transaction.Transaction, ratings []Rating, adjustedRatingNumbers []int, matchID int64, hasWon bool) error {
+	for i := range ratings {
 		rating := Rating{
-			LeagueID: repoRatings[i].LeagueID,
-			PlayerID: repoRatings[i].PlayerID,
-			Rating:   adjustedRatings[i],
+			LeagueID: ratings[i].LeagueID,
+			PlayerID: ratings[i].PlayerID,
+			Rating:   adjustedRatingNumbers[i],
 		}
 		err := r.ratingRepository.UpdateRating(tr, rating)
 		if err != nil {
@@ -84,9 +84,9 @@ func (r *ratingService) adjustRatings(tr transaction.Transaction, repoRatings []
 		}
 
 		details := details.Details{
-			PlayerID:     repoRatings[i].PlayerID,
+			PlayerID:     ratings[i].PlayerID,
 			MatchID:      matchID,
-			RatingChange: adjustedRatings[i] - repoRatings[i].Rating,
+			RatingChange: adjustedRatingNumbers[i] - ratings[i].Rating,
 			HasWon:       hasWon,
 		}
 		err = r.detailsRepository.Create(tr, details)

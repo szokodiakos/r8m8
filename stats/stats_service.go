@@ -2,6 +2,7 @@ package stats
 
 import (
 	"github.com/szokodiakos/r8m8/league"
+	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -13,6 +14,7 @@ type Service interface {
 
 type statsService struct {
 	playerStatsRepository PlayerRepository
+	playerRepository      player.Repository
 }
 
 func (s *statsService) GetLeaderboard(tr transaction.Transaction, league league.League) (Leaderboard, error) {
@@ -30,12 +32,27 @@ func (s *statsService) GetLeaderboard(tr transaction.Transaction, league league.
 }
 
 func (s *statsService) GetMatchStats(tr transaction.Transaction, matchID int64) (MatchStats, error) {
-	return MatchStats{}, nil
+	var matchStats MatchStats
+
+	// repoPlayer, err := s.playerRepository.GetReporterPlayerByMatchID(tr, matchID)
+	// if err != nil {
+	// 	return matchStats, err
+	// }
+
+	// matchStats.ReporterDisplayName = repoPlayer.DisplayName
+
+	// players, err := s.playerRepository.GetMultipleByMatchID(tr, matchID)
+	// if err != nil {
+	// 	return matchStats, err
+	// }
+
+	return matchStats, nil
 }
 
 // NewService factory
-func NewService(playerStatsRepository PlayerRepository) Service {
+func NewService(playerStatsRepository PlayerRepository, playerRepository player.Repository) Service {
 	return &statsService{
 		playerStatsRepository: playerStatsRepository,
+		playerRepository:      playerRepository,
 	}
 }

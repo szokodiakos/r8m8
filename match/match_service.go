@@ -66,8 +66,8 @@ func isReporterPlayerNotInLeague(reporterPlayer player.Player, players []player.
 	return missingFromLeague
 }
 
-func getReporterRepoPlayer(reporterPlayer player.Player, repoPlayers []player.RepoPlayer) player.RepoPlayer {
-	var reporterRepoPlayer player.RepoPlayer
+func getReporterRepoPlayer(reporterPlayer player.Player, repoPlayers []player.Player) player.Player {
+	var reporterRepoPlayer player.Player
 
 	for i := range repoPlayers {
 		if repoPlayers[i].UniqueName == reporterPlayer.UniqueName {
@@ -78,10 +78,10 @@ func getReporterRepoPlayer(reporterPlayer player.Player, repoPlayers []player.Re
 	return reporterRepoPlayer
 }
 
-func mapToIDs(repoPlayers []player.RepoPlayer) []int64 {
-	IDs := make([]int64, len(repoPlayers))
-	for i := range repoPlayers {
-		IDs[i] = repoPlayers[i].ID
+func mapToIDs(players []player.Player) []int64 {
+	IDs := make([]int64, len(players))
+	for i := range players {
+		IDs[i] = players[i].ID
 	}
 	return IDs
 }

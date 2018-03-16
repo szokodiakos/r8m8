@@ -21,8 +21,8 @@ func (r *ratingRepositorySQL) Create(tr transaction.Transaction, rating Rating) 
 	return err
 }
 
-func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(tr transaction.Transaction, playerIDs []int64) ([]RepoRating, error) {
-	repoRatings := []RepoRating{}
+func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(tr transaction.Transaction, playerIDs []int64) ([]Rating, error) {
+	ratings := []Rating{}
 
 	query := `
 		SELECT
@@ -36,9 +36,9 @@ func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(tr transaction.Transaction,
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Select(&repoRatings, query, pq.Array(playerIDs))
+	err := sqlTransaction.Select(&ratings, query, pq.Array(playerIDs))
 
-	return repoRatings, err
+	return ratings, err
 }
 
 func (r *ratingRepositorySQL) UpdateRating(tr transaction.Transaction, rating Rating) error {

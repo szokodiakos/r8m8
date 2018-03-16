@@ -7,6 +7,6 @@ import (
 // Repository interface
 type Repository interface {
 	Create(tr transaction.Transaction, rating Rating) error
-	GetMultipleByPlayerIDs(tr transaction.Transaction, playerIDs []int64) ([]RepoRating, error)
+	GetMultipleByPlayerIDs(tr transaction.Transaction, playerIDs []int64) ([]Rating, error)
 	UpdateRating(tr transaction.Transaction, rating Rating) error
 }

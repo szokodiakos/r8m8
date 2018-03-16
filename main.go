@@ -70,7 +70,7 @@ func main() {
 	match.NewSlackControllerHTTP(slackGroup, matchSlackService, slackService)
 
 	playerStatsRepository := stats.NewPlayerRepositorySQL()
-	statsService := stats.NewService(playerStatsRepository)
+	statsService := stats.NewService(playerStatsRepository, playerRepository)
 	statsSlackService := stats.NewSlackService(statsService, leagueSlackService, slackService, transactionService)
 	stats.NewSlackControllerHTTP(slackGroup, statsSlackService, slackService)
 
