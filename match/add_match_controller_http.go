@@ -35,7 +35,7 @@ func (a *AddMatchControllerHTTP) postMatch(context echo.Context) error {
 
 // NewAddMatchControllerHTTP factory
 func NewAddMatchControllerHTTP(
-	slackGroup *echo.Group,
+	routeGroup *echo.Group,
 	inputAdapter AddMatchInputAdapter,
 	outputAdapter AddMatchOutputAdapter,
 	useCase AddMatchUseCase,
@@ -45,6 +45,6 @@ func NewAddMatchControllerHTTP(
 		outputAdapter: outputAdapter,
 		useCase:       useCase,
 	}
-	slackGroup.POST("/match", handler.postMatch)
+	routeGroup.POST("/match", handler.postMatch)
 	return handler
 }

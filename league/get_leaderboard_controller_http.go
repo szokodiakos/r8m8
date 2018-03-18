@@ -35,7 +35,7 @@ func (g *GetLeaderboardControllerHTTP) postsStatsLeaderboard(context echo.Contex
 
 // NewGetLeaderboardControllerHTTP factory
 func NewGetLeaderboardControllerHTTP(
-	slackGroup *echo.Group,
+	routeGroup *echo.Group,
 	inputAdapter GetLeaderboardInputAdapter,
 	outputAdapter GetLeaderboardOutputAdapter,
 	useCase GetLeaderboardUseCase,
@@ -45,6 +45,6 @@ func NewGetLeaderboardControllerHTTP(
 		outputAdapter: outputAdapter,
 		useCase:       useCase,
 	}
-	slackGroup.POST("/stats/leaderboard", handler.postsStatsLeaderboard)
+	routeGroup.POST("/stats/leaderboard", handler.postsStatsLeaderboard)
 	return handler
 }
