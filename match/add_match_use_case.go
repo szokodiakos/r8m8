@@ -12,15 +12,15 @@ import (
 
 // AddMatchUseCase interface
 type AddMatchUseCase interface {
-	Handle(model.AddMatchInput) (model.AddMatchOutput, error)
+	Handle(input model.AddMatchInput) (model.AddMatchOutput, error)
 }
 
 type addMatchUseCase struct {
+	transactionService transaction.Service
 	matchRepository    Repository
 	ratingService      rating.Service
 	playerService      player.Service
 	leagueService      league.Service
-	transactionService transaction.Service
 	matchService       Service
 }
 
@@ -112,6 +112,7 @@ func mapToIDs(players []playerModel.Player) []int64 {
 
 // NewAddMatchUseCase factory
 func NewAddMatchUseCase(
+	transactionService transaction.Service,
 	matchRepository Repository,
 	ratingService rating.Service,
 	playerService player.Service,
@@ -119,10 +120,11 @@ func NewAddMatchUseCase(
 	matchService Service,
 ) AddMatchUseCase {
 	return &addMatchUseCase{
-		matchRepository: matchRepository,
-		ratingService:   ratingService,
-		playerService:   playerService,
-		leagueService:   leagueService,
-		matchService:    matchService,
+		transactionService: transactionService,
+		matchRepository:    matchRepository,
+		ratingService:      ratingService,
+		playerService:      playerService,
+		leagueService:      leagueService,
+		matchService:       matchService,
 	}
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/szokodiakos/r8m8/league"
-	"github.com/szokodiakos/r8m8/stats"
 
 	"github.com/szokodiakos/r8m8/details"
 
@@ -40,17 +39,20 @@ func main() {
 	transactionService := transaction.NewServiceSQL(database)
 
 	detailsRepository := details.NewRepositorySQL()
-
 	ratingRepository := rating.NewRepositorySQL()
+	playerRepository := player.NewRepositorySQL()
+	leagueRepository := league.NewRepositorySQL()
+	leaguePlayerRepository := league.NewPlayerRepositorySQL()
+	matchRepository := match.NewRepositorySQL()
+	matchPlayerRepository := match.NewPlayerRepositorySQL()
+
 	ratingStrategyElo := rating.NewStrategyElo()
 	ratingService := rating.NewService(ratingStrategyElo, ratingRepository, detailsRepository)
 
 	initialRating := 1500
-	playerRepository := player.NewRepositorySQL()
 	playerService := player.NewService(playerRepository, ratingRepository, initialRating)
 	playerSlackService := player.NewSlackService()
 
-	leagueRepository := league.NewRepositorySQL()
 	leagueService := league.NewService(leagueRepository)
 	leagueSlackService := league.NewSlackService()
 
@@ -64,16 +66,16 @@ func main() {
 	httpErrorHandler := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
 	slackGroup := e.Group("/slack", bodyParser, slackTokenVerifier, httpErrorHandler)
 
-	matchPlayerStatsRepository := stats.NewMatchPlayerStatsRepositorySQL()
-	playerStatsRepository := stats.NewPlayerRepositorySQL()
-	statsService := stats.NewService(playerStatsRepository, playerRepository, matchPlayerStatsRepository)
-	statsSlackService := stats.NewSlackService(statsService, leagueSlackService, slackService, transactionService)
-	stats.NewSlackControllerHTTP(slackGroup, statsSlackService, slackService)
+	getLeaderboardInputAdapterSlack := league.NewGetLeaderboardInputAdapterSlack(slackService, leagueSlackService)
+	getLeaderboardOutputAdapterSlack := league.NewGetLeaderboardOutputAdapterSlack()
+	getLeaderboardUseCase := league.NewGetLeaderboardUseCase(transactionService, leaguePlayerRepository)
+	league.NewGetLeaderboardControllerHTTP(slackGroup, getLeaderboardInputAdapterSlack, getLeaderboardOutputAdapterSlack, getLeaderboardUseCase)
 
-	matchRepository := match.NewRepositorySQL()
-	matchService := match.NewService(matchRepository, ratingService, playerService, leagueService)
-	matchSlackService := match.NewSlackService(matchService, slackService, playerSlackService, leagueSlackService, transactionService, statsService)
-	match.NewSlackControllerHTTP(slackGroup, matchSlackService, slackService)
+	matchService := match.NewService(matchRepository, matchPlayerRepository)
+	addMatchInputAdapterSlack := match.NewAddMatchInputAdapterSlack(slackService, playerSlackService, leagueSlackService)
+	addMatchOutputAdapterSlack := match.NewAddMatchOutputAdapterSlack()
+	addMatchUseCase := match.NewAddMatchUseCase(transactionService, matchRepository, ratingService, playerService, leagueService, matchService)
+	match.NewAddMatchControllerHTTP(slackGroup, addMatchInputAdapterSlack, addMatchOutputAdapterSlack, addMatchUseCase)
 
 	port := viper.GetString("port")
 	e.Logger.Fatal(e.Start(port))

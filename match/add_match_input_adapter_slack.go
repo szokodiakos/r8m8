@@ -15,18 +15,18 @@ type addMatchInputAdapterSlack struct {
 
 func (a *addMatchInputAdapterSlack) Handle(data interface{}) (model.AddMatchInput, error) {
 	values := data.(string)
-	var addMatchInput model.AddMatchInput
+	var input model.AddMatchInput
 
 	requestValues, err := a.slackService.ParseRequestValues(values)
 	if err != nil {
-		return addMatchInput, err
+		return input, err
 	}
 
 	text := requestValues.Text
 	teamID := requestValues.TeamID
 	players, err := a.playerSlackService.ToPlayers(text, teamID)
 	if err != nil {
-		return addMatchInput, err
+		return input, err
 	}
 
 	teamDomain := requestValues.TeamDomain
@@ -38,12 +38,12 @@ func (a *addMatchInputAdapterSlack) Handle(data interface{}) (model.AddMatchInpu
 	userName := requestValues.UserName
 	reporterPlayer := a.playerSlackService.ToPlayer(teamID, userID, userName)
 
-	addMatchInput = model.AddMatchInput{
+	input = model.AddMatchInput{
 		League:         league,
 		Players:        players,
 		ReporterPlayer: reporterPlayer,
 	}
-	return addMatchInput, err
+	return input, err
 }
 
 // NewAddMatchInputAdapterSlack factory

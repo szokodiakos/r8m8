@@ -1,14 +1,14 @@
-package stats
+package league
 
 import (
-	"github.com/szokodiakos/r8m8/stats/model"
+	"github.com/szokodiakos/r8m8/league/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
-type playerStatsRepositorySQL struct{}
+type leaguePlayerRepositorySQL struct{}
 
-func (s *playerStatsRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]model.PlayerStats, error) {
-	playersStats := []model.PlayerStats{}
+func (s *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]model.LeaguePlayer, error) {
+	leaguePlayers := []model.LeaguePlayer{}
 
 	query := `
 		SELECT
@@ -37,12 +37,12 @@ func (s *playerStatsRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Select(&playersStats, query, uniqueName)
+	err := sqlTransaction.Select(&leaguePlayers, query, uniqueName)
 
-	return playersStats, err
+	return leaguePlayers, err
 }
 
 // NewPlayerRepositorySQL factory
 func NewPlayerRepositorySQL() PlayerRepository {
-	return &playerStatsRepositorySQL{}
+	return &leaguePlayerRepositorySQL{}
 }

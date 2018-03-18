@@ -8,24 +8,24 @@ import (
 
 // AddMatchControllerHTTP struct
 type AddMatchControllerHTTP struct {
-	addMatchInputAdapter  AddMatchInputAdapter
-	addMatchOutputAdapter AddMatchOutputAdapter
-	addMatchUseCase       AddMatchUseCase
+	inputAdapter  AddMatchInputAdapter
+	outputAdapter AddMatchOutputAdapter
+	useCase       AddMatchUseCase
 }
 
-func (s *AddMatchControllerHTTP) postMatch(context echo.Context) error {
+func (a *AddMatchControllerHTTP) postMatch(context echo.Context) error {
 	body := context.Get("parsedBody").(string)
-	input, err := s.addMatchInputAdapter.Handle(body)
+	input, err := a.inputAdapter.Handle(body)
 	if err != nil {
 		return err
 	}
 
-	output, err := s.addMatchUseCase.Handle(input)
+	output, err := a.useCase.Handle(input)
 	if err != nil {
 		return err
 	}
 
-	response, err := s.addMatchOutputAdapter.Handle(output)
+	response, err := a.outputAdapter.Handle(output)
 	if err != nil {
 		return err
 	}
@@ -36,14 +36,14 @@ func (s *AddMatchControllerHTTP) postMatch(context echo.Context) error {
 // NewAddMatchControllerHTTP factory
 func NewAddMatchControllerHTTP(
 	slackGroup *echo.Group,
-	addMatchInputAdapter AddMatchInputAdapter,
-	addMatchOutputAdapter AddMatchOutputAdapter,
-	addMatchUseCase AddMatchUseCase,
+	inputAdapter AddMatchInputAdapter,
+	outputAdapter AddMatchOutputAdapter,
+	useCase AddMatchUseCase,
 ) *AddMatchControllerHTTP {
 	handler := &AddMatchControllerHTTP{
-		addMatchInputAdapter:  addMatchInputAdapter,
-		addMatchOutputAdapter: addMatchOutputAdapter,
-		addMatchUseCase:       addMatchUseCase,
+		inputAdapter:  inputAdapter,
+		outputAdapter: outputAdapter,
+		useCase:       useCase,
 	}
 	slackGroup.POST("/match", handler.postMatch)
 	return handler

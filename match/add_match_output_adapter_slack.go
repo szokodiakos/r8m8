@@ -12,7 +12,8 @@ type addMatchOutputAdapterSlack struct {
 }
 
 func (a *addMatchOutputAdapterSlack) Handle(output model.AddMatchOutput) (interface{}, error) {
-	return getSuccessMessageResponse(output.Match), nil
+	match := output.Match
+	return getSuccessMessageResponse(match), nil
 }
 
 func getSuccessMessageResponse(match model.Match) slack.MessageResponse {
