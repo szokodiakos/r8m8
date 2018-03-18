@@ -1,99 +1,58 @@
 package match
 
 import (
-	"github.com/szokodiakos/r8m8/league"
-	leagueModel "github.com/szokodiakos/r8m8/league/model"
-	"github.com/szokodiakos/r8m8/match/errors"
-	"github.com/szokodiakos/r8m8/player"
-	playerModel "github.com/szokodiakos/r8m8/player/model"
-	"github.com/szokodiakos/r8m8/rating"
+	"github.com/szokodiakos/r8m8/match/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // Service interface
 type Service interface {
-	Add(tr transaction.Transaction, players []playerModel.Player, league leagueModel.League, reporterPlayer playerModel.Player) (int64, error)
+	GetByID(tr transaction.Transaction, matchID int64) (model.Match, error)
 }
 
 type matchService struct {
-	matchRepository Repository
-	ratingService   rating.Service
-	playerService   player.Service
-	leagueService   league.Service
+	matchRepository       Repository
+	matchPlayerRepository PlayerRepository
 }
 
-func (m *matchService) Add(tr transaction.Transaction, players []playerModel.Player, league leagueModel.League, reporterPlayer playerModel.Player) (int64, error) {
-	if isPlayerCountUneven(players) {
-		return 0, &errors.UnevenMatchPlayersError{}
-	}
-
-	if isReporterPlayerNotInLeague(reporterPlayer, players) {
-		return 0, &errors.ReporterPlayerNotInLeagueError{}
-	}
-
-	repoLeague, err := m.leagueService.GetOrAddLeague(tr, league)
+func (m *matchService) GetByID(tr transaction.Transaction, matchID int64) (model.Match, error) {
+	match, err := m.matchRepository.GetByID(tr, matchID)
 	if err != nil {
-		return 0, err
+		return match, err
 	}
 
-	leagueID := repoLeague.ID
-	repoPlayers, err := m.playerService.GetOrAddPlayers(tr, players, leagueID)
+	matchPlayers, err := m.matchPlayerRepository.GetMultipleByMatchID(tr, matchID)
 	if err != nil {
-		return 0, err
+		return match, err
 	}
 
-	reporterRepoPlayer := getReporterRepoPlayer(reporterPlayer, repoPlayers)
-	reporterRepoPlayerID := reporterRepoPlayer.ID
-	matchID, err := m.matchRepository.Create(tr, leagueID, reporterRepoPlayerID)
-	if err != nil {
-		return 0, err
-	}
+	winnerMatchPlayers, loserMatchPlayers := sortMatchPlayers(matchPlayers)
+	match.WinnerMatchPlayers = winnerMatchPlayers
+	match.LoserMatchPlayers = loserMatchPlayers
 
-	repoPlayerIDs := mapToIDs(repoPlayers)
-	err = m.ratingService.UpdateRatings(tr, repoPlayerIDs, matchID)
-	return matchID, err
+	return match, nil
 }
 
-func isPlayerCountUneven(players []playerModel.Player) bool {
-	return (len(players) % 2) != 0
-}
-
-func isReporterPlayerNotInLeague(reporterPlayer playerModel.Player, players []playerModel.Player) bool {
-	missingFromLeague := true
-	for i := range players {
-		if players[i].UniqueName == reporterPlayer.UniqueName {
-			missingFromLeague = false
+func sortMatchPlayers(matchPlayers []model.MatchPlayer) ([]model.MatchPlayer, []model.MatchPlayer) {
+	winnerMatchPlayers := []model.MatchPlayer{}
+	loserMatchPlayers := []model.MatchPlayer{}
+	for i := range matchPlayers {
+		if matchPlayers[i].Details.HasWon == true {
+			winnerMatchPlayers = append(winnerMatchPlayers, matchPlayers[i])
+		} else {
+			loserMatchPlayers = append(loserMatchPlayers, matchPlayers[i])
 		}
 	}
-	return missingFromLeague
-}
-
-func getReporterRepoPlayer(reporterPlayer playerModel.Player, repoPlayers []playerModel.Player) playerModel.Player {
-	var reporterRepoPlayer playerModel.Player
-
-	for i := range repoPlayers {
-		if repoPlayers[i].UniqueName == reporterPlayer.UniqueName {
-			reporterRepoPlayer = repoPlayers[i]
-		}
-	}
-
-	return reporterRepoPlayer
-}
-
-func mapToIDs(players []playerModel.Player) []int64 {
-	IDs := make([]int64, len(players))
-	for i := range players {
-		IDs[i] = players[i].ID
-	}
-	return IDs
+	return winnerMatchPlayers, loserMatchPlayers
 }
 
 // NewService creates a service
-func NewService(matchRepository Repository, ratingService rating.Service, playerService player.Service, leagueService league.Service) Service {
+func NewService(
+	matchRepository Repository,
+	matchPlayerRepository PlayerRepository,
+) Service {
 	return &matchService{
-		matchRepository: matchRepository,
-		ratingService:   ratingService,
-		playerService:   playerService,
-		leagueService:   leagueService,
+		matchRepository:       matchRepository,
+		matchPlayerRepository: matchPlayerRepository,
 	}
 }

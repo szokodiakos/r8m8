@@ -1,7 +1,7 @@
 package league
 
 import (
-	_sql "database/sql"
+	"database/sql"
 
 	"github.com/szokodiakos/r8m8/league/errors"
 	"github.com/szokodiakos/r8m8/league/model"
@@ -25,7 +25,7 @@ func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, unique
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Get(&league, query, uniqueName)
-	if err == _sql.ErrNoRows {
+	if err == sql.ErrNoRows {
 		return league, &errors.LeagueNotFoundError{
 			UniqueName: uniqueName,
 		}
