@@ -21,11 +21,8 @@ func (g *GetLeaderboardControllerHTTP) postsStatsLeaderboard(context echo.Contex
 	}
 
 	output, err := g.useCase.Handle(input)
-	if err != nil {
-		return err
-	}
 
-	response, err := g.outputAdapter.Handle(output)
+	response, err := g.outputAdapter.Handle(output, err)
 	if err != nil {
 		return err
 	}

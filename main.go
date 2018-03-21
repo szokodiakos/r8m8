@@ -63,8 +63,8 @@ func main() {
 	bodyParser := echoExtensions.BodyParser()
 	slackTokenVerifier := slack.TokenVerifier(slackService)
 	slackErrorHandler := slack.NewErrorHandler()
-	httpErrorHandler := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
-	slackGroup := e.Group("/slack", bodyParser, slackTokenVerifier, httpErrorHandler)
+	slackHTTPErrorHandlerMiddleware := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
+	slackGroup := e.Group("/slack", bodyParser, slackTokenVerifier, slackHTTPErrorHandlerMiddleware)
 
 	getLeaderboardInputAdapterSlack := league.NewGetLeaderboardInputAdapterSlack(slackService, leagueSlackService)
 	getLeaderboardOutputAdapterSlack := league.NewGetLeaderboardOutputAdapterSlack()

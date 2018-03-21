@@ -11,7 +11,11 @@ import (
 type getLeaderboardOutputAdapterSlack struct {
 }
 
-func (g *getLeaderboardOutputAdapterSlack) Handle(output model.GetLeaderboardOutput) (interface{}, error) {
+func (g *getLeaderboardOutputAdapterSlack) Handle(output model.GetLeaderboardOutput, err error) (interface{}, error) {
+	if err != nil {
+		return slack.MessageResponse{}, err
+	}
+
 	league := output.League
 	return getSuccessMessageResponse(league), nil
 }
