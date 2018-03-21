@@ -5,6 +5,7 @@ import (
 	"github.com/szokodiakos/r8m8/match/errors"
 	"github.com/szokodiakos/r8m8/match/model"
 	"github.com/szokodiakos/r8m8/player"
+	playerErrors "github.com/szokodiakos/r8m8/player/errors"
 	playerModel "github.com/szokodiakos/r8m8/player/model"
 	"github.com/szokodiakos/r8m8/rating"
 	"github.com/szokodiakos/r8m8/transaction"
@@ -19,9 +20,9 @@ type addMatchUseCase struct {
 	transactionService transaction.Service
 	matchRepository    Repository
 	ratingService      rating.Service
-	playerService      player.Service
 	leagueService      league.Service
 	matchService       Service
+	playerRepository   player.Repository
 }
 
 func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutput, error) {
@@ -41,35 +42,32 @@ func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutpu
 		return output, a.transactionService.Rollback(tr, err)
 	}
 
-	leagueID := repoLeague.ID
-	repoPlayers, err := a.playerService.GetOrAddMultipleByLeagueID(tr, input.Players, leagueID)
+	err = a.leagueService.AddAnyMissingPlayers(tr, repoLeague, input.Players)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
 	}
 
-	if isReporterPlayerNotInLeague(input.ReporterPlayer, repoPlayers) {
-		return output, &errors.ReporterPlayerNotInLeagueError{}
+	repoReporterPlayer, err := a.playerRepository.GetByUniqueName(tr, input.ReporterPlayer.UniqueName)
+	if err != nil {
+		switch err.(type) {
+		case *playerErrors.PlayerNotFoundError:
+			return output, a.transactionService.Rollback(tr, &errors.ReporterPlayerNotInLeagueError{})
+		default:
+			return output, a.transactionService.Rollback(tr, err)
+		}
 	}
-
-	reporterRepoPlayer := getReporterRepoPlayer(input.ReporterPlayer, repoPlayers)
 
 	match := model.Match{
 		League:         repoLeague,
-		ReporterPlayer: reporterRepoPlayer,
+		ReporterPlayer: repoReporterPlayer,
 	}
-	repoMatch, err := a.matchRepository.Create(tr, match)
-	if err != nil {
-		return output, a.transactionService.Rollback(tr, err)
-	}
-
-	repoPlayerIDs := mapToIDs(repoPlayers)
-	err = a.ratingService.UpdateRatings(tr, repoPlayerIDs, repoMatch.ID)
+	repoMatch, err := a.matchService.CreateWithPlayers(tr, match, input.Players)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
 	}
 
 	output = model.AddMatchOutput{
-		Match: match,
+		Match: repoMatch,
 	}
 	err = a.transactionService.Commit(tr)
 	return output, err
@@ -77,16 +75,6 @@ func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutpu
 
 func isPlayerCountUneven(players []playerModel.Player) bool {
 	return (len(players) % 2) != 0
-}
-
-func isReporterPlayerNotInLeague(reporterPlayer playerModel.Player, players []playerModel.Player) bool {
-	missingFromLeague := true
-	for i := range players {
-		if players[i].UniqueName == reporterPlayer.UniqueName {
-			missingFromLeague = false
-		}
-	}
-	return missingFromLeague
 }
 
 func getReporterRepoPlayer(reporterPlayer playerModel.Player, repoPlayers []playerModel.Player) playerModel.Player {
@@ -101,29 +89,21 @@ func getReporterRepoPlayer(reporterPlayer playerModel.Player, repoPlayers []play
 	return reporterRepoPlayer
 }
 
-func mapToIDs(players []playerModel.Player) []int64 {
-	IDs := make([]int64, len(players))
-	for i := range players {
-		IDs[i] = players[i].ID
-	}
-	return IDs
-}
-
 // NewAddMatchUseCase factory
 func NewAddMatchUseCase(
 	transactionService transaction.Service,
 	matchRepository Repository,
 	ratingService rating.Service,
-	playerService player.Service,
 	leagueService league.Service,
 	matchService Service,
+	playerRepository player.Repository,
 ) AddMatchUseCase {
 	return &addMatchUseCase{
 		transactionService: transactionService,
 		matchRepository:    matchRepository,
 		ratingService:      ratingService,
-		playerService:      playerService,
 		leagueService:      leagueService,
 		matchService:       matchService,
+		playerRepository:   playerRepository,
 	}
 }

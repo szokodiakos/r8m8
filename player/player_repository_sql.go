@@ -28,7 +28,7 @@ func (p *playerRepositorySQL) GetMultipleByUniqueNames(tr transaction.Transactio
 	return players, err
 }
 
-func (p *playerRepositorySQL) Create(tr transaction.Transaction, player model.Player) (int64, error) {
+func (p *playerRepositorySQL) Create(tr transaction.Transaction, player model.Player) (model.Player, error) {
 	var createdID int64
 
 	query := `
@@ -41,10 +41,14 @@ func (p *playerRepositorySQL) Create(tr transaction.Transaction, player model.Pl
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Get(&createdID, query, player.UniqueName, player.DisplayName)
-	return createdID, err
+	if err != nil {
+		return model.Player{}, err
+	}
+
+	return p.GetByUniqueName(tr, player.UniqueName)
 }
 
-func (p *playerRepositorySQL) GetReporterPlayerByMatchID(tr transaction.Transaction, matchID int64) (model.Player, error) {
+func (p *playerRepositorySQL) GetByUniqueName(tr transaction.Transaction, uniqueName string) (model.Player, error) {
 	repoPlayer := model.Player{}
 
 	query := `
@@ -53,15 +57,13 @@ func (p *playerRepositorySQL) GetReporterPlayerByMatchID(tr transaction.Transact
 			p.unique_name,
 			p.display_name
 		FROM
-			players p,
-			matches m
+			players p
 		WHERE
-			m.id = $1 AND
-			m.reporter_player_id = p.id;
+			p.id = $1;
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Get(&repoPlayer, query, matchID)
+	err := sqlTransaction.Get(&repoPlayer, query, uniqueName)
 	return repoPlayer, err
 }
 

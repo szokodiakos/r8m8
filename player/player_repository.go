@@ -7,7 +7,7 @@ import (
 
 // Repository interface
 type Repository interface {
-	Create(tr transaction.Transaction, player model.Player) (int64, error)
+	Create(tr transaction.Transaction, player model.Player) (model.Player, error)
 	GetMultipleByUniqueNames(tr transaction.Transaction, uniqueNames []string) ([]model.Player, error)
-	GetReporterPlayerByMatchID(tr transaction.Transaction, matchID int64) (model.Player, error)
+	GetByUniqueName(tr transaction.Transaction, uniqueName string) (model.Player, error)
 }
