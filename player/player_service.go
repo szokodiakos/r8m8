@@ -10,7 +10,7 @@ import (
 
 // Service interface
 type Service interface {
-	GetOrAddPlayersByLeagueID(tr transaction.Transaction, players []model.Player, leagueID int64) ([]model.Player, error)
+	GetOrAddMultipleByLeagueID(tr transaction.Transaction, players []model.Player, leagueID int64) ([]model.Player, error)
 }
 
 type playerService struct {
@@ -19,7 +19,7 @@ type playerService struct {
 	initialRating    int
 }
 
-func (p *playerService) GetOrAddPlayersByLeagueID(tr transaction.Transaction, players []model.Player, leagueID int64) ([]model.Player, error) {
+func (p *playerService) GetOrAddMultipleByLeagueID(tr transaction.Transaction, players []model.Player, leagueID int64) ([]model.Player, error) {
 	uniqueNames := mapToUniqueNames(players)
 
 	repoPlayers, err := p.playerRepository.GetMultipleByUniqueNames(tr, uniqueNames)

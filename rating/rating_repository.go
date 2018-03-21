@@ -9,5 +9,5 @@ import (
 type Repository interface {
 	Create(tr transaction.Transaction, rating model.Rating) error
 	GetMultipleByPlayerIDs(tr transaction.Transaction, playerIDs []int64) ([]model.Rating, error)
-	UpdateRating(tr transaction.Transaction, rating model.Rating) error
+	Update(tr transaction.Transaction, rating model.Rating) error
 }

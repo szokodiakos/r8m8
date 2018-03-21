@@ -42,7 +42,7 @@ func (r *ratingRepositorySQL) GetMultipleByPlayerIDs(tr transaction.Transaction,
 	return ratings, err
 }
 
-func (r *ratingRepositorySQL) UpdateRating(tr transaction.Transaction, rating model.Rating) error {
+func (r *ratingRepositorySQL) Update(tr transaction.Transaction, rating model.Rating) error {
 	query := `
 		UPDATE ratings
 		SET

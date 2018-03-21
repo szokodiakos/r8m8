@@ -80,7 +80,7 @@ func (r *ratingService) adjustRatings(tr transaction.Transaction, ratings []mode
 			PlayerID: ratings[i].PlayerID,
 			Rating:   adjustedRatingNumbers[i],
 		}
-		err := r.ratingRepository.UpdateRating(tr, rating)
+		err := r.ratingRepository.Update(tr, rating)
 		if err != nil {
 			return err
 		}

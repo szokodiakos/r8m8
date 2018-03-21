@@ -8,14 +8,14 @@ import (
 
 // Service interface
 type Service interface {
-	GetOrAddLeague(tr transaction.Transaction, league model.League) (model.League, error)
+	GetOrAdd(tr transaction.Transaction, league model.League) (model.League, error)
 }
 
 type leagueService struct {
 	leagueRepository Repository
 }
 
-func (l *leagueService) GetOrAddLeague(tr transaction.Transaction, league model.League) (model.League, error) {
+func (l *leagueService) GetOrAdd(tr transaction.Transaction, league model.League) (model.League, error) {
 	repoLeague, err := l.leagueRepository.GetByUniqueName(tr, league.UniqueName)
 	if err != nil {
 		return l.handleGetLeagueError(tr, league, err)
@@ -30,7 +30,7 @@ func (l *leagueService) handleGetLeagueError(tr transaction.Transaction, league 
 		if err != nil {
 			return league, err
 		}
-		return l.GetOrAddLeague(tr, league)
+		return l.GetOrAdd(tr, league)
 	default:
 		return league, err
 	}

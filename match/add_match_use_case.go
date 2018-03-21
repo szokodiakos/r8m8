@@ -40,13 +40,13 @@ func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutpu
 		return output, err
 	}
 
-	repoLeague, err := a.leagueService.GetOrAddLeague(tr, input.League)
+	repoLeague, err := a.leagueService.GetOrAdd(tr, input.League)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
 	}
 
 	leagueID := repoLeague.ID
-	repoPlayers, err := a.playerService.GetOrAddPlayersByLeagueID(tr, input.Players, leagueID)
+	repoPlayers, err := a.playerService.GetOrAddMultipleByLeagueID(tr, input.Players, leagueID)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
 	}
