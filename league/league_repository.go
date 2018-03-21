@@ -8,5 +8,5 @@ import (
 // Repository interface
 type Repository interface {
 	GetByUniqueName(tr transaction.Transaction, uniqueName string) (model.League, error)
-	Create(tr transaction.Transaction, league model.League) error
+	Create(tr transaction.Transaction, league model.League) (model.League, error)
 }

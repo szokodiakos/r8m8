@@ -26,11 +26,7 @@ func (l *leagueService) GetOrAdd(tr transaction.Transaction, league model.League
 func (l *leagueService) handleGetLeagueError(tr transaction.Transaction, league model.League, err error) (model.League, error) {
 	switch err.(type) {
 	case *errors.LeagueNotFoundError:
-		err = l.leagueRepository.Create(tr, league)
-		if err != nil {
-			return league, err
-		}
-		return l.GetOrAdd(tr, league)
+		return l.leagueRepository.Create(tr, league)
 	default:
 		return league, err
 	}

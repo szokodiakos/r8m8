@@ -33,7 +33,7 @@ func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, unique
 	return league, err
 }
 
-func (l *leagueRepositorySQL) Create(tr transaction.Transaction, league model.League) error {
+func (l *leagueRepositorySQL) Create(tr transaction.Transaction, league model.League) (model.League, error) {
 	query := `
 		INSERT INTO leagues
 			(unique_name, display_name)
@@ -43,7 +43,11 @@ func (l *leagueRepositorySQL) Create(tr transaction.Transaction, league model.Le
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
 	_, err := sqlTransaction.Exec(query, league.UniqueName, league.DisplayName)
-	return err
+	if err != nil {
+		return league, err
+	}
+
+	return l.GetByUniqueName(tr, league.UniqueName)
 }
 
 // NewRepositorySQL factory
