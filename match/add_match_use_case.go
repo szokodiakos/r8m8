@@ -53,7 +53,12 @@ func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutpu
 
 	reporterRepoPlayer := getReporterRepoPlayer(input.ReporterPlayer, repoPlayers)
 	reporterRepoPlayerID := reporterRepoPlayer.ID
-	matchID, err := a.matchRepository.Create(tr, leagueID, reporterRepoPlayerID)
+
+	match := model.Match{
+		LeagueID:         leagueID,
+		ReporterPlayerID: reporterRepoPlayerID,
+	}
+	matchID, err := a.matchRepository.Create(tr, match)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
 	}
@@ -64,7 +69,7 @@ func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutpu
 		return output, a.transactionService.Rollback(tr, err)
 	}
 
-	match, err := a.matchService.GetByID(tr, matchID)
+	match, err = a.matchService.GetByID(tr, matchID)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
 	}

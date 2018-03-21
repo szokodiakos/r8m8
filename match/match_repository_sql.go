@@ -11,7 +11,7 @@ import (
 type matchRepositorySQL struct {
 }
 
-func (m *matchRepositorySQL) Create(tr transaction.Transaction, leagueID int64, reporterPlayerID int64) (int64, error) {
+func (m *matchRepositorySQL) Create(tr transaction.Transaction, match model.Match) (int64, error) {
 	var createdID int64
 
 	query := `
@@ -23,7 +23,7 @@ func (m *matchRepositorySQL) Create(tr transaction.Transaction, leagueID int64, 
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Get(&createdID, query, leagueID, reporterPlayerID)
+	err := sqlTransaction.Get(&createdID, query, match.LeagueID, match.ReporterPlayerID)
 	return createdID, err
 }
 

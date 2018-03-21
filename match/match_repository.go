@@ -7,6 +7,6 @@ import (
 
 // Repository interface
 type Repository interface {
-	Create(tr transaction.Transaction, leagueID int64, reporterPlayerID int64) (int64, error)
+	Create(tr transaction.Transaction, match model.Match) (int64, error)
 	GetByID(tr transaction.Transaction, matchID int64) (model.Match, error)
 }
