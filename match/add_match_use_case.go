@@ -31,10 +31,6 @@ func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutpu
 		return output, &errors.UnevenMatchPlayersError{}
 	}
 
-	if isReporterPlayerNotInLeague(input.ReporterPlayer, input.Players) {
-		return output, &errors.ReporterPlayerNotInLeagueError{}
-	}
-
 	tr, err := a.transactionService.Start()
 	if err != nil {
 		return output, err
@@ -49,6 +45,10 @@ func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutpu
 	repoPlayers, err := a.playerService.GetOrAddMultipleByLeagueID(tr, input.Players, leagueID)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
+	}
+
+	if isReporterPlayerNotInLeague(input.ReporterPlayer, repoPlayers) {
+		return output, &errors.ReporterPlayerNotInLeagueError{}
 	}
 
 	reporterRepoPlayer := getReporterRepoPlayer(input.ReporterPlayer, repoPlayers)
