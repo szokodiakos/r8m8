@@ -8,7 +8,9 @@ import (
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
-type leagueRepositorySQL struct{}
+type leagueRepositorySQL struct {
+	leaguePlayerRepository PlayerRepository
+}
 
 func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, uniqueName string) (model.League, error) {
 	league := model.League{}
@@ -30,6 +32,13 @@ func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, unique
 			UniqueName: uniqueName,
 		}
 	}
+
+	top10, err := l.leaguePlayerRepository.GetMultipleByLeagueUniqueNameOrderedByRating(tr, uniqueName)
+	if err != nil {
+		return league, err
+	}
+
+	league.Top10 = top10
 	return league, err
 }
 
@@ -51,6 +60,8 @@ func (l *leagueRepositorySQL) Create(tr transaction.Transaction, league model.Le
 }
 
 // NewRepositorySQL factory
-func NewRepositorySQL() Repository {
-	return &leagueRepositorySQL{}
+func NewRepositorySQL(leaguePlayerRepository PlayerRepository) Repository {
+	return &leagueRepositorySQL{
+		leaguePlayerRepository: leaguePlayerRepository,
+	}
 }

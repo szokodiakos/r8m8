@@ -7,7 +7,7 @@ import (
 
 type leaguePlayerRepositorySQL struct{}
 
-func (s *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction.Transaction, uniqueName string) ([]model.LeaguePlayer, error) {
+func (s *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueNameOrderedByRating(tr transaction.Transaction, uniqueName string) ([]model.LeaguePlayer, error) {
 	leaguePlayers := []model.LeaguePlayer{}
 
 	query := `
@@ -33,7 +33,8 @@ func (s *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueName(tr transaction
 			p.display_name,
 			r.rating
 		ORDER BY
-			r.rating DESC;
+			r.rating DESC
+		LIMIT 10;
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)

@@ -11,8 +11,8 @@ type GetLeaderboardUseCase interface {
 }
 
 type getLeaderboardUseCase struct {
-	transactionService     transaction.Service
-	leaguePlayerRepository PlayerRepository
+	transactionService transaction.Service
+	leagueRepository   Repository
 }
 
 func (g *getLeaderboardUseCase) Handle(input model.GetLeaderboardInput) (model.GetLeaderboardOutput, error) {
@@ -24,14 +24,13 @@ func (g *getLeaderboardUseCase) Handle(input model.GetLeaderboardInput) (model.G
 		return output, err
 	}
 
-	leaguePlayers, err := g.leaguePlayerRepository.GetMultipleByLeagueUniqueName(tr, league.UniqueName)
+	repoLeague, err := g.leagueRepository.GetByUniqueName(tr, league.UniqueName)
 	if err != nil {
 		return output, g.transactionService.Rollback(tr, err)
 	}
 
-	league.LeaguePlayers = leaguePlayers
 	output = model.GetLeaderboardOutput{
-		League: league,
+		League: repoLeague,
 	}
 	err = g.transactionService.Commit(tr)
 	return output, err
@@ -40,10 +39,10 @@ func (g *getLeaderboardUseCase) Handle(input model.GetLeaderboardInput) (model.G
 // NewGetLeaderboardUseCase factory
 func NewGetLeaderboardUseCase(
 	transactionService transaction.Service,
-	leaguePlayerRepository PlayerRepository,
+	leagueRepository Repository,
 ) GetLeaderboardUseCase {
 	return &getLeaderboardUseCase{
-		transactionService:     transactionService,
-		leaguePlayerRepository: leaguePlayerRepository,
+		transactionService: transactionService,
+		leagueRepository:   leagueRepository,
 	}
 }

@@ -41,8 +41,8 @@ func main() {
 	detailsRepository := details.NewRepositorySQL()
 	ratingRepository := rating.NewRepositorySQL()
 	playerRepository := player.NewRepositorySQL()
-	leagueRepository := league.NewRepositorySQL()
 	leaguePlayerRepository := league.NewPlayerRepositorySQL()
+	leagueRepository := league.NewRepositorySQL(leaguePlayerRepository)
 	matchRepository := match.NewRepositorySQL()
 	matchPlayerRepository := match.NewPlayerRepositorySQL()
 
@@ -68,7 +68,7 @@ func main() {
 
 	getLeaderboardInputAdapterSlack := league.NewGetLeaderboardInputAdapterSlack(slackService, leagueSlackService)
 	getLeaderboardOutputAdapterSlack := league.NewGetLeaderboardOutputAdapterSlack()
-	getLeaderboardUseCase := league.NewGetLeaderboardUseCase(transactionService, leaguePlayerRepository)
+	getLeaderboardUseCase := league.NewGetLeaderboardUseCase(transactionService, leagueRepository)
 	league.NewGetLeaderboardControllerHTTP(slackGroup, getLeaderboardInputAdapterSlack, getLeaderboardOutputAdapterSlack, getLeaderboardUseCase)
 
 	matchService := match.NewService(matchRepository, matchPlayerRepository)

@@ -25,15 +25,12 @@ func getSuccessMessageResponse(league model.League) slack.MessageResponse {
 :fire: TOP 10 Leaderboard for *%v* :fire:
 
 %v
-	`, league.DisplayName, getPlayersStatsTexts(league.LeaguePlayers, 10))
+	`, league.DisplayName, getPlayersStatsTexts(league.Top10))
 	return slack.CreateChannelResponse(text)
 }
 
-func getPlayersStatsTexts(leaguePlayers []model.LeaguePlayer, c int) string {
+func getPlayersStatsTexts(leaguePlayers []model.LeaguePlayer) string {
 	count := len(leaguePlayers)
-	if c < count {
-		count = c
-	}
 
 	playerText := make([]string, count)
 	for i := 0; i < count; i++ {
