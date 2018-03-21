@@ -21,11 +21,8 @@ func (a *AddMatchControllerHTTP) postMatch(context echo.Context) error {
 	}
 
 	output, err := a.useCase.Handle(input)
-	if err != nil {
-		return err
-	}
 
-	response, err := a.outputAdapter.Handle(output)
+	response, err := a.outputAdapter.Handle(output, err)
 	if err != nil {
 		return err
 	}

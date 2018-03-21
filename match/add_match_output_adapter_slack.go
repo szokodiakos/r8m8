@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/szokodiakos/r8m8/match/errors"
 	"github.com/szokodiakos/r8m8/match/model"
 	"github.com/szokodiakos/r8m8/slack"
 )
@@ -11,9 +12,41 @@ import (
 type addMatchOutputAdapterSlack struct {
 }
 
-func (a *addMatchOutputAdapterSlack) Handle(output model.AddMatchOutput) (interface{}, error) {
+func (a *addMatchOutputAdapterSlack) Handle(output model.AddMatchOutput, err error) (interface{}, error) {
 	match := output.Match
+
+	if err != nil {
+		return getErrorMessageResponse(err)
+	}
+
 	return getSuccessMessageResponse(match), nil
+}
+
+func getErrorMessageResponse(err error) (slack.MessageResponse, error) {
+	switch err.(type) {
+	case *errors.ReporterPlayerNotInLeagueError:
+		return getReporterPlayerNotInLeagueResponse(), nil
+	case *errors.UnevenMatchPlayersError:
+		return getUnevenMatchPlayersResponse(), nil
+	default:
+		return slack.MessageResponse{}, err
+	}
+}
+
+func getReporterPlayerNotInLeagueResponse() slack.MessageResponse {
+	text := `
+> Darn! You must be the participant of at least one match (including this one). :hushed:
+> :exclamation: Please play a match before posting! :exclamation:
+`
+	return slack.CreateDirectResponse(text)
+}
+
+func getUnevenMatchPlayersResponse() slack.MessageResponse {
+	text := `
+> Darn! Reported players are uneven! :hushed:
+> :exclamation: Make sure you report even number of players! :exclamation:
+`
+	return slack.CreateDirectResponse(text)
 }
 
 func getSuccessMessageResponse(match model.Match) slack.MessageResponse {
