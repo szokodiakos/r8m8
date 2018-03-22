@@ -38,7 +38,7 @@ func (l *leagueRepositorySQL) GetByUniqueName(tr transaction.Transaction, unique
 		return league, err
 	}
 
-	league.Top10 = top10
+	league.SetTop10(top10)
 	return league, err
 }
 

@@ -7,7 +7,18 @@ import (
 // LeaguePlayer struct
 type LeaguePlayer struct {
 	Player     playerModel.Player `db:"player"`
+	League     League             `db:"league"`
 	Rating     int                `db:"rating"`
-	WinCount   int                `db:"won_match_count"`
-	MatchCount int                `db:"total_match_count"`
+	winCount   int                `db:"win_count"`
+	matchCount int                `db:"match_count"`
+}
+
+// GetWinCount func
+func (l LeaguePlayer) GetWinCount() int {
+	return l.winCount
+}
+
+// GetMatchCount func
+func (l LeaguePlayer) GetMatchCount() int {
+	return l.matchCount
 }

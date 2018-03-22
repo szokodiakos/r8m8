@@ -1,39 +1,40 @@
 package league
 
 import (
+	"github.com/lib/pq"
 	"github.com/szokodiakos/r8m8/league/model"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 type leaguePlayerRepositorySQL struct{}
 
-func (s *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueNameOrderedByRating(tr transaction.Transaction, uniqueName string) ([]model.LeaguePlayer, error) {
+func (l *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueNameOrderedByRating(tr transaction.Transaction, uniqueName string) ([]model.LeaguePlayer, error) {
 	leaguePlayers := []model.LeaguePlayer{}
 
 	query := `
 		SELECT
 			p.display_name AS "player.display_name",
-			r.rating AS "rating.rating",
-			COUNT(CASE WHEN d.has_won THEN 1 END) AS won_match_count,
-			COUNT(*) AS total_match_count
+			lp.rating,
+			COUNT(CASE WHEN d.has_won THEN 1 END) AS win_count,
+			COUNT(*) AS match_count
 		FROM
 			players p,
-			ratings r,
+			league_players lp,
 			leagues l,
 			matches m,
-			details d
+			match_players mp
 		WHERE
 			l.unique_name = $1 AND
-			l.id = r.league_id AND
-			r.player_id = p.id AND
-			p.id = d.player_id AND
+			l.id = lp.league_id AND
+			lp.player_id = p.id AND
+			p.id = mp.player_id AND
 			m.league_id = l.id AND
-			d.match_id = m.id
+			mp.match_id = m.id
 		GROUP BY
 			p.display_name,
-			r.rating
+			lp.rating
 		ORDER BY
-			r.rating DESC
+			lp.rating DESC
 		LIMIT 10;
 	`
 
@@ -41,6 +42,58 @@ func (s *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueNameOrderedByRating
 	err := sqlTransaction.Select(&leaguePlayers, query, uniqueName)
 
 	return leaguePlayers, err
+}
+
+func (l *leaguePlayerRepositorySQL) GetMultipleByPlayerUniqueNames(tr transaction.Transaction, uniqueNames []string) ([]model.LeaguePlayer, error) {
+	leaguePlayers := []model.LeaguePlayer{}
+
+	query := `
+		SELECT
+			lp.rating,
+			p.id AS "player.id",
+			l.id AS "league.id",
+			p.unique_name AS "player.unique_name",
+		FROM
+			league_players l,
+			league l,
+			players p
+		WHERE
+			lp.player_id = p.id AND
+			lp.league_id = l.id AND
+			p.unique_name = ANY($1);
+	`
+
+	sqlTransaction := transaction.GetSQLTransaction(tr)
+	err := sqlTransaction.Select(&leaguePlayers, query, pq.Array(uniqueNames))
+	return leaguePlayers, err
+}
+
+func (l *leaguePlayerRepositorySQL) Update(tr transaction.Transaction, leaguePlayer model.LeaguePlayer) error {
+	query := `
+		UPDATE league_players
+		SET
+			rating = $1
+		WHERE
+			player_id = $2 AND
+			league_id = $3;
+	`
+
+	sqlTransaction := transaction.GetSQLTransaction(tr)
+	_, err := sqlTransaction.Exec(query, leaguePlayer.Rating, leaguePlayer.Player.ID, leaguePlayer.League.ID)
+	return err
+}
+
+func (l *leaguePlayerRepositorySQL) Create(tr transaction.Transaction, leaguePlayer model.LeaguePlayer) error {
+	query := `
+			INSERT INTO league_players
+				(player_id, league_id, rating)
+			VALUES
+				($1, $2, $3);
+		`
+
+	sqlTransaction := transaction.GetSQLTransaction(tr)
+	_, err := sqlTransaction.Exec(query, leaguePlayer.Player.ID, leaguePlayer.League.ID, leaguePlayer.Rating)
+	return err
 }
 
 // NewPlayerRepositorySQL factory

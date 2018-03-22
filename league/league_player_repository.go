@@ -7,5 +7,8 @@ import (
 
 // PlayerRepository interface
 type PlayerRepository interface {
+	GetMultipleByPlayerUniqueNames(tr transaction.Transaction, uniqueNames []string) ([]model.LeaguePlayer, error)
 	GetMultipleByLeagueUniqueNameOrderedByRating(tr transaction.Transaction, uniqueName string) ([]model.LeaguePlayer, error)
+	Update(tr transaction.Transaction, leaguePlayer model.LeaguePlayer) error
+	Create(tr transaction.Transaction, leaguePlayer model.LeaguePlayer) error
 }

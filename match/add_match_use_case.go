@@ -7,7 +7,6 @@ import (
 	"github.com/szokodiakos/r8m8/player"
 	playerErrors "github.com/szokodiakos/r8m8/player/errors"
 	playerModel "github.com/szokodiakos/r8m8/player/model"
-	"github.com/szokodiakos/r8m8/rating"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -18,10 +17,10 @@ type AddMatchUseCase interface {
 
 type addMatchUseCase struct {
 	transactionService transaction.Service
-	matchRepository    Repository
-	ratingService      rating.Service
+	playerService      player.Service
 	leagueService      league.Service
 	matchService       Service
+	matchRepository    Repository
 	playerRepository   player.Repository
 }
 
@@ -61,7 +60,9 @@ func (a *addMatchUseCase) Handle(input model.AddMatchInput) (model.AddMatchOutpu
 		League:         repoLeague,
 		ReporterPlayer: repoReporterPlayer,
 	}
-	repoMatch, err := a.matchService.CreateWithPlayers(tr, match, input.Players)
+
+	uniqueNames := a.playerService.MapToUniqueNames(input.Players)
+	repoMatch, err := a.matchService.CreateWithPlayerUniqueNames(tr, match, uniqueNames)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
 	}
@@ -92,18 +93,18 @@ func getReporterRepoPlayer(reporterPlayer playerModel.Player, repoPlayers []play
 // NewAddMatchUseCase factory
 func NewAddMatchUseCase(
 	transactionService transaction.Service,
-	matchRepository Repository,
-	ratingService rating.Service,
+	playerService player.Service,
 	leagueService league.Service,
 	matchService Service,
+	matchRepository Repository,
 	playerRepository player.Repository,
 ) AddMatchUseCase {
 	return &addMatchUseCase{
 		transactionService: transactionService,
-		matchRepository:    matchRepository,
-		ratingService:      ratingService,
+		playerService:      playerService,
 		leagueService:      leagueService,
 		matchService:       matchService,
+		matchRepository:    matchRepository,
 		playerRepository:   playerRepository,
 	}
 }

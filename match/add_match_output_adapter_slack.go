@@ -59,8 +59,8 @@ func getSuccessMessageResponse(match model.Match) slack.MessageResponse {
 %v
 	`
 	reporterDisplayName := match.ReporterPlayer.DisplayName
-	winnerMatchPlayersText := getMatchPlayersText(match.WinnerMatchPlayers)
-	loserMatchPlayersText := getMatchPlayersText(match.LoserMatchPlayers)
+	winnerMatchPlayersText := getMatchPlayersText(match.WinnerMatchPlayers())
+	loserMatchPlayersText := getMatchPlayersText(match.LoserMatchPlayers())
 	text := fmt.Sprintf(template, reporterDisplayName, winnerMatchPlayersText, loserMatchPlayersText)
 	return slack.CreateChannelResponse(text)
 }
@@ -69,8 +69,8 @@ func getMatchPlayersText(matchPlayers []model.MatchPlayer) string {
 	texts := []string{}
 	for i := range matchPlayers {
 		displayName := matchPlayers[i].Player.DisplayName
-		ratingChange := matchPlayers[i].Details.RatingChange
-		rating := matchPlayers[i].Rating.Rating
+		ratingChange := matchPlayers[i].RatingChange
+		rating := 1337
 		text := fmt.Sprintf("> *%v* %v and is now at *%v*!", displayName, getRatingChangeText(ratingChange), rating)
 		texts = append(texts, text)
 	}

@@ -14,22 +14,16 @@ func (d *matchPlayerRepositorySQL) GetMultipleByMatchID(tr transaction.Transacti
 	query := `
 		SELECT
 			p.display_name AS "player.display_name",
-			r.rating AS "rating.rating",
-			d.rating_change AS "details.rating_change",
-			d.has_won AS "details.has_won"
+			mp.rating_change AS "rating_change",
+			mp.has_won AS "has_won"
 		FROM
 			players p,
-			ratings r,
-			details d,
-			leagues l,
+			match_players mp,
 			matches m
 		WHERE
 			m.id = $1 AND
-			d.match_id = m.id AND
-			d.player_id = p.id AND
-			r.player_id = p.id AND
-			r.league_id = l.id AND
-			m.league_id = l.id;
+			mp.match_id = m.id AND
+			mp.player_id = p.id;
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)

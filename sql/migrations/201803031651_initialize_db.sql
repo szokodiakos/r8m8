@@ -19,24 +19,24 @@ CREATE TABLE matches (
   created_at TIMESTAMP NOT NULL
 );
 
-CREATE TABLE details (
+CREATE TABLE match_players (
   player_id INT NOT NULL REFERENCES players(id),
   match_id INT NOT NULL REFERENCES matches(id),
   rating_change INT NOT NULL,
   has_won BOOLEAN NOT NULL
 );
 
-CREATE TABLE ratings (
+CREATE TABLE league_players (
   player_id INT NOT NULL REFERENCES players(id),
   league_id INT NOT NULL REFERENCES leagues(id),
   rating INT NOT NULL,
-  CONSTRAINT ratings_pk PRIMARY KEY (player_id, league_id)
+  CONSTRAINT league_players_pk PRIMARY KEY (player_id, league_id)
 );
 
 -- +migrate Down
 
-DROP TABLE ratings;
-DROP TABLE details;
+DROP TABLE league_players;
+DROP TABLE match_players;
 DROP TABLE matches;
 DROP TABLE players;
 DROP TABLE leagues;

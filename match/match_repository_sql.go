@@ -9,6 +9,7 @@ import (
 )
 
 type matchRepositorySQL struct {
+	matchPlayerRepository PlayerRepository
 }
 
 func (m *matchRepositorySQL) Create(tr transaction.Transaction, match model.Match) (model.Match, error) {
@@ -53,10 +54,19 @@ func (m *matchRepositorySQL) GetByID(tr transaction.Transaction, matchID int64) 
 			ID: matchID,
 		}
 	}
+
+	matchPlayers, err := m.matchPlayerRepository.GetMultipleByMatchID(tr, matchID)
+	if err != nil {
+		return match, err
+	}
+
+	match.MatchPlayers = matchPlayers
 	return match, err
 }
 
 // NewRepositorySQL factory
-func NewRepositorySQL() Repository {
-	return &matchRepositorySQL{}
+func NewRepositorySQL(matchPlayerRepository PlayerRepository) Repository {
+	return &matchRepositorySQL{
+		matchPlayerRepository: matchPlayerRepository,
+	}
 }

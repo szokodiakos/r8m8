@@ -1,110 +1,110 @@
 package match
 
 import (
+	"github.com/szokodiakos/r8m8/league"
+	leagueModel "github.com/szokodiakos/r8m8/league/model"
 	"github.com/szokodiakos/r8m8/match/model"
-	"github.com/szokodiakos/r8m8/player"
-	playerModel "github.com/szokodiakos/r8m8/player/model"
 	"github.com/szokodiakos/r8m8/rating"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // Service interface
 type Service interface {
-	CreateWithPlayers(tr transaction.Transaction, match model.Match, players []playerModel.Player) (model.Match, error)
+	CreateWithPlayerUniqueNames(tr transaction.Transaction, match model.Match, uniqueNames []string) (model.Match, error)
 }
 
 type matchService struct {
+	ratingStrategy        rating.Strategy
 	matchRepository       Repository
 	matchPlayerRepository PlayerRepository
-	playerService         player.Service
-	ratingService         rating.Service
+	leaguePlayerService   league.PlayerService
 }
 
-func (m *matchService) CreateWithPlayers(tr transaction.Transaction, match model.Match, players []playerModel.Player) (model.Match, error) {
-	
-	// TODO use league players here
-	
-	// repoLeaguePlayers := leaguePlayerService.GetMultipleByPlayers(tr, players)
-	// winnerRepoLeaguePlayers, loserRepoLeaguePlayers...
-	// calculate adjusted ratings
-	// update league players ratings
-	// create match with winner and loser players
-
-	repoPlayers, err := m.playerService.GetRepoPlayersInOrder(tr, players)
+func (m *matchService) CreateWithPlayerUniqueNames(tr transaction.Transaction, match model.Match, uniqueNames []string) (model.Match, error) {
+	repoLeaguePlayers, err := m.leaguePlayerService.GetMultipleByUniqueNamesInOrder(tr, uniqueNames)
 	if err != nil {
 		return match, err
 	}
 
-	winnerRepoPlayers := getWinnerPlayers(repoPlayers)
-	loserRepoPlayers := getLoserPlayers(repoPlayers)
+	winnerRepoLeaguePlayers := getWinnerLeaguePlayers(repoLeaguePlayers)
+	loserRepoLeaguePlayers := getLoserLeaguePlayers(repoLeaguePlayers)
 
-	winnerMatchPlayers := 
-	matchPlayers, err := m.createMultipleMatchPlayers(tr, repoPlayers)
+	winnerRatings := mapToRatings(winnerRepoLeaguePlayers)
+	loserRatings := mapToRatings(loserRepoLeaguePlayers)
+	adjustedWinnerRatings, adjustedLoserRatings := m.ratingStrategy.Calculate(winnerRatings, loserRatings)
 
+	adjustedWinnerLeaguePlayers := adjustLeaguePlayersRatings(winnerRepoLeaguePlayers, adjustedWinnerRatings)
+	adjustedLoserLeaguePlayers := adjustLeaguePlayersRatings(winnerRepoLeaguePlayers, adjustedLoserRatings)
+	adjustedLeaguePlayers := append(adjustedWinnerLeaguePlayers, adjustedLoserLeaguePlayers...)
+	err = m.leaguePlayerService.UpdateMultiple(tr, adjustedLeaguePlayers)
+	if err != nil {
+		return match, err
+	}
+
+	hasWon := true
+	winnerMatchPlayers := m.createMultipleMatchPlayers(winnerRepoLeaguePlayers, adjustedWinnerLeaguePlayers, hasWon)
+	loserMatchPlayers := m.createMultipleMatchPlayers(loserRepoLeaguePlayers, adjustedLoserLeaguePlayers, !hasWon)
+
+	match.MatchPlayers = append(winnerMatchPlayers, loserMatchPlayers...)
 	repoMatch, err := m.matchRepository.Create(tr, match)
 	if err != nil {
 		return match, err
 	}
 
-	// playerIDs := mapToIDs(repoPlayers)
-	// err = m.ratingService.UpdatePlayers(tr, playerIDs, repoMatch.ID)
-	// if err != nil {
-	// 	return match, err
-	// }
-
-	// matchPlayers, err := m.matchPlayerRepository.GetMultipleByMatchID(tr, matchID)
-	// if err != nil {
-	// 	return match, err
-	// }
-
-	winnerMatchPlayers, loserMatchPlayers := sortMatchPlayers(matchPlayers)
-	match.WinnerMatchPlayers = winnerMatchPlayers
-	match.LoserMatchPlayers = loserMatchPlayers
-
-	return match, nil
+	return repoMatch, nil
 }
 
-func getWinnerPlayers(players []playerModel.Player) []playerModel.Player {
-	return players[:(len(playerIDs) / 2)]
+func getWinnerLeaguePlayers(leaguePlayers []leagueModel.LeaguePlayer) []leagueModel.LeaguePlayer {
+	return leaguePlayers[:(len(leaguePlayers) / 2)]
 }
 
-func getLoserPlayers(players []playerModel.Player) []playerModel.Player {
-	return players[(len(playerIDs) / 2):]
+func getLoserLeaguePlayers(leaguePlayers []leagueModel.LeaguePlayer) []leagueModel.LeaguePlayer {
+	return leaguePlayers[(len(leaguePlayers) / 2):]
 }
 
-func (m *matchService) createMultipleMatchPlayers(tr transaction.Transaction, players []playerModel.Player) ([]model.MatchPlayer, error) {
-	matchPlayers := make([]model.MatchPlayer, len(players))
-	for i := range players {
+func mapToRatings(leaguePlayers []leagueModel.LeaguePlayer) []int {
+	ratings := make([]int, len(leaguePlayers))
+	for i := range ratings {
+		ratings[i] = leaguePlayers[i].Rating
+	}
+	return ratings
+}
+
+func adjustLeaguePlayersRatings(repoLeaguePlayers []leagueModel.LeaguePlayer, adjustedRatings []int) []leagueModel.LeaguePlayer {
+	adjustedRepoLeaguePlayers := make([]leagueModel.LeaguePlayer, len(repoLeaguePlayers))
+
+	for i := range repoLeaguePlayers {
+		adjustedRepoLeaguePlayers[i].Rating = adjustedRatings[i]
+	}
+
+	return adjustedRepoLeaguePlayers
+}
+
+func (m *matchService) createMultipleMatchPlayers(repoLeaguePlayers []leagueModel.LeaguePlayer, adjustedLeaguePlayers []leagueModel.LeaguePlayer, hasWon bool) []model.MatchPlayer {
+	matchPlayers := make([]model.MatchPlayer, len(repoLeaguePlayers))
+
+	for i := range repoLeaguePlayers {
 		matchPlayers[i] = model.MatchPlayer{
-			Player: players[i],
+			Player:       repoLeaguePlayers[i].Player,
+			HasWon:       hasWon,
+			RatingChange: adjustedLeaguePlayers[i].Rating - repoLeaguePlayers[i].Rating,
 		}
 	}
-}
 
-func sortMatchPlayers(matchPlayers []model.MatchPlayer) ([]model.MatchPlayer, []model.MatchPlayer) {
-	winnerMatchPlayers := []model.MatchPlayer{}
-	loserMatchPlayers := []model.MatchPlayer{}
-	for i := range matchPlayers {
-		if matchPlayers[i].Details.HasWon == true {
-			winnerMatchPlayers = append(winnerMatchPlayers, matchPlayers[i])
-		} else {
-			loserMatchPlayers = append(loserMatchPlayers, matchPlayers[i])
-		}
-	}
-	return winnerMatchPlayers, loserMatchPlayers
+	return matchPlayers
 }
 
 // NewService creates a service
 func NewService(
+	ratingStrategy rating.Strategy,
 	matchRepository Repository,
 	matchPlayerRepository PlayerRepository,
-	playerService player.Service,
-	ratingService rating.Service,
+	leaguePlayerService league.PlayerService,
 ) Service {
 	return &matchService{
+		ratingStrategy:        ratingStrategy,
 		matchRepository:       matchRepository,
 		matchPlayerRepository: matchPlayerRepository,
-		playerService:         playerService,
-		ratingService:         ratingService,
+		leaguePlayerService:   leaguePlayerService,
 	}
 }

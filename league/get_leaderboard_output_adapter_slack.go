@@ -25,7 +25,7 @@ func getSuccessMessageResponse(league model.League) slack.MessageResponse {
 :fire: TOP 10 Leaderboard for *%v* :fire:
 
 %v
-	`, league.DisplayName, getPlayersStatsTexts(league.Top10))
+	`, league.DisplayName, getPlayersStatsTexts(league.Top10()))
 	return slack.CreateChannelResponse(text)
 }
 
@@ -36,9 +36,9 @@ func getPlayersStatsTexts(leaguePlayers []model.LeaguePlayer) string {
 	for i := 0; i < count; i++ {
 		icon := getIcon(i + 1)
 		displayName := leaguePlayers[i].Player.DisplayName
-		rating := leaguePlayers[i].Rating.Rating
-		winCount := leaguePlayers[i].WinCount
-		matchCount := leaguePlayers[i].MatchCount
+		rating := leaguePlayers[i].Rating
+		winCount := leaguePlayers[i].GetWinCount()
+		matchCount := leaguePlayers[i].GetMatchCount()
 		lossCount := matchCount - winCount
 		textTemplate := "> *%v*	%v	*%v*	(%v Win / %v Loss)"
 		playerText[i] = fmt.Sprintf(textTemplate, icon, displayName, rating, winCount, lossCount)
