@@ -85,7 +85,7 @@ func (m *matchService) createMultipleMatchPlayers(repoLeaguePlayers []leagueMode
 
 	for i := range repoLeaguePlayers {
 		matchPlayers[i] = model.MatchPlayer{
-			Player:       repoLeaguePlayers[i].Player,
+			LeaguePlayer: repoLeaguePlayers[i],
 			HasWon:       hasWon,
 			RatingChange: adjustedLeaguePlayers[i].Rating - repoLeaguePlayers[i].Rating,
 		}

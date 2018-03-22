@@ -15,7 +15,7 @@ func (l *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueNameOrderedByRating
 		SELECT
 			p.display_name AS "player.display_name",
 			lp.rating,
-			COUNT(CASE WHEN d.has_won THEN 1 END) AS win_count,
+			COUNT(CASE WHEN mp.has_won THEN 1 END) AS win_count,
 			COUNT(*) AS match_count
 		FROM
 			players p,
@@ -29,6 +29,8 @@ func (l *leaguePlayerRepositorySQL) GetMultipleByLeagueUniqueNameOrderedByRating
 			lp.player_id = p.id AND
 			p.id = mp.player_id AND
 			m.league_id = l.id AND
+			mp.player_id = lp.player_id AND
+			mp.league_id = lp.league_id AND
 			mp.match_id = m.id
 		GROUP BY
 			p.display_name,
@@ -52,10 +54,10 @@ func (l *leaguePlayerRepositorySQL) GetMultipleByPlayerUniqueNames(tr transactio
 			lp.rating,
 			p.id AS "player.id",
 			l.id AS "league.id",
-			p.unique_name AS "player.unique_name",
+			p.unique_name AS "player.unique_name"
 		FROM
-			league_players l,
-			league l,
+			league_players lp,
+			leagues l,
 			players p
 		WHERE
 			lp.player_id = p.id AND

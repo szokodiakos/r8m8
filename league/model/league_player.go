@@ -9,16 +9,16 @@ type LeaguePlayer struct {
 	Player     playerModel.Player `db:"player"`
 	League     League             `db:"league"`
 	Rating     int                `db:"rating"`
-	winCount   int                `db:"win_count"`
-	matchCount int                `db:"match_count"`
+	WinCount   int                `db:"win_count"`
+	MatchCount int                `db:"match_count"`
 }
 
 // GetWinCount func
 func (l LeaguePlayer) GetWinCount() int {
-	return l.winCount
+	return l.WinCount
 }
 
 // GetMatchCount func
 func (l LeaguePlayer) GetMatchCount() int {
-	return l.matchCount
+	return l.MatchCount
 }

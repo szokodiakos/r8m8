@@ -59,7 +59,7 @@ func (p *playerRepositorySQL) GetByUniqueName(tr transaction.Transaction, unique
 		FROM
 			players p
 		WHERE
-			p.id = $1;
+			p.unique_name = $1;
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)

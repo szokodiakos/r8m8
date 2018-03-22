@@ -68,9 +68,9 @@ func getSuccessMessageResponse(match model.Match) slack.MessageResponse {
 func getMatchPlayersText(matchPlayers []model.MatchPlayer) string {
 	texts := []string{}
 	for i := range matchPlayers {
-		displayName := matchPlayers[i].Player.DisplayName
+		displayName := matchPlayers[i].LeaguePlayer.Player.DisplayName
 		ratingChange := matchPlayers[i].RatingChange
-		rating := 1337
+		rating := matchPlayers[i].LeaguePlayer.Rating
 		text := fmt.Sprintf("> *%v* %v and is now at *%v*!", displayName, getRatingChangeText(ratingChange), rating)
 		texts = append(texts, text)
 	}
