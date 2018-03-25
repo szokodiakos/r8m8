@@ -27,7 +27,7 @@ func getErrorMessageResponse(err error) (slack.MessageResponse, error) {
 	switch err.(type) {
 	case *errors.ReporterPlayerNotInLeagueError:
 		return getReporterPlayerNotInLeagueResponse(), nil
-	case *errors.UnevenMatchPlayersError:
+	case *playerErrors.UnevenMatchPlayersError:
 		return getUnevenMatchPlayersResponse(), nil
 	case *playerErrors.BadSlackPlayerFormatError:
 		badSlackPlayerFormatError := err.(*playerErrors.BadSlackPlayerFormatError)

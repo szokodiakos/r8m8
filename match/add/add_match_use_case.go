@@ -26,51 +26,56 @@ type addMatchUseCase struct {
 	leagueRepository    entity.LeagueRepository
 }
 
-func (a *addMatchUseCase) Handle(input Input) (Output, error) {
-	var output Output
-
-	if isPlayerCountUneven(input.Players) {
-		return output, &errors.UnevenMatchPlayersError{}
-	}
-
+func (a *addMatchUseCase) Handle(input Input) (output Output, err error) {
 	tr, err := a.transactionService.Start()
 	if err != nil {
-		return output, err
+		return
 	}
+
+	defer func() {
+		switch err {
+		case nil:
+			err = a.transactionService.Commit(tr)
+			return
+		default:
+			err = a.transactionService.Rollback(tr, err)
+			return
+		}
+	}()
 
 	repoLeague, err := a.leagueService.GetOrAddLeague(tr, input.League, input.Players)
 	if err != nil {
-		return output, a.transactionService.Rollback(tr, err)
+		return
 	}
 
 	err = a.playerService.AddAnyMissingPlayers(tr, input.Players)
 	if err != nil {
-		return output, a.transactionService.Rollback(tr, err)
+		return
 	}
 
 	missingLeaguePlayers, err := a.leaguePlayerService.CreateAnyMissingLeaguePlayers(tr, repoLeague, input.Players)
 	if err != nil {
-		return output, a.transactionService.Rollback(tr, err)
+		return
 	}
-
-	repoLeague = appendMissingLeaguePlayers(repoLeague, missingLeaguePlayers)
 
 	repoReporterPlayer, err := a.playerRepository.GetByID(tr, input.ReporterPlayer.ID)
 	if err != nil {
 		switch err.(type) {
 		case *playerErrors.PlayerNotFoundError:
-			return output, a.transactionService.Rollback(tr, &errors.ReporterPlayerNotInLeagueError{})
+			err = &errors.ReporterPlayerNotInLeagueError{}
+			return
 		default:
-			return output, a.transactionService.Rollback(tr, err)
+			return
 		}
 	}
 
+	repoLeague.LeaguePlayers = append(repoLeague.LeaguePlayers, missingLeaguePlayers...)
 	adjustedLeaguePlayers, matchPlayers := a.matchService.CalculatePlayerChanges(repoLeague.LeaguePlayers, input.Players)
 
 	repoLeague.LeaguePlayers = adjustedLeaguePlayers
 	err = a.leagueRepository.Update(tr, repoLeague)
 	if err != nil {
-		return output, a.transactionService.Rollback(tr, err)
+		return
 	}
 
 	match := entity.Match{
@@ -81,23 +86,13 @@ func (a *addMatchUseCase) Handle(input Input) (Output, error) {
 
 	repoMatch, err := a.matchRepository.Add(tr, match)
 	if err != nil {
-		return output, a.transactionService.Rollback(tr, err)
+		return
 	}
 
 	output = Output{
 		Match: repoMatch,
 	}
-	err = a.transactionService.Commit(tr)
-	return output, err
-}
-
-func isPlayerCountUneven(players []entity.Player) bool {
-	return (len(players) % 2) != 0
-}
-
-func appendMissingLeaguePlayers(league entity.League, missingLeaguePlayers []entity.LeaguePlayer) entity.League {
-	league.LeaguePlayers = append(league.LeaguePlayers, missingLeaguePlayers...)
-	return league
+	return
 }
 
 // NewAddMatchUseCase factory

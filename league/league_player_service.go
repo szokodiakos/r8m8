@@ -10,6 +10,7 @@ import (
 // PlayerService interface
 type PlayerService interface {
 	CreateAnyMissingLeaguePlayers(tr transaction.Transaction, league entity.League, players []entity.Player) ([]entity.LeaguePlayer, error)
+	UndoRatingChangesForLeaguePlayers(leaguePlayers []entity.LeaguePlayer, matchPlayers []entity.MatchPlayer) []entity.LeaguePlayer
 }
 
 type leaguePlayerService struct {
@@ -66,6 +67,25 @@ func testRepoLeaguePlayerMissing(repoPlayer entity.Player, repoLeaguePlayers []e
 	return &errors.LeaguePlayerNotFoundError{
 		ID: repoPlayer.ID,
 	}
+}
+
+func (l *leaguePlayerService) UndoRatingChangesForLeaguePlayers(leaguePlayers []entity.LeaguePlayer, matchPlayers []entity.MatchPlayer) []entity.LeaguePlayer {
+	adjustedLeaguePlayers := make([]entity.LeaguePlayer, len(leaguePlayers))
+	copy(adjustedLeaguePlayers, leaguePlayers)
+
+	for i := range matchPlayers {
+		for j := range leaguePlayers {
+			if isLeaguePlayerParticipatedInMatch(matchPlayers[i], leaguePlayers[j]) {
+				adjustedLeaguePlayers[j].Rating -= matchPlayers[i].RatingChange
+			}
+		}
+	}
+
+	return adjustedLeaguePlayers
+}
+
+func isLeaguePlayerParticipatedInMatch(matchPlayer entity.MatchPlayer, leaguePlayer entity.LeaguePlayer) bool {
+	return matchPlayer.PlayerID == leaguePlayer.PlayerID
 }
 
 // NewPlayerService factory

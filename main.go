@@ -78,7 +78,7 @@ func main() {
 
 	undoMatchInputAdapterSlack := undo.NewUndoMatchInputAdapterSlack(slackService, playerSlackService)
 	undoMatchOutputAdapterSlack := undo.NewUndoMatchOutputAdapterSlack()
-	undoMatchUseCase := undo.NewUndoMatchUseCase(transactionService, matchRepository, leagueRepository)
+	undoMatchUseCase := undo.NewUndoMatchUseCase(transactionService, leaguePlayerService, matchRepository, leagueRepository)
 	undo.NewUndoMatchControllerHTTP(slackGroup, undoMatchInputAdapterSlack, undoMatchOutputAdapterSlack, undoMatchUseCase)
 
 	port := viper.GetString("port")

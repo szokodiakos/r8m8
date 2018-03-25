@@ -2,6 +2,7 @@ package player
 
 import (
 	"github.com/szokodiakos/r8m8/entity"
+	"github.com/szokodiakos/r8m8/player/errors"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -16,6 +17,10 @@ type playerService struct {
 }
 
 func (p *playerService) AddAnyMissingPlayers(tr transaction.Transaction, players []entity.Player) error {
+	if isPlayerCountUneven(players) {
+		return &errors.UnevenMatchPlayersError{}
+	}
+
 	ids := p.MapToIDs(players)
 	repoPlayers, err := p.playerRepository.GetMultipleByIDs(tr, ids)
 	if err != nil {
@@ -29,6 +34,10 @@ func (p *playerService) AddAnyMissingPlayers(tr transaction.Transaction, players
 	}
 
 	return nil
+}
+
+func isPlayerCountUneven(players []entity.Player) bool {
+	return (len(players) % 2) != 0
 }
 
 func (p *playerService) MapToIDs(players []entity.Player) []string {
