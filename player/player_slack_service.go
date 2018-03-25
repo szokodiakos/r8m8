@@ -40,7 +40,7 @@ func (p *playerSlackService) parsePlayer(slackPlayer string, teamID string) (ent
 	results := pattern.FindStringSubmatch(slackPlayer)
 
 	if isSlackPlayerInvalid(results) {
-		return player, errors.NewBadSlackPlayerFormatError(slackPlayer)
+		return player, &errors.BadSlackPlayerFormatError{SlackPlayer: slackPlayer}
 	}
 
 	userID := results[1]

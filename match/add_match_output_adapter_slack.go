@@ -6,6 +6,7 @@ import (
 
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/match/errors"
+	playerErrors "github.com/szokodiakos/r8m8/player/errors"
 	"github.com/szokodiakos/r8m8/slack"
 )
 
@@ -28,6 +29,9 @@ func getErrorMessageResponse(err error) (slack.MessageResponse, error) {
 		return getReporterPlayerNotInLeagueResponse(), nil
 	case *errors.UnevenMatchPlayersError:
 		return getUnevenMatchPlayersResponse(), nil
+	case *playerErrors.BadSlackPlayerFormatError:
+		badSlackPlayerFormatError := err.(*playerErrors.BadSlackPlayerFormatError)
+		return getBadSlackPlayerFormatResponse(badSlackPlayerFormatError), nil
 	default:
 		return slack.MessageResponse{}, err
 	}
@@ -46,6 +50,14 @@ func getUnevenMatchPlayersResponse() slack.MessageResponse {
 > Darn! Reported players are uneven! :hushed:
 > :exclamation: Make sure you report even number of players! :exclamation:
 `
+	return slack.CreateDirectResponse(text)
+}
+
+func getBadSlackPlayerFormatResponse(err *playerErrors.BadSlackPlayerFormatError) slack.MessageResponse {
+	text := fmt.Sprintf(`
+> Darn! Reported player "%v" is not valid! :hushed:
+`, err.SlackPlayer)
+
 	return slack.CreateDirectResponse(text)
 }
 
