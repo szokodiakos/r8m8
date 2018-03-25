@@ -4,8 +4,8 @@ import (
 	"github.com/szokodiakos/r8m8/entity"
 )
 
-// UndoMatchOutput struct
-type UndoMatchOutput struct {
+// Output struct
+type Output struct {
 	ReporterPlayer entity.Player
 	LeaguePlayers  []entity.LeaguePlayer
 	MatchPlayers   []entity.MatchPlayer

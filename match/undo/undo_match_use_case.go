@@ -5,9 +5,9 @@ import (
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
-// UndoMatchUseCase interface
-type UndoMatchUseCase interface {
-	Handle(input UndoMatchInput) (UndoMatchOutput, error)
+// UseCase interface
+type UseCase interface {
+	Handle(input Input) (Output, error)
 }
 
 type undoMatchUseCase struct {
@@ -16,8 +16,8 @@ type undoMatchUseCase struct {
 	leagueRepository   entity.LeagueRepository
 }
 
-func (u *undoMatchUseCase) Handle(input UndoMatchInput) (UndoMatchOutput, error) {
-	var output UndoMatchOutput
+func (u *undoMatchUseCase) Handle(input Input) (Output, error) {
+	var output Output
 
 	tr, err := u.transactionService.Start()
 	if err != nil {
@@ -48,7 +48,7 @@ func (u *undoMatchUseCase) Handle(input UndoMatchInput) (UndoMatchOutput, error)
 	}
 
 	err = u.transactionService.Commit(tr)
-	output = UndoMatchOutput{
+	output = Output{
 		ReporterPlayer: input.ReporterPlayer,
 		LeaguePlayers:  adjustedLeaguePlayers,
 		MatchPlayers:   repoMatch.MatchPlayers,
@@ -77,7 +77,7 @@ func isLeaguePlayerParticipatedInMatch(matchPlayer entity.MatchPlayer, leaguePla
 }
 
 // NewUndoMatchUseCase factory
-func NewUndoMatchUseCase(transactionService transaction.Service, matchRepository entity.MatchRepository, leagueRepository entity.LeagueRepository) UndoMatchUseCase {
+func NewUndoMatchUseCase(transactionService transaction.Service, matchRepository entity.MatchRepository, leagueRepository entity.LeagueRepository) UseCase {
 	return &undoMatchUseCase{
 		transactionService: transactionService,
 		matchRepository:    matchRepository,

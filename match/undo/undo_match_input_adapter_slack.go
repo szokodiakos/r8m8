@@ -10,9 +10,9 @@ type undoMatchInputAdapterSlack struct {
 	playerSlackService player.SlackService
 }
 
-func (a *undoMatchInputAdapterSlack) Handle(data interface{}) (UndoMatchInput, error) {
+func (a *undoMatchInputAdapterSlack) Handle(data interface{}) (Input, error) {
 	values := data.(string)
-	var input UndoMatchInput
+	var input Input
 
 	requestValues, err := a.slackService.ParseRequestValues(values)
 	if err != nil {
@@ -24,7 +24,7 @@ func (a *undoMatchInputAdapterSlack) Handle(data interface{}) (UndoMatchInput, e
 	userName := requestValues.UserName
 	reporterPlayer := a.playerSlackService.ToPlayer(teamID, userID, userName)
 
-	input = UndoMatchInput{
+	input = Input{
 		ReporterPlayer: reporterPlayer,
 	}
 	return input, err
@@ -34,7 +34,7 @@ func (a *undoMatchInputAdapterSlack) Handle(data interface{}) (UndoMatchInput, e
 func NewUndoMatchInputAdapterSlack(
 	slackService slack.Service,
 	playerSlackService player.SlackService,
-) UndoMatchInputAdapter {
+) InputAdapter {
 	return &undoMatchInputAdapterSlack{
 		slackService:       slackService,
 		playerSlackService: playerSlackService,

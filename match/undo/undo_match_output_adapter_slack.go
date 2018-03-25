@@ -12,7 +12,7 @@ import (
 type undoMatchOutputAdapterSlack struct {
 }
 
-func (a *undoMatchOutputAdapterSlack) Handle(output UndoMatchOutput, err error) (interface{}, error) {
+func (a *undoMatchOutputAdapterSlack) Handle(output Output, err error) (interface{}, error) {
 	if err != nil {
 		return getErrorMessageResponse(err)
 	}
@@ -86,6 +86,6 @@ func getParticipatingLeaguePlayer(matchPlayer entity.MatchPlayer, leaguePlayers 
 }
 
 // NewUndoMatchOutputAdapterSlack factory
-func NewUndoMatchOutputAdapterSlack() UndoMatchOutputAdapter {
+func NewUndoMatchOutputAdapterSlack() OutputAdapter {
 	return &undoMatchOutputAdapterSlack{}
 }

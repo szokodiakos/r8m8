@@ -1,6 +1,6 @@
 package undo
 
-// UndoMatchInputAdapter interface
-type UndoMatchInputAdapter interface {
-	Handle(interface{}) (UndoMatchInput, error)
+// InputAdapter interface
+type InputAdapter interface {
+	Handle(interface{}) (Input, error)
 }

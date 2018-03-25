@@ -6,27 +6,27 @@ import (
 	"github.com/labstack/echo"
 )
 
-// UndoMatchControllerHTTP struct
-type UndoMatchControllerHTTP struct {
-	inputAdapter  UndoMatchInputAdapter
-	outputAdapter UndoMatchOutputAdapter
-	useCase       UndoMatchUseCase
+// ControllerHTTP struct
+type ControllerHTTP struct {
+	inputAdapter  InputAdapter
+	outputAdapter OutputAdapter
+	useCase       UseCase
 }
 
-func (a *UndoMatchControllerHTTP) postMatch(context echo.Context) error {
+func (c *ControllerHTTP) postMatch(context echo.Context) error {
 	body := context.Get("parsedBody").(string)
-	input, err := a.inputAdapter.Handle(body)
+	input, err := c.inputAdapter.Handle(body)
 	if err != nil {
-		return a.handleOutput(context, UndoMatchOutput{}, err)
+		return c.handleOutput(context, Output{}, err)
 	}
 
-	output, err := a.useCase.Handle(input)
+	output, err := c.useCase.Handle(input)
 
-	return a.handleOutput(context, output, err)
+	return c.handleOutput(context, output, err)
 }
 
-func (a *UndoMatchControllerHTTP) handleOutput(context echo.Context, output UndoMatchOutput, err error) error {
-	response, err := a.outputAdapter.Handle(output, err)
+func (c *ControllerHTTP) handleOutput(context echo.Context, output Output, err error) error {
+	response, err := c.outputAdapter.Handle(output, err)
 	if err != nil {
 		return err
 	}
@@ -37,11 +37,11 @@ func (a *UndoMatchControllerHTTP) handleOutput(context echo.Context, output Undo
 // NewUndoMatchControllerHTTP factory
 func NewUndoMatchControllerHTTP(
 	routeGroup *echo.Group,
-	inputAdapter UndoMatchInputAdapter,
-	outputAdapter UndoMatchOutputAdapter,
-	useCase UndoMatchUseCase,
-) *UndoMatchControllerHTTP {
-	handler := &UndoMatchControllerHTTP{
+	inputAdapter InputAdapter,
+	outputAdapter OutputAdapter,
+	useCase UseCase,
+) *ControllerHTTP {
+	handler := &ControllerHTTP{
 		inputAdapter:  inputAdapter,
 		outputAdapter: outputAdapter,
 		useCase:       useCase,
