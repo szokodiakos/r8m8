@@ -46,6 +46,6 @@ func NewAddMatchControllerHTTP(
 		outputAdapter: outputAdapter,
 		useCase:       useCase,
 	}
-	routeGroup.POST("/match", handler.postMatch)
+	routeGroup.POST("/match/add", handler.postMatch)
 	return handler
 }

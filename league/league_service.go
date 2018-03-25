@@ -17,6 +17,7 @@ type leagueService struct {
 	leaguePlayerService PlayerService
 	leagueRepository    entity.LeagueRepository
 	playerRepository    entity.PlayerRepository
+	initialRating       int
 }
 
 func (l *leagueService) GetOrAddLeague(tr transaction.Transaction, league entity.League, players []entity.Player) (entity.League, error) {
@@ -38,7 +39,7 @@ func (l *leagueService) addLeague(tr transaction.Transaction, league entity.Leag
 		return league, err
 	}
 
-	leaguePlayers := createLeaguePlayers(repoPlayers)
+	leaguePlayers := l.createLeaguePlayers(repoPlayers)
 	league.LeaguePlayers = leaguePlayers
 
 	return l.leagueRepository.Add(tr, league)
@@ -56,23 +57,30 @@ func (l *leagueService) addPlayers(tr transaction.Transaction, players []entity.
 	return repoPlayers, nil
 }
 
-func createLeaguePlayers(repoPlayers []entity.Player) []entity.LeaguePlayer {
+func (l *leagueService) createLeaguePlayers(repoPlayers []entity.Player) []entity.LeaguePlayer {
 	leaguePlayers := make([]entity.LeaguePlayer, len(repoPlayers))
 	for i := range repoPlayers {
 		leaguePlayers[i] = entity.LeaguePlayer{
 			PlayerID: repoPlayers[i].ID,
-			Rating:   1500,
+			Rating:   l.initialRating,
 		}
 	}
 	return leaguePlayers
 }
 
 // NewService factory
-func NewService(playerService player.Service, leaguePlayerService PlayerService, leagueRepository entity.LeagueRepository, playerRepository entity.PlayerRepository) Service {
+func NewService(
+	playerService player.Service,
+	leaguePlayerService PlayerService,
+	leagueRepository entity.LeagueRepository,
+	playerRepository entity.PlayerRepository,
+	initialRating int,
+) Service {
 	return &leagueService{
 		playerService:       playerService,
 		leaguePlayerService: leaguePlayerService,
 		leagueRepository:    leagueRepository,
 		playerRepository:    playerRepository,
+		initialRating:       initialRating,
 	}
 }

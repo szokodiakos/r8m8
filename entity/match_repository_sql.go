@@ -89,7 +89,8 @@ func (m *matchRepositorySQL) GetByID(tr transaction.Transaction, matchID int64) 
 			players p
 		WHERE
 			m.id = $1 AND
-			m.reporter_player_id = p.id;
+			m.reporter_player_id = p.id
+		LIMIT 1;
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
@@ -185,6 +186,62 @@ func mapToMatchPlayers(matchPlayersSQL []matchPlayerSQL) []MatchPlayer {
 		}
 	}
 	return matchPlayers
+}
+
+func (m *matchRepositorySQL) GetLatestByReporterPlayerID(tr transaction.Transaction, reporterPlayerID string) (Match, error) {
+	match := Match{}
+	matchSQL := matchSQL{}
+
+	query := `
+		SELECT
+			m.id,
+			m.league_id,
+			p.id AS "reporter_player_id",
+			p.display_name AS "reporter_player_display_name"
+		FROM
+			matches m,
+			players p
+		WHERE
+			p.id = $1 AND
+			m.reporter_player_id = p.id
+		ORDER BY
+			m.created_at DESC
+		LIMIT 1;
+	`
+
+	sqlTransaction := transaction.GetSQLTransaction(tr)
+	err := sqlTransaction.Get(&matchSQL, query, reporterPlayerID)
+	if err == sql.ErrNoRows {
+		return match, &errors.MatchNotFoundError{
+			ReporterPlayerID: reporterPlayerID,
+		}
+	}
+	if err != nil {
+		return match, err
+	}
+
+	match = mapToMatch(matchSQL)
+
+	matchPlayers, err := getMatchPlayersByMatchID(tr, match.ID)
+	if err != nil {
+		return match, err
+	}
+
+	match.MatchPlayers = matchPlayers
+	return match, err
+}
+
+func (m *matchRepositorySQL) Remove(tr transaction.Transaction, match Match) error {
+	query := `
+			DELETE FROM
+				matches m
+			WHERE
+				m.id = $1;
+		`
+
+	sqlTransaction := transaction.GetSQLTransaction(tr)
+	_, err := sqlTransaction.Exec(query, match.ID)
+	return err
 }
 
 // NewMatchRepositorySQL factory

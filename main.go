@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
+	"github.com/szokodiakos/r8m8/match/undo"
 
 	"github.com/szokodiakos/r8m8/rating"
 
@@ -48,7 +49,7 @@ func main() {
 	playerSlackService := player.NewSlackService()
 
 	leaguePlayerService := league.NewPlayerService(playerService, playerRepository, initialRating)
-	leagueService := league.NewService(playerService, leaguePlayerService, leagueRepository, playerRepository)
+	leagueService := league.NewService(playerService, leaguePlayerService, leagueRepository, playerRepository, initialRating)
 	leagueSlackService := league.NewSlackService()
 
 	verificationToken := viper.GetString("slack_verification_token")
@@ -67,11 +68,16 @@ func main() {
 	league.NewGetLeaderboardControllerHTTP(slackGroup, getLeaderboardInputAdapterSlack, getLeaderboardOutputAdapterSlack, getLeaderboardUseCase)
 
 	matchService := match.NewService(ratingStrategyElo, matchRepository, leaguePlayerService)
+
 	addMatchInputAdapterSlack := match.NewAddMatchInputAdapterSlack(slackService, playerSlackService, leagueSlackService)
 	addMatchOutputAdapterSlack := match.NewAddMatchOutputAdapterSlack()
-
 	addMatchUseCase := match.NewAddMatchUseCase(transactionService, playerService, leagueService, leaguePlayerService, matchService, matchRepository, playerRepository, leagueRepository)
 	match.NewAddMatchControllerHTTP(slackGroup, addMatchInputAdapterSlack, addMatchOutputAdapterSlack, addMatchUseCase)
+
+	undoMatchInputAdapterSlack := undo.NewUndoMatchInputAdapterSlack(slackService, playerSlackService)
+	undoMatchOutputAdapterSlack := undo.NewUndoMatchOutputAdapterSlack()
+	undoMatchUseCase := undo.NewUndoMatchUseCase(transactionService, matchRepository, leagueRepository)
+	undo.NewUndoMatchControllerHTTP(slackGroup, undoMatchInputAdapterSlack, undoMatchOutputAdapterSlack, undoMatchUseCase)
 
 	port := viper.GetString("port")
 	e.Logger.Fatal(e.Start(port))
