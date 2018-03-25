@@ -47,7 +47,7 @@ func (a *addMatchUseCase) Handle(input AddMatchInput) (AddMatchOutput, error) {
 		return output, a.transactionService.Rollback(tr, err)
 	}
 
-	missingLeaguePlayers, err := a.leaguePlayerService.CreateAnyMissingLeaguePlayers(tr, input.League, input.Players)
+	missingLeaguePlayers, err := a.leaguePlayerService.CreateAnyMissingLeaguePlayers(tr, repoLeague, input.Players)
 	if err != nil {
 		return output, a.transactionService.Rollback(tr, err)
 	}
