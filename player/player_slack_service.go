@@ -5,22 +5,22 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/player/errors"
-	"github.com/szokodiakos/r8m8/player/model"
 )
 
 // SlackService interface
 type SlackService interface {
-	ToPlayers(text string, teamID string) ([]model.Player, error)
-	ToPlayer(teamID string, userID string, userName string) model.Player
+	ToPlayers(text string, teamID string) ([]entity.Player, error)
+	ToPlayer(teamID string, userID string, userName string) entity.Player
 }
 
 type playerSlackService struct {
 }
 
-func (p *playerSlackService) ToPlayers(text string, teamID string) ([]model.Player, error) {
+func (p *playerSlackService) ToPlayers(text string, teamID string) ([]entity.Player, error) {
 	slackPlayers := strings.Split(text, " ")
-	players := make([]model.Player, len(slackPlayers))
+	players := make([]entity.Player, len(slackPlayers))
 
 	for i := range slackPlayers {
 		player, err := p.parsePlayer(slackPlayers[i], teamID)
@@ -34,8 +34,8 @@ func (p *playerSlackService) ToPlayers(text string, teamID string) ([]model.Play
 	return players, nil
 }
 
-func (p *playerSlackService) parsePlayer(slackPlayer string, teamID string) (model.Player, error) {
-	var player model.Player
+func (p *playerSlackService) parsePlayer(slackPlayer string, teamID string) (entity.Player, error) {
+	var player entity.Player
 	pattern, _ := regexp.Compile(`<@(.*)\|(.*)>`)
 	results := pattern.FindStringSubmatch(slackPlayer)
 
@@ -54,12 +54,12 @@ func isSlackPlayerInvalid(results []string) bool {
 	return (len(results) != 3)
 }
 
-func (p *playerSlackService) ToPlayer(teamID string, userID string, userName string) model.Player {
+func (p *playerSlackService) ToPlayer(teamID string, userID string, userName string) entity.Player {
 	displayName := userName
-	uniqueName := fmt.Sprintf("slack_%v_%v", teamID, userID)
-	return model.Player{
+	id := fmt.Sprintf("slack_%v_%v", teamID, userID)
+	return entity.Player{
+		ID:          id,
 		DisplayName: displayName,
-		UniqueName:  uniqueName,
 	}
 }
 

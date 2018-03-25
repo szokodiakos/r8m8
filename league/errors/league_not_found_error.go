@@ -6,9 +6,9 @@ import (
 
 // LeagueNotFoundError struct
 type LeagueNotFoundError struct {
-	UniqueName string
+	ID string
 }
 
 func (e *LeagueNotFoundError) Error() string {
-	return fmt.Sprintf(`League with Unique Name "%v" Not Found.`, e.UniqueName)
+	return fmt.Sprintf(`League with ID "%v" Not Found.`, e.ID)
 }

@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/match/errors"
-	"github.com/szokodiakos/r8m8/match/model"
 	"github.com/szokodiakos/r8m8/slack"
 )
 
 type addMatchOutputAdapterSlack struct {
 }
 
-func (a *addMatchOutputAdapterSlack) Handle(output model.AddMatchOutput, err error) (interface{}, error) {
+func (a *addMatchOutputAdapterSlack) Handle(output AddMatchOutput, err error) (interface{}, error) {
 	match := output.Match
 
 	if err != nil {
@@ -49,7 +49,7 @@ func getUnevenMatchPlayersResponse() slack.MessageResponse {
 	return slack.CreateDirectResponse(text)
 }
 
-func getSuccessMessageResponse(match model.Match) slack.MessageResponse {
+func getSuccessMessageResponse(match entity.Match) slack.MessageResponse {
 	template := `
 *%v* recorded a new Match! Good Game! :muscle:
 
@@ -58,19 +58,22 @@ func getSuccessMessageResponse(match model.Match) slack.MessageResponse {
 *Losers*
 %v
 	`
-	reporterDisplayName := match.ReporterPlayer.DisplayName
+	reporterDisplayName := match.ReporterPlayer().DisplayName
 	winnerMatchPlayersText := getMatchPlayersText(match.WinnerMatchPlayers())
 	loserMatchPlayersText := getMatchPlayersText(match.LoserMatchPlayers())
 	text := fmt.Sprintf(template, reporterDisplayName, winnerMatchPlayersText, loserMatchPlayersText)
 	return slack.CreateChannelResponse(text)
 }
 
-func getMatchPlayersText(matchPlayers []model.MatchPlayer) string {
+func getMatchPlayersText(matchPlayers []entity.MatchPlayer) string {
 	texts := []string{}
-	for i := range matchPlayers {
-		displayName := matchPlayers[i].LeaguePlayer.Player.DisplayName
-		ratingChange := matchPlayers[i].RatingChange
-		rating := matchPlayers[i].LeaguePlayer.Rating
+	for _, matchPlayer := range matchPlayers {
+		leaguePlayer := matchPlayer.LeaguePlayer()
+		player := leaguePlayer.Player()
+
+		displayName := player.DisplayName
+		ratingChange := matchPlayer.RatingChange
+		rating := leaguePlayer.Rating
 		text := fmt.Sprintf("> *%v* %v and is now at *%v*!", displayName, getRatingChangeText(ratingChange), rating)
 		texts = append(texts, text)
 	}

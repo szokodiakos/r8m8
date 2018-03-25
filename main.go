@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
 
 	"github.com/szokodiakos/r8m8/rating"
@@ -36,11 +37,9 @@ func main() {
 	database := sqlDB.NewSQLDB(db)
 	transactionService := transaction.NewServiceSQL(database)
 
-	playerRepository := player.NewRepositorySQL()
-	leaguePlayerRepository := league.NewPlayerRepositorySQL()
-	leagueRepository := league.NewRepositorySQL(leaguePlayerRepository)
-	matchPlayerRepository := match.NewPlayerRepositorySQL()
-	matchRepository := match.NewRepositorySQL(matchPlayerRepository)
+	playerRepository := entity.NewPlayerRepositorySQL()
+	leagueRepository := entity.NewLeagueRepositorySQL()
+	matchRepository := entity.NewMatchRepositorySQL()
 
 	ratingStrategyElo := rating.NewStrategyElo()
 
@@ -48,8 +47,8 @@ func main() {
 	playerService := player.NewService(playerRepository)
 	playerSlackService := player.NewSlackService()
 
-	leaguePlayerService := league.NewPlayerService(playerService, playerRepository, leaguePlayerRepository, initialRating)
-	leagueService := league.NewService(playerService, leaguePlayerService, leagueRepository)
+	leaguePlayerService := league.NewPlayerService(playerService, playerRepository, initialRating)
+	leagueService := league.NewService(playerService, leaguePlayerService, leagueRepository, playerRepository)
 	leagueSlackService := league.NewSlackService()
 
 	verificationToken := viper.GetString("slack_verification_token")
@@ -67,10 +66,11 @@ func main() {
 	getLeaderboardUseCase := league.NewGetLeaderboardUseCase(transactionService, leagueRepository)
 	league.NewGetLeaderboardControllerHTTP(slackGroup, getLeaderboardInputAdapterSlack, getLeaderboardOutputAdapterSlack, getLeaderboardUseCase)
 
-	matchService := match.NewService(ratingStrategyElo, matchRepository, matchPlayerRepository, leaguePlayerService)
+	matchService := match.NewService(ratingStrategyElo, matchRepository, leaguePlayerService)
 	addMatchInputAdapterSlack := match.NewAddMatchInputAdapterSlack(slackService, playerSlackService, leagueSlackService)
 	addMatchOutputAdapterSlack := match.NewAddMatchOutputAdapterSlack()
-	addMatchUseCase := match.NewAddMatchUseCase(transactionService, playerService, leagueService, matchService, matchRepository, playerRepository)
+
+	addMatchUseCase := match.NewAddMatchUseCase(transactionService, playerService, leagueService, leaguePlayerService, matchService, matchRepository, playerRepository, leagueRepository)
 	match.NewAddMatchControllerHTTP(slackGroup, addMatchInputAdapterSlack, addMatchOutputAdapterSlack, addMatchUseCase)
 
 	port := viper.GetString("port")

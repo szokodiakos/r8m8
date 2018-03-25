@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -31,18 +32,22 @@ func (t *transaction) Rollback() error {
 }
 
 func (t *transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
-	log.Println(query, args)
+	log.Println(query, spew.Sdump(args))
 	return t.tx.Exec(query, args...)
 }
 
 func (t *transaction) Select(dest interface{}, query string, args ...interface{}) error {
-	log.Println(query, args)
-	return t.tx.Select(dest, query, args...)
+	log.Println(query, spew.Sdump(args))
+	err := t.tx.Select(dest, query, args...)
+	log.Println(spew.Sdump(dest))
+	return err
 }
 
 func (t *transaction) Get(dest interface{}, query string, args ...interface{}) error {
-	log.Println(query, args)
-	return t.tx.Get(dest, query, args...)
+	log.Println(query, spew.Sdump(args))
+	err := t.tx.Get(dest, query, args...)
+	log.Println(spew.Sdump(dest))
+	return err
 }
 
 // NewSQLTransaction factory

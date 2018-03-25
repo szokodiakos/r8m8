@@ -2,7 +2,6 @@ package match
 
 import (
 	"github.com/szokodiakos/r8m8/league"
-	"github.com/szokodiakos/r8m8/match/model"
 	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/slack"
 )
@@ -13,9 +12,9 @@ type addMatchInputAdapterSlack struct {
 	leagueSlackService league.SlackService
 }
 
-func (a *addMatchInputAdapterSlack) Handle(data interface{}) (model.AddMatchInput, error) {
+func (a *addMatchInputAdapterSlack) Handle(data interface{}) (AddMatchInput, error) {
 	values := data.(string)
-	var input model.AddMatchInput
+	var input AddMatchInput
 
 	requestValues, err := a.slackService.ParseRequestValues(values)
 	if err != nil {
@@ -38,7 +37,7 @@ func (a *addMatchInputAdapterSlack) Handle(data interface{}) (model.AddMatchInpu
 	userName := requestValues.UserName
 	reporterPlayer := a.playerSlackService.ToPlayer(teamID, userID, userName)
 
-	input = model.AddMatchInput{
+	input = AddMatchInput{
 		League:         league,
 		Players:        players,
 		ReporterPlayer: reporterPlayer,

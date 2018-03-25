@@ -1,22 +1,22 @@
 package league
 
 import (
-	"github.com/szokodiakos/r8m8/league/model"
+	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // GetLeaderboardUseCase interface
 type GetLeaderboardUseCase interface {
-	Handle(input model.GetLeaderboardInput) (model.GetLeaderboardOutput, error)
+	Handle(input GetLeaderboardInput) (GetLeaderboardOutput, error)
 }
 
 type getLeaderboardUseCase struct {
 	transactionService transaction.Service
-	leagueRepository   Repository
+	leagueRepository   entity.LeagueRepository
 }
 
-func (g *getLeaderboardUseCase) Handle(input model.GetLeaderboardInput) (model.GetLeaderboardOutput, error) {
-	var output model.GetLeaderboardOutput
+func (g *getLeaderboardUseCase) Handle(input GetLeaderboardInput) (GetLeaderboardOutput, error) {
+	var output GetLeaderboardOutput
 	league := input.League
 
 	tr, err := g.transactionService.Start()
@@ -24,12 +24,14 @@ func (g *getLeaderboardUseCase) Handle(input model.GetLeaderboardInput) (model.G
 		return output, err
 	}
 
-	repoLeague, err := g.leagueRepository.GetByUniqueName(tr, league.UniqueName)
+	repoLeague, err := g.leagueRepository.GetByID(tr, league.ID)
 	if err != nil {
 		return output, g.transactionService.Rollback(tr, err)
 	}
 
-	output = model.GetLeaderboardOutput{
+	repoLeague.LeaguePlayers = repoLeague.GetTop10LeaguePlayers()
+
+	output = GetLeaderboardOutput{
 		League: repoLeague,
 	}
 	err = g.transactionService.Commit(tr)
@@ -39,7 +41,7 @@ func (g *getLeaderboardUseCase) Handle(input model.GetLeaderboardInput) (model.G
 // NewGetLeaderboardUseCase factory
 func NewGetLeaderboardUseCase(
 	transactionService transaction.Service,
-	leagueRepository Repository,
+	leagueRepository entity.LeagueRepository,
 ) GetLeaderboardUseCase {
 	return &getLeaderboardUseCase{
 		transactionService: transactionService,

@@ -1,7 +1,6 @@
 package league
 
 import (
-	"github.com/szokodiakos/r8m8/league/model"
 	"github.com/szokodiakos/r8m8/slack"
 )
 
@@ -10,8 +9,8 @@ type getLeaderboardInputAdapterSlack struct {
 	leagueSlackService SlackService
 }
 
-func (g *getLeaderboardInputAdapterSlack) Handle(data interface{}) (model.GetLeaderboardInput, error) {
-	var input model.GetLeaderboardInput
+func (g *getLeaderboardInputAdapterSlack) Handle(data interface{}) (GetLeaderboardInput, error) {
+	var input GetLeaderboardInput
 	values := data.(string)
 
 	requestValues, err := g.slackService.ParseRequestValues(values)
@@ -25,7 +24,7 @@ func (g *getLeaderboardInputAdapterSlack) Handle(data interface{}) (model.GetLea
 	channelName := requestValues.ChannelName
 	league := g.leagueSlackService.ToLeague(teamID, teamDomain, channelID, channelName)
 
-	input = model.GetLeaderboardInput{
+	input = GetLeaderboardInput{
 		League: league,
 	}
 	return input, nil
