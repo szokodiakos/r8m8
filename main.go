@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
+	"github.com/szokodiakos/r8m8/match/add"
 	"github.com/szokodiakos/r8m8/match/undo"
 
 	"github.com/szokodiakos/r8m8/rating"
@@ -69,10 +70,10 @@ func main() {
 
 	matchService := match.NewService(ratingStrategyElo, matchRepository, leaguePlayerService)
 
-	addMatchInputAdapterSlack := match.NewAddMatchInputAdapterSlack(slackService, playerSlackService, leagueSlackService)
-	addMatchOutputAdapterSlack := match.NewAddMatchOutputAdapterSlack()
-	addMatchUseCase := match.NewAddMatchUseCase(transactionService, playerService, leagueService, leaguePlayerService, matchService, matchRepository, playerRepository, leagueRepository)
-	match.NewAddMatchControllerHTTP(slackGroup, addMatchInputAdapterSlack, addMatchOutputAdapterSlack, addMatchUseCase)
+	addMatchInputAdapterSlack := add.NewAddMatchInputAdapterSlack(slackService, playerSlackService, leagueSlackService)
+	addMatchOutputAdapterSlack := add.NewAddMatchOutputAdapterSlack()
+	addMatchUseCase := add.NewAddMatchUseCase(transactionService, playerService, leagueService, leaguePlayerService, matchService, matchRepository, playerRepository, leagueRepository)
+	add.NewAddMatchControllerHTTP(slackGroup, addMatchInputAdapterSlack, addMatchOutputAdapterSlack, addMatchUseCase)
 
 	undoMatchInputAdapterSlack := undo.NewUndoMatchInputAdapterSlack(slackService, playerSlackService)
 	undoMatchOutputAdapterSlack := undo.NewUndoMatchOutputAdapterSlack()

@@ -1,17 +1,18 @@
-package match
+package add
 
 import (
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
+	"github.com/szokodiakos/r8m8/match"
 	"github.com/szokodiakos/r8m8/match/errors"
 	"github.com/szokodiakos/r8m8/player"
 	playerErrors "github.com/szokodiakos/r8m8/player/errors"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
-// AddMatchUseCase interface
-type AddMatchUseCase interface {
-	Handle(input AddMatchInput) (AddMatchOutput, error)
+// UseCase interface
+type UseCase interface {
+	Handle(input Input) (Output, error)
 }
 
 type addMatchUseCase struct {
@@ -19,14 +20,14 @@ type addMatchUseCase struct {
 	playerService       player.Service
 	leagueService       league.Service
 	leaguePlayerService league.PlayerService
-	matchService        Service
+	matchService        match.Service
 	matchRepository     entity.MatchRepository
 	playerRepository    entity.PlayerRepository
 	leagueRepository    entity.LeagueRepository
 }
 
-func (a *addMatchUseCase) Handle(input AddMatchInput) (AddMatchOutput, error) {
-	var output AddMatchOutput
+func (a *addMatchUseCase) Handle(input Input) (Output, error) {
+	var output Output
 
 	if isPlayerCountUneven(input.Players) {
 		return output, &errors.UnevenMatchPlayersError{}
@@ -83,7 +84,7 @@ func (a *addMatchUseCase) Handle(input AddMatchInput) (AddMatchOutput, error) {
 		return output, a.transactionService.Rollback(tr, err)
 	}
 
-	output = AddMatchOutput{
+	output = Output{
 		Match: repoMatch,
 	}
 	err = a.transactionService.Commit(tr)
@@ -105,11 +106,11 @@ func NewAddMatchUseCase(
 	playerService player.Service,
 	leagueService league.Service,
 	leaguePlayerService league.PlayerService,
-	matchService Service,
+	matchService match.Service,
 	matchRepository entity.MatchRepository,
 	playerRepository entity.PlayerRepository,
 	leagueRepository entity.LeagueRepository,
-) AddMatchUseCase {
+) UseCase {
 	return &addMatchUseCase{
 		transactionService:  transactionService,
 		playerService:       playerService,

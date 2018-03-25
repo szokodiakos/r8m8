@@ -1,4 +1,4 @@
-package match
+package add
 
 import (
 	"github.com/szokodiakos/r8m8/league"
@@ -12,9 +12,9 @@ type addMatchInputAdapterSlack struct {
 	leagueSlackService league.SlackService
 }
 
-func (a *addMatchInputAdapterSlack) Handle(data interface{}) (AddMatchInput, error) {
+func (a *addMatchInputAdapterSlack) Handle(data interface{}) (Input, error) {
 	values := data.(string)
-	var input AddMatchInput
+	var input Input
 
 	requestValues, err := a.slackService.ParseRequestValues(values)
 	if err != nil {
@@ -37,7 +37,7 @@ func (a *addMatchInputAdapterSlack) Handle(data interface{}) (AddMatchInput, err
 	userName := requestValues.UserName
 	reporterPlayer := a.playerSlackService.ToPlayer(teamID, userID, userName)
 
-	input = AddMatchInput{
+	input = Input{
 		League:         league,
 		Players:        players,
 		ReporterPlayer: reporterPlayer,
@@ -50,7 +50,7 @@ func NewAddMatchInputAdapterSlack(
 	slackService slack.Service,
 	playerSlackService player.SlackService,
 	leagueSlackService league.SlackService,
-) AddMatchInputAdapter {
+) InputAdapter {
 	return &addMatchInputAdapterSlack{
 		slackService:       slackService,
 		playerSlackService: playerSlackService,

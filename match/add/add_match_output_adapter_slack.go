@@ -1,4 +1,4 @@
-package match
+package add
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 type addMatchOutputAdapterSlack struct {
 }
 
-func (a *addMatchOutputAdapterSlack) Handle(output AddMatchOutput, err error) (interface{}, error) {
+func (a *addMatchOutputAdapterSlack) Handle(output Output, err error) (interface{}, error) {
 	match := output.Match
 
 	if err != nil {
@@ -103,6 +103,6 @@ func getRatingChangeText(ratingChange int) string {
 }
 
 // NewAddMatchOutputAdapterSlack factory
-func NewAddMatchOutputAdapterSlack() AddMatchOutputAdapter {
+func NewAddMatchOutputAdapterSlack() OutputAdapter {
 	return &addMatchOutputAdapterSlack{}
 }

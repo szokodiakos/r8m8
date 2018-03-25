@@ -1,8 +1,8 @@
-package match
+package add
 
 import "github.com/szokodiakos/r8m8/entity"
 
-// AddMatchOutput struct
-type AddMatchOutput struct {
+// Output struct
+type Output struct {
 	Match entity.Match
 }
