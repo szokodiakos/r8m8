@@ -1,6 +1,8 @@
 package entity
 
-import "sort"
+import (
+	"sort"
+)
 
 // LeaguePlayers type
 type LeaguePlayers []LeaguePlayer
@@ -14,7 +16,7 @@ type League struct {
 
 // GetTop10LeaguePlayers func
 func (l League) GetTop10LeaguePlayers() LeaguePlayers {
-	sort.Sort(l.LeaguePlayers)
+	sort.Reverse(l.LeaguePlayers)
 
 	if len(l.LeaguePlayers) > 10 {
 		return l.LeaguePlayers[:10]

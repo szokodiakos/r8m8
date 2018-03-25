@@ -1,4 +1,4 @@
-package league
+package leaderboard
 
 // GetLeaderboardOutputAdapter interface
 type GetLeaderboardOutputAdapter interface {

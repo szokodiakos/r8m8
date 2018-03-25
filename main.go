@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
+	"github.com/szokodiakos/r8m8/league/leaderboard"
 	"github.com/szokodiakos/r8m8/match/add"
 	"github.com/szokodiakos/r8m8/match/undo"
 
@@ -63,10 +64,10 @@ func main() {
 	slackHTTPErrorHandlerMiddleware := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
 	slackGroup := e.Group("/slack", bodyParser, slackTokenVerifier, slackHTTPErrorHandlerMiddleware)
 
-	getLeaderboardInputAdapterSlack := league.NewGetLeaderboardInputAdapterSlack(slackService, leagueSlackService)
-	getLeaderboardOutputAdapterSlack := league.NewGetLeaderboardOutputAdapterSlack()
-	getLeaderboardUseCase := league.NewGetLeaderboardUseCase(transactionService, leagueRepository)
-	league.NewGetLeaderboardControllerHTTP(slackGroup, getLeaderboardInputAdapterSlack, getLeaderboardOutputAdapterSlack, getLeaderboardUseCase)
+	getLeaderboardInputAdapterSlack := leaderboard.NewGetLeaderboardInputAdapterSlack(slackService, leagueSlackService)
+	getLeaderboardOutputAdapterSlack := leaderboard.NewGetLeaderboardOutputAdapterSlack()
+	getLeaderboardUseCase := leaderboard.NewGetLeaderboardUseCase(transactionService, leagueRepository)
+	leaderboard.NewGetLeaderboardControllerHTTP(slackGroup, getLeaderboardInputAdapterSlack, getLeaderboardOutputAdapterSlack, getLeaderboardUseCase)
 
 	matchService := match.NewService(ratingStrategyElo, matchRepository, leaguePlayerService)
 

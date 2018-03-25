@@ -1,4 +1,4 @@
-package league
+package leaderboard
 
 import "github.com/szokodiakos/r8m8/entity"
 

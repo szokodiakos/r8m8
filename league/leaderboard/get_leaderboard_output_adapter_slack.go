@@ -1,4 +1,4 @@
-package league
+package leaderboard
 
 import (
 	"fmt"
