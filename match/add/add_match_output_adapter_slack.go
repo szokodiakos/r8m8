@@ -27,6 +27,8 @@ func getErrorMessageResponse(err error) (slack.MessageResponse, error) {
 	switch err.(type) {
 	case *errors.ReporterPlayerNotInLeagueError:
 		return getReporterPlayerNotInLeagueResponse(), nil
+	case *playerErrors.DuplicatedPlayerExistsError:
+		return getDuplicatedPlayerExistsResponse(), nil
 	case *playerErrors.UnevenMatchPlayersError:
 		return getUnevenMatchPlayersResponse(), nil
 	case *playerErrors.BadSlackPlayerFormatError:
@@ -41,6 +43,13 @@ func getReporterPlayerNotInLeagueResponse() slack.MessageResponse {
 	text := `
 > Darn! You must be the participant of at least one match (including this one). :hushed:
 > :exclamation: Please play a match before posting! :exclamation:
+`
+	return slack.CreateDirectResponse(text)
+}
+
+func getDuplicatedPlayerExistsResponse() slack.MessageResponse {
+	text := `
+> Darn! You provided a player more than once. :hushed:
 `
 	return slack.CreateDirectResponse(text)
 }

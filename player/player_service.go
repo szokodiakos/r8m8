@@ -21,6 +21,10 @@ func (p *playerService) AddAnyMissingPlayers(tr transaction.Transaction, players
 		return &errors.UnevenMatchPlayersError{}
 	}
 
+	if p.isDuplicatedPlayerExists(players) {
+		return &errors.DuplicatedPlayerExistsError{}
+	}
+
 	ids := p.MapToIDs(players)
 	repoPlayers, err := p.playerRepository.GetMultipleByIDs(tr, ids)
 	if err != nil {
@@ -38,6 +42,21 @@ func (p *playerService) AddAnyMissingPlayers(tr transaction.Transaction, players
 
 func isPlayerCountUneven(players []entity.Player) bool {
 	return (len(players) % 2) != 0
+}
+
+func (p *playerService) isDuplicatedPlayerExists(players []entity.Player) bool {
+	ids := p.MapToIDs(players)
+	idMap := map[string]bool{}
+
+	for _, id := range ids {
+		if idMap[id] == false {
+			idMap[id] = true
+		} else {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (p *playerService) MapToIDs(players []entity.Player) []string {

@@ -16,7 +16,7 @@ type League struct {
 
 // GetTop10LeaguePlayers func
 func (l League) GetTop10LeaguePlayers() LeaguePlayers {
-	sort.Reverse(l.LeaguePlayers)
+	sort.Sort(sort.Reverse(l.LeaguePlayers))
 
 	if len(l.LeaguePlayers) > 10 {
 		return l.LeaguePlayers[:10]
