@@ -42,6 +42,6 @@ func NewGetLeaderboardControllerHTTP(
 		outputAdapter: outputAdapter,
 		useCase:       useCase,
 	}
-	routeGroup.POST("/stats/leaderboard", handler.postsStatsLeaderboard)
+	routeGroup.POST("/league/leaderboard", handler.postsStatsLeaderboard)
 	return handler
 }

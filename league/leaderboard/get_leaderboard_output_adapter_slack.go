@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/szokodiakos/r8m8/entity"
+	"github.com/szokodiakos/r8m8/league/errors"
 	"github.com/szokodiakos/r8m8/slack"
 )
 
@@ -13,11 +14,28 @@ type getLeaderboardOutputAdapterSlack struct {
 
 func (g *getLeaderboardOutputAdapterSlack) Handle(output GetLeaderboardOutput, err error) (interface{}, error) {
 	if err != nil {
-		return slack.MessageResponse{}, err
+		return getErrorMessageResponse(err)
 	}
 
 	league := output.League
 	return getSuccessMessageResponse(league), nil
+}
+
+func getErrorMessageResponse(err error) (slack.MessageResponse, error) {
+	switch err.(type) {
+	case *errors.LeagueNotFoundError:
+		return getLeagueNotFoundResponse(), nil
+	default:
+		return slack.MessageResponse{}, err
+	}
+}
+
+func getLeagueNotFoundResponse() slack.MessageResponse {
+	text := `
+> Darn! Theres no matches in this League yet! Go play some! :hushed:
+`
+
+	return slack.CreateDirectResponse(text)
 }
 
 func getSuccessMessageResponse(league entity.League) slack.MessageResponse {
