@@ -21,9 +21,9 @@ func (p *playerService) AddAnyMissingPlayers(tr transaction.Transaction, players
 		return &errors.UnevenMatchPlayersError{}
 	}
 
-	// if p.isDuplicatedPlayerExists(players) {
-	// 	return &errors.DuplicatedPlayerExistsError{}
-	// }
+	if p.isDuplicatedPlayerExists(players) {
+		return &errors.DuplicatedPlayerExistsError{}
+	}
 
 	ids := p.MapToIDs(players)
 	repoPlayers, err := p.playerRepository.GetMultipleByIDs(tr, ids)

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/jmoiron/sqlx"
+	"database/sql"
+
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
 	"github.com/szokodiakos/r8m8/league/leaderboard"
@@ -32,14 +33,14 @@ func main() {
 
 	sqlDialect := viper.GetString("sql_dialect")
 	sqlConnectionString := viper.GetString("sql_connection_string")
-	db, err := sqlx.Open(sqlDialect, sqlConnectionString)
+	db, err := sql.Open(sqlDialect, sqlConnectionString)
 	if err != nil {
 		logger.Get().Fatal("Database connect error", err)
 	}
 
 	sqlDB.Execute(db, sqlDialect)
 
-	database := sqlDB.NewSQLDB(db)
+	database := sqlDB.NewSQLDB(db, sqlDialect)
 	transactionService := transaction.NewServiceSQL(database)
 
 	playerRepository := entity.NewPlayerRepositorySQL()

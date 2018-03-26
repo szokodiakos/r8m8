@@ -4,11 +4,11 @@ import (
 	"github.com/szokodiakos/r8m8/sql"
 )
 
-type transactionService struct {
+type transactionServiceSQL struct {
 	db sql.DB
 }
 
-func (ts *transactionService) Start() (Transaction, error) {
+func (ts *transactionServiceSQL) Start() (Transaction, error) {
 	var transaction Transaction
 	sqlTransaction, err := ts.db.Begin()
 	if err != nil {
@@ -20,12 +20,12 @@ func (ts *transactionService) Start() (Transaction, error) {
 	return transaction, nil
 }
 
-func (ts *transactionService) Commit(transaction Transaction) error {
+func (ts *transactionServiceSQL) Commit(transaction Transaction) error {
 	sqlTransaction := GetSQLTransaction(transaction)
 	return sqlTransaction.Commit()
 }
 
-func (ts *transactionService) Rollback(transaction Transaction, err error) error {
+func (ts *transactionServiceSQL) Rollback(transaction Transaction, err error) error {
 	sqlTransaction := GetSQLTransaction(transaction)
 	trErr := sqlTransaction.Rollback()
 	if trErr != nil {
@@ -36,7 +36,7 @@ func (ts *transactionService) Rollback(transaction Transaction, err error) error
 
 // NewServiceSQL factory
 func NewServiceSQL(db sql.DB) Service {
-	return &transactionService{
+	return &transactionServiceSQL{
 		db: db,
 	}
 }

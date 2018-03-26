@@ -1,6 +1,8 @@
 package sql
 
 import (
+	"database/sql"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/szokodiakos/r8m8/logger"
 )
@@ -28,8 +30,8 @@ func (d *db) Begin() (Transaction, error) {
 }
 
 // NewSQLDB factory
-func NewSQLDB(sqlDB *sqlx.DB) DB {
+func NewSQLDB(sqlDB *sql.DB, dialect string) DB {
 	return &db{
-		db: sqlDB,
+		db: sqlx.NewDb(sqlDB, dialect),
 	}
 }
