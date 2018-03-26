@@ -15,7 +15,6 @@ func Setup() {
 
 	viper.SetConfigName("config")
 	viper.AddConfigPath("./config")
-	viper.SetEnvPrefix("r8m8")
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
