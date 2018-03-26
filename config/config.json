@@ -1,4 +1,4 @@
 {
-  "port": ":13337",
+  "port": "13337",
   "sql_dialect": "postgres"
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
@@ -87,5 +88,5 @@ func main() {
 
 	port := viper.GetString("port")
 	logger.Get().Infof("Server starting on port %v.", port)
-	logger.Get().Fatal("Server could not start", server.Start(port))
+	logger.Get().Fatal("Server could not start", server.Start(fmt.Sprintf(":%v", port)))
 }
