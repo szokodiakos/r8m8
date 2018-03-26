@@ -64,3 +64,8 @@
 [[constraint]]
   name = "github.com/evalphobia/logrus_sentry"
   version = "0.4.5"
+
+[metadata.heroku]
+  root-package = "github.com/szokodiakos/r8m8"
+  go-version = "1.10"
+  install = [ "./..." ]
