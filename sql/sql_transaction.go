@@ -22,31 +22,31 @@ type transaction struct {
 }
 
 func (t *transaction) Commit() error {
-	logger.Get().Debug("Transaction Commit")
+	logger.Get().Info("Transaction Commit")
 	return t.tx.Commit()
 }
 
 func (t *transaction) Rollback() error {
-	logger.Get().Debug("Transaction Rollback")
+	logger.Get().Info("Transaction Rollback")
 	return t.tx.Rollback()
 }
 
 func (t *transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
-	logger.Get().Debug(query, spew.Sdump(args))
+	logger.Get().Info(query, spew.Sdump(args))
 	return t.tx.Exec(query, args...)
 }
 
 func (t *transaction) Select(dest interface{}, query string, args ...interface{}) error {
-	logger.Get().Debug(query, spew.Sdump(args))
+	logger.Get().Info(query, spew.Sdump(args))
 	err := t.tx.Select(dest, query, args...)
-	logger.Get().Debug(spew.Sdump(dest))
+	logger.Get().Info(spew.Sdump(dest))
 	return err
 }
 
 func (t *transaction) Get(dest interface{}, query string, args ...interface{}) error {
-	logger.Get().Debug(query, spew.Sdump(args))
+	logger.Get().Info(query, spew.Sdump(args))
 	err := t.tx.Get(dest, query, args...)
-	logger.Get().Debug(spew.Sdump(dest))
+	logger.Get().Info(spew.Sdump(dest))
 	return err
 }
 

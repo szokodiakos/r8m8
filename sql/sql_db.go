@@ -17,7 +17,7 @@ type db struct {
 }
 
 func (d *db) Begin() (Transaction, error) {
-	logger.Get().Debug("Transaction Begin")
+	logger.Get().Info("Transaction Begin")
 	var transaction Transaction
 
 	tx, err := d.db.Beginx()
