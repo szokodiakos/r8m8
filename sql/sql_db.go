@@ -1,9 +1,8 @@
 package sql
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
+	"github.com/szokodiakos/r8m8/logger"
 )
 
 // DB interface
@@ -16,7 +15,7 @@ type db struct {
 }
 
 func (d *db) Begin() (Transaction, error) {
-	log.Println("Transaction Begin")
+	logger.Get().Debug("Transaction Begin")
 	var transaction Transaction
 
 	tx, err := d.db.Beginx()

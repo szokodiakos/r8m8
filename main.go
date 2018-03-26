@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
 	"github.com/szokodiakos/r8m8/league/leaderboard"
+	"github.com/szokodiakos/r8m8/logger"
 	"github.com/szokodiakos/r8m8/match/add"
 	"github.com/szokodiakos/r8m8/match/undo"
 
@@ -28,11 +27,14 @@ import (
 func main() {
 	config.Setup()
 
+	sentryDSN := viper.GetString("sentry_dsn")
+	logger.Setup(sentryDSN)
+
 	sqlDialect := viper.GetString("sql_dialect")
 	sqlConnectionString := viper.GetString("sql_connection_string")
 	db, err := sqlx.Open(sqlDialect, sqlConnectionString)
 	if err != nil {
-		log.Fatal("Database connect error: ", err)
+		logger.Get().Fatal("Database connect error", err)
 	}
 
 	sqlDB.Execute(db, sqlDialect)
@@ -57,12 +59,13 @@ func main() {
 	verificationToken := viper.GetString("slack_verification_token")
 	slackService := slack.NewService(verificationToken)
 
-	e := echo.New()
+	server := echo.New()
+	server.HideBanner = true
 	bodyParser := echoExtensions.BodyParser()
 	slackTokenVerifier := slack.TokenVerifier(slackService)
 	slackErrorHandler := slack.NewErrorHandler()
 	slackHTTPErrorHandlerMiddleware := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
-	slackGroup := e.Group("/slack", bodyParser, slackTokenVerifier, slackHTTPErrorHandlerMiddleware)
+	slackGroup := server.Group("/slack", bodyParser, slackTokenVerifier, slackHTTPErrorHandlerMiddleware)
 
 	getLeaderboardInputAdapterSlack := leaderboard.NewGetLeaderboardInputAdapterSlack(slackService, leagueSlackService)
 	getLeaderboardOutputAdapterSlack := leaderboard.NewGetLeaderboardOutputAdapterSlack()
@@ -82,5 +85,6 @@ func main() {
 	undo.NewUndoMatchControllerHTTP(slackGroup, undoMatchInputAdapterSlack, undoMatchOutputAdapterSlack, undoMatchUseCase)
 
 	port := viper.GetString("port")
-	e.Logger.Fatal(e.Start(port))
+	logger.Get().Infof("Server starting on port %v.", port)
+	logger.Get().Fatal("Server could not start", server.Start(port))
 }

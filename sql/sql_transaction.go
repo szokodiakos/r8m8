@@ -2,10 +2,10 @@ package sql
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
+	"github.com/szokodiakos/r8m8/logger"
 )
 
 // Transaction interface
@@ -22,31 +22,31 @@ type transaction struct {
 }
 
 func (t *transaction) Commit() error {
-	log.Println("Transaction Commit")
+	logger.Get().Debug("Transaction Commit")
 	return t.tx.Commit()
 }
 
 func (t *transaction) Rollback() error {
-	log.Println("Transaction Rollback")
+	logger.Get().Debug("Transaction Rollback")
 	return t.tx.Rollback()
 }
 
 func (t *transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
-	log.Println(query, spew.Sdump(args))
+	logger.Get().Debug(query, spew.Sdump(args))
 	return t.tx.Exec(query, args...)
 }
 
 func (t *transaction) Select(dest interface{}, query string, args ...interface{}) error {
-	log.Println(query, spew.Sdump(args))
+	logger.Get().Debug(query, spew.Sdump(args))
 	err := t.tx.Select(dest, query, args...)
-	log.Println(spew.Sdump(dest))
+	logger.Get().Debug(spew.Sdump(dest))
 	return err
 }
 
 func (t *transaction) Get(dest interface{}, query string, args ...interface{}) error {
-	log.Println(query, spew.Sdump(args))
+	logger.Get().Debug(query, spew.Sdump(args))
 	err := t.tx.Get(dest, query, args...)
-	log.Println(spew.Sdump(dest))
+	logger.Get().Debug(spew.Sdump(dest))
 	return err
 }
 
