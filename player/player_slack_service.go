@@ -11,19 +11,19 @@ import (
 
 // SlackService interface
 type SlackService interface {
-	ToPlayers(text string, teamID string) ([]entity.Player, error)
-	ToPlayer(teamID string, userID string, userName string) entity.Player
+	ToPlayers(text string, teamID string, channelID string) ([]entity.Player, error)
+	ToPlayer(teamID string, channelID string, userID string, userName string) entity.Player
 }
 
 type playerSlackService struct {
 }
 
-func (p *playerSlackService) ToPlayers(text string, teamID string) ([]entity.Player, error) {
+func (p *playerSlackService) ToPlayers(text string, teamID string, channelID string) ([]entity.Player, error) {
 	slackPlayers := strings.Split(text, " ")
 	players := make([]entity.Player, len(slackPlayers))
 
 	for i := range slackPlayers {
-		player, err := p.parsePlayer(slackPlayers[i], teamID)
+		player, err := p.parsePlayer(slackPlayers[i], teamID, channelID)
 
 		if err != nil {
 			return nil, err
@@ -34,7 +34,7 @@ func (p *playerSlackService) ToPlayers(text string, teamID string) ([]entity.Pla
 	return players, nil
 }
 
-func (p *playerSlackService) parsePlayer(slackPlayer string, teamID string) (entity.Player, error) {
+func (p *playerSlackService) parsePlayer(slackPlayer string, teamID string, channelID string) (entity.Player, error) {
 	var player entity.Player
 	pattern, _ := regexp.Compile(`<@(.*)\|(.*)>`)
 	results := pattern.FindStringSubmatch(slackPlayer)
@@ -46,7 +46,7 @@ func (p *playerSlackService) parsePlayer(slackPlayer string, teamID string) (ent
 	userID := results[1]
 	userName := results[2]
 
-	player = p.ToPlayer(teamID, userID, userName)
+	player = p.ToPlayer(teamID, channelID, userID, userName)
 	return player, nil
 }
 
@@ -54,9 +54,9 @@ func isSlackPlayerInvalid(results []string) bool {
 	return (len(results) != 3)
 }
 
-func (p *playerSlackService) ToPlayer(teamID string, userID string, userName string) entity.Player {
+func (p *playerSlackService) ToPlayer(teamID string, channelID string, userID string, userName string) entity.Player {
 	displayName := userName
-	id := fmt.Sprintf("slack_%v_%v", teamID, userID)
+	id := fmt.Sprintf("slack_%v_%v_%v", teamID, channelID, userID)
 	return entity.Player{
 		ID:          id,
 		DisplayName: displayName,

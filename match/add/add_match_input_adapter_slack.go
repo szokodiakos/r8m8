@@ -23,19 +23,19 @@ func (a *addMatchInputAdapterSlack) Handle(data interface{}) (Input, error) {
 
 	text := requestValues.Text
 	teamID := requestValues.TeamID
-	players, err := a.playerSlackService.ToPlayers(text, teamID)
+	channelID := requestValues.ChannelID
+	players, err := a.playerSlackService.ToPlayers(text, teamID, channelID)
 	if err != nil {
 		return input, err
 	}
 
 	teamDomain := requestValues.TeamDomain
-	channelID := requestValues.ChannelID
 	channelName := requestValues.ChannelName
 	league := a.leagueSlackService.ToLeague(teamID, teamDomain, channelID, channelName)
 
 	userID := requestValues.UserID
 	userName := requestValues.UserName
-	reporterPlayer := a.playerSlackService.ToPlayer(teamID, userID, userName)
+	reporterPlayer := a.playerSlackService.ToPlayer(teamID, channelID, userID, userName)
 
 	input = Input{
 		League:         league,

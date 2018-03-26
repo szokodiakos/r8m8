@@ -20,9 +20,10 @@ func (a *undoMatchInputAdapterSlack) Handle(data interface{}) (Input, error) {
 	}
 
 	teamID := requestValues.TeamID
+	channelID := requestValues.ChannelID
 	userID := requestValues.UserID
 	userName := requestValues.UserName
-	reporterPlayer := a.playerSlackService.ToPlayer(teamID, userID, userName)
+	reporterPlayer := a.playerSlackService.ToPlayer(teamID, channelID, userID, userName)
 
 	input = Input{
 		ReporterPlayer: reporterPlayer,
