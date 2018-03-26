@@ -10,7 +10,7 @@ import (
 func Setup() {
 	err := godotenv.Load()
 	if err != nil {
-		logger.Get().Fatal("Error loading .env file", err)
+		logger.Get().Info(".env file was not found", err)
 	}
 
 	viper.SetConfigName("config")
