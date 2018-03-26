@@ -58,7 +58,6 @@ func (u *undoMatchUseCase) Handle(input Input) (output Output, err error) {
 		return
 	}
 
-	err = u.transactionService.Commit(tr)
 	output = Output{
 		ReporterPlayer: input.ReporterPlayer,
 		LeaguePlayers:  adjustedLeaguePlayers,
