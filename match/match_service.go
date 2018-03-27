@@ -26,16 +26,21 @@ func (m *matchService) CalculatePlayerChanges(repoLeaguePlayers []entity.LeagueP
 
 	winnerRatings := mapToRatings(winnerRepoLeaguePlayers)
 	loserRatings := mapToRatings(loserRepoLeaguePlayers)
-	adjustedWinnerRatings, adjustedLoserRatings := m.ratingStrategy.Calculate(winnerRatings, loserRatings)
+	ratingResult := m.ratingStrategy.Calculate(winnerRatings, loserRatings)
 
 	hasWon := true
-	adjustedWinnerLeaguePlayers, winnerMatchPlayers := calculatePlayerChanges(winnerRepoLeaguePlayers, adjustedWinnerRatings, hasWon)
 	hasLost := !hasWon
-	adjustedLoserLeaguePlayers, loserMatchPlayers := calculatePlayerChanges(loserRepoLeaguePlayers, adjustedLoserRatings, hasLost)
-	adjustedLeaguePlayers := append(adjustedWinnerLeaguePlayers, adjustedLoserLeaguePlayers...)
 
+	adjustedWinnerLeaguePlayers := adjustLeaguePlayers(winnerRepoLeaguePlayers, ratingResult.WinnerRatings, hasWon)
+	adjustedLoserLeaguePlayers := adjustLeaguePlayers(loserRepoLeaguePlayers, ratingResult.LoserRatings, hasLost)
+	adjustedLeaguePlayers := append(adjustedWinnerLeaguePlayers, adjustedLoserLeaguePlayers...)
+	mergedLeaguePlayers := mergeInAdjustedLeaguePlayers(adjustedLeaguePlayers, repoLeaguePlayers)
+
+	winnerMatchPlayers := createMatchPlayers(winnerRepoLeaguePlayers, ratingResult.WinnerRatings, hasWon)
+	loserMatchPlayers := createMatchPlayers(loserRepoLeaguePlayers, ratingResult.LoserRatings, hasLost)
 	matchPlayers := append(winnerMatchPlayers, loserMatchPlayers...)
-	return mergeInAdjustedLeaguePlayers(adjustedLeaguePlayers, repoLeaguePlayers), matchPlayers
+
+	return mergedLeaguePlayers, matchPlayers
 }
 
 func getWinnerPlayers(players []entity.Player) []entity.Player {
@@ -66,8 +71,16 @@ func mapToRatings(leaguePlayers []entity.LeaguePlayer) []int {
 	return ratings
 }
 
-func calculatePlayerChanges(repoLeaguePlayers []entity.LeaguePlayer, adjustedRatings []int, hasWon bool) ([]entity.LeaguePlayer, []entity.MatchPlayer) {
+func adjustLeaguePlayers(repoLeaguePlayers []entity.LeaguePlayer, adjustedRatings []int, hasWon bool) []entity.LeaguePlayer {
 	adjustedRepoLeaguePlayers := make([]entity.LeaguePlayer, len(repoLeaguePlayers))
+	for i := range repoLeaguePlayers {
+		adjustedRepoLeaguePlayers[i] = repoLeaguePlayers[i]
+		adjustedRepoLeaguePlayers[i].Rating = adjustedRatings[i]
+	}
+	return adjustedRepoLeaguePlayers
+}
+
+func createMatchPlayers(repoLeaguePlayers []entity.LeaguePlayer, adjustedRatings []int, hasWon bool) []entity.MatchPlayer {
 	matchPlayers := make([]entity.MatchPlayer, len(repoLeaguePlayers))
 	for i := range repoLeaguePlayers {
 		matchPlayer := entity.MatchPlayer{
@@ -75,11 +88,9 @@ func calculatePlayerChanges(repoLeaguePlayers []entity.LeaguePlayer, adjustedRat
 			PlayerID:     repoLeaguePlayers[i].PlayerID,
 			HasWon:       hasWon,
 		}
-		adjustedRepoLeaguePlayers[i] = repoLeaguePlayers[i]
-		adjustedRepoLeaguePlayers[i].Rating = adjustedRatings[i]
 		matchPlayers[i] = matchPlayer
 	}
-	return adjustedRepoLeaguePlayers, matchPlayers
+	return matchPlayers
 }
 
 func mergeInAdjustedLeaguePlayers(adjustedLeaguePlayers []entity.LeaguePlayer, repoLeaguePlayers []entity.LeaguePlayer) []entity.LeaguePlayer {

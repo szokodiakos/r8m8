@@ -4,7 +4,7 @@ import "math"
 
 type strategyElo struct{}
 
-func (s *strategyElo) Calculate(winnerRatings []int, loserRatings []int) ([]int, []int) {
+func (s *strategyElo) Calculate(winnerRatings []int, loserRatings []int) Result {
 	isWinner := true
 	adjustedWinnerRatings := make([]int, len(winnerRatings))
 	for i := range winnerRatings {
@@ -16,7 +16,10 @@ func (s *strategyElo) Calculate(winnerRatings []int, loserRatings []int) ([]int,
 		adjustedLoserRatings[i] = calculateRating(loserRatings[i], loserRatings, !isWinner)
 	}
 
-	return adjustedWinnerRatings, adjustedLoserRatings
+	return Result{
+		WinnerRatings: adjustedWinnerRatings,
+		LoserRatings:  adjustedLoserRatings,
+	}
 }
 
 func calculateRating(rating int, enemyRatings []int, isWinner bool) int {
