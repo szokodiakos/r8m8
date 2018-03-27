@@ -41,7 +41,7 @@ func (t *transaction) Exec(query string, args ...interface{}) (sql.Result, error
 	logger.Get().WithFields(logrus.Fields{
 		"query":     formatQueryString(query),
 		"operation": "Exec",
-		"input":     spew.Sprint(args),
+		"input":     spew.Sprintf("%#v", args),
 	}).Info()
 	return t.tx.Exec(query, args...)
 }
@@ -51,8 +51,8 @@ func (t *transaction) Select(dest interface{}, query string, args ...interface{}
 	logger.Get().WithFields(logrus.Fields{
 		"query":     formatQueryString(query),
 		"operation": "Select",
-		"input":     spew.Sprint(args),
-		"output":    spew.Sprint(dest),
+		"input":     spew.Sprintf("%#v", args),
+		"output":    spew.Sprintf("%#v", dest),
 	}).Info()
 	return err
 }
@@ -62,8 +62,8 @@ func (t *transaction) Get(dest interface{}, query string, args ...interface{}) e
 	logger.Get().WithFields(logrus.Fields{
 		"query":     formatQueryString(query),
 		"operation": "Get",
-		"input":     spew.Sprint(args),
-		"output":    spew.Sprint(dest),
+		"input":     spew.Sprintf("%#v", args),
+		"output":    spew.Sprintf("%#v", dest),
 	}).Info()
 	return err
 }
