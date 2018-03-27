@@ -53,11 +53,6 @@ func (a *addMatchUseCase) Handle(input Input) (output Output, err error) {
 		return
 	}
 
-	missingLeaguePlayers, err := a.leaguePlayerService.CreateAnyMissingLeaguePlayers(tr, repoLeague, input.Players)
-	if err != nil {
-		return
-	}
-
 	repoReporterPlayer, err := a.playerRepository.GetByID(tr, input.ReporterPlayer.ID)
 	if err != nil {
 		switch err.(type) {
@@ -69,6 +64,7 @@ func (a *addMatchUseCase) Handle(input Input) (output Output, err error) {
 		}
 	}
 
+	missingLeaguePlayers := a.leaguePlayerService.CreateAnyMissingLeaguePlayers(repoLeague.LeaguePlayers, input.Players)
 	repoLeague.LeaguePlayers = append(repoLeague.LeaguePlayers, missingLeaguePlayers...)
 	adjustedLeaguePlayers, matchPlayers := a.matchService.CalculatePlayerChanges(repoLeague.LeaguePlayers, input.Players)
 

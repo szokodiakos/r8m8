@@ -4,12 +4,11 @@ import (
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league/errors"
 	"github.com/szokodiakos/r8m8/player"
-	"github.com/szokodiakos/r8m8/transaction"
 )
 
 // PlayerService interface
 type PlayerService interface {
-	CreateAnyMissingLeaguePlayers(tr transaction.Transaction, league entity.League, players []entity.Player) ([]entity.LeaguePlayer, error)
+	CreateAnyMissingLeaguePlayers(repoLeaguePlayers []entity.LeaguePlayer, players []entity.Player) []entity.LeaguePlayer
 	UndoRatingChangesForLeaguePlayers(leaguePlayers []entity.LeaguePlayer, matchPlayers []entity.MatchPlayer) []entity.LeaguePlayer
 }
 
@@ -19,36 +18,18 @@ type leaguePlayerService struct {
 	initialRating    int
 }
 
-func (l *leaguePlayerService) CreateAnyMissingLeaguePlayers(tr transaction.Transaction, repoLeague entity.League, players []entity.Player) ([]entity.LeaguePlayer, error) {
-	ids := l.playerService.MapToIDs(players)
-	repoLeaguePlayers := repoLeague.LeaguePlayers
+func (l *leaguePlayerService) CreateAnyMissingLeaguePlayers(
+	repoLeaguePlayers []entity.LeaguePlayer,
+	players []entity.Player,
+) []entity.LeaguePlayer {
 	missingLeaguePlayers := []entity.LeaguePlayer{}
 
-	if isMissingLeaguePlayerExists(players, repoLeaguePlayers) {
-		repoPlayers, err := l.playerRepository.GetMultipleByIDs(tr, ids)
-		if err != nil {
-			return nil, err
-		}
-
-		missingLeaguePlayers = l.createMissingLeaguePlayers(repoPlayers, repoLeaguePlayers, repoLeague)
-	}
-
-	return missingLeaguePlayers, nil
-}
-
-func isMissingLeaguePlayerExists(players []entity.Player, repoLeaguePlayers []entity.LeaguePlayer) bool {
-	return (len(players) != len(repoLeaguePlayers))
-}
-
-func (l *leaguePlayerService) createMissingLeaguePlayers(repoPlayers []entity.Player, repoLeaguePlayers []entity.LeaguePlayer, league entity.League) []entity.LeaguePlayer {
-	missingLeaguePlayers := []entity.LeaguePlayer{}
-
-	for i := range repoPlayers {
-		err := testRepoLeaguePlayerMissing(repoPlayers[i], repoLeaguePlayers)
+	for i := range players {
+		err := testRepoLeaguePlayerMissing(players[i], repoLeaguePlayers)
 		switch err.(type) {
 		case *errors.LeaguePlayerNotFoundError:
 			missingLeaguePlayers = append(missingLeaguePlayers, entity.LeaguePlayer{
-				PlayerID: repoPlayers[i].ID,
+				PlayerID: players[i].ID,
 				Rating:   l.initialRating,
 			})
 		}
