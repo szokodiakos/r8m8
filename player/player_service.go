@@ -72,7 +72,7 @@ func isMissingPlayerExists(players []entity.Player, repoPlayers []entity.Player)
 }
 
 func getMissingPlayers(players []entity.Player, repoPlayers []entity.Player) []entity.Player {
-	missingPlayers := make([]entity.Player, 0, len(repoPlayers))
+	missingPlayers := make([]entity.Player, 0, len(players))
 
 	for i := range players {
 		repoPlayer := getRepoCounterpart(players[i], repoPlayers)
