@@ -2,11 +2,11 @@ package sql
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 	"github.com/szokodiakos/r8m8/logger"
 )
 
@@ -24,36 +24,52 @@ type transaction struct {
 }
 
 func (t *transaction) Commit() error {
-	logger.Get().Info("Transaction Commit")
+	logger.Get().WithFields(logrus.Fields{
+		"operation": "Transaction Commit",
+	}).Info()
 	return t.tx.Commit()
 }
 
 func (t *transaction) Rollback() error {
-	logger.Get().Info("Transaction Rollback")
+	logger.Get().WithFields(logrus.Fields{
+		"operation": "Transaction Rollback",
+	}).Info()
 	return t.tx.Rollback()
 }
 
 func (t *transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
-	logger.Get().Info(formatQueryString(query), spew.Sdump(args))
+	logger.Get().WithFields(logrus.Fields{
+		"query":     formatQueryString(query),
+		"operation": "Exec",
+		"input":     spew.Sprint(args),
+	}).Info()
 	return t.tx.Exec(query, args...)
 }
 
 func (t *transaction) Select(dest interface{}, query string, args ...interface{}) error {
-	logger.Get().Info(formatQueryString(query), spew.Sdump(args))
 	err := t.tx.Select(dest, query, args...)
-	logger.Get().Info(spew.Sdump(dest))
+	logger.Get().WithFields(logrus.Fields{
+		"query":     formatQueryString(query),
+		"operation": "Select",
+		"input":     spew.Sprint(args),
+		"output":    spew.Sprint(dest),
+	}).Info()
 	return err
 }
 
 func (t *transaction) Get(dest interface{}, query string, args ...interface{}) error {
-	logger.Get().Info(formatQueryString(query), spew.Sdump(args))
 	err := t.tx.Get(dest, query, args...)
-	logger.Get().Info(spew.Sdump(dest))
+	logger.Get().WithFields(logrus.Fields{
+		"query":     formatQueryString(query),
+		"operation": "Get",
+		"input":     spew.Sprint(args),
+		"output":    spew.Sprint(dest),
+	}).Info()
 	return err
 }
 
 func formatQueryString(query string) string {
-	return shorten(withoutTabs(withoutNewLines(query)))
+	return withoutTabs(withoutNewLines(query))
 }
 
 func withoutNewLines(input string) string {
@@ -62,10 +78,6 @@ func withoutNewLines(input string) string {
 
 func withoutTabs(input string) string {
 	return strings.Replace(input, "\t", "", -1)
-}
-
-func shorten(input string) string {
-	return fmt.Sprintf("%v...", input[:50])
 }
 
 // NewSQLTransaction factory

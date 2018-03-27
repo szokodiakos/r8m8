@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 	"github.com/szokodiakos/r8m8/logger"
 )
 
@@ -17,7 +18,9 @@ type db struct {
 }
 
 func (d *db) Begin() (Transaction, error) {
-	logger.Get().Info("Transaction Begin")
+	logger.Get().WithFields(logrus.Fields{
+		"operation": "Transaction Begin",
+	}).Info()
 	var transaction Transaction
 
 	tx, err := d.db.Beginx()
