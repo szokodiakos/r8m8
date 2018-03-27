@@ -55,7 +55,7 @@ func main() {
 	playerSlackService := player.NewSlackService()
 
 	leaguePlayerService := league.NewPlayerService(playerService, playerRepository, initialRating)
-	leagueService := league.NewService(playerService, leaguePlayerService, leagueRepository, playerRepository, initialRating)
+	leagueService := league.NewService(leagueRepository, playerRepository, initialRating)
 	leagueSlackService := league.NewSlackService()
 
 	verificationToken := viper.GetString("slack_verification_token")
@@ -74,7 +74,7 @@ func main() {
 	getLeaderboardUseCase := leaderboard.NewGetLeaderboardUseCase(transactionService, leagueRepository)
 	leaderboard.NewGetLeaderboardControllerHTTP(slackGroup, getLeaderboardInputAdapterSlack, getLeaderboardOutputAdapterSlack, getLeaderboardUseCase)
 
-	matchService := match.NewService(ratingStrategyElo, matchRepository, leaguePlayerService)
+	matchService := match.NewService(ratingStrategyElo)
 
 	addMatchInputAdapterSlack := add.NewAddMatchInputAdapterSlack(slackService, playerSlackService, leagueSlackService)
 	addMatchOutputAdapterSlack := add.NewAddMatchOutputAdapterSlack()

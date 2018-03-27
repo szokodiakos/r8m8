@@ -9,7 +9,6 @@ import (
 // Service interface
 type Service interface {
 	AddAnyMissingPlayers(tr transaction.Transaction, players []entity.Player) error
-	MapToIDs(players []entity.Player) []string
 }
 
 type playerService struct {
@@ -21,11 +20,11 @@ func (p *playerService) AddAnyMissingPlayers(tr transaction.Transaction, players
 		return &errors.UnevenMatchPlayersError{}
 	}
 
-	if p.isDuplicatedPlayerExists(players) {
+	if isDuplicatedPlayerExists(players) {
 		return &errors.DuplicatedPlayerExistsError{}
 	}
 
-	ids := p.MapToIDs(players)
+	ids := mapToIDs(players)
 	repoPlayers, err := p.playerRepository.GetMultipleByIDs(tr, ids)
 	if err != nil {
 		return err
@@ -44,8 +43,8 @@ func isPlayerCountUneven(players []entity.Player) bool {
 	return (len(players) % 2) != 0
 }
 
-func (p *playerService) isDuplicatedPlayerExists(players []entity.Player) bool {
-	ids := p.MapToIDs(players)
+func isDuplicatedPlayerExists(players []entity.Player) bool {
+	ids := mapToIDs(players)
 	idMap := map[string]bool{}
 
 	for _, id := range ids {
@@ -59,7 +58,7 @@ func (p *playerService) isDuplicatedPlayerExists(players []entity.Player) bool {
 	return false
 }
 
-func (p *playerService) MapToIDs(players []entity.Player) []string {
+func mapToIDs(players []entity.Player) []string {
 	ids := make([]string, len(players))
 	for i := range players {
 		ids[i] = players[i].ID

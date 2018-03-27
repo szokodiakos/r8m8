@@ -3,7 +3,6 @@ package league
 import (
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league/errors"
-	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -13,11 +12,9 @@ type Service interface {
 }
 
 type leagueService struct {
-	playerService       player.Service
-	leaguePlayerService PlayerService
-	leagueRepository    entity.LeagueRepository
-	playerRepository    entity.PlayerRepository
-	initialRating       int
+	leagueRepository entity.LeagueRepository
+	playerRepository entity.PlayerRepository
+	initialRating    int
 }
 
 func (l *leagueService) GetOrAddLeague(tr transaction.Transaction, league entity.League, players []entity.Player) (entity.League, error) {
@@ -70,17 +67,13 @@ func (l *leagueService) createLeaguePlayers(repoPlayers []entity.Player) []entit
 
 // NewService factory
 func NewService(
-	playerService player.Service,
-	leaguePlayerService PlayerService,
 	leagueRepository entity.LeagueRepository,
 	playerRepository entity.PlayerRepository,
 	initialRating int,
 ) Service {
 	return &leagueService{
-		playerService:       playerService,
-		leaguePlayerService: leaguePlayerService,
-		leagueRepository:    leagueRepository,
-		playerRepository:    playerRepository,
-		initialRating:       initialRating,
+		leagueRepository: leagueRepository,
+		playerRepository: playerRepository,
+		initialRating:    initialRating,
 	}
 }

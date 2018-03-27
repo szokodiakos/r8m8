@@ -2,7 +2,6 @@ package match
 
 import (
 	"github.com/szokodiakos/r8m8/entity"
-	"github.com/szokodiakos/r8m8/league"
 	"github.com/szokodiakos/r8m8/rating"
 )
 
@@ -12,17 +11,15 @@ type Service interface {
 }
 
 type matchService struct {
-	ratingStrategy      rating.Strategy
-	matchRepository     entity.MatchRepository
-	leaguePlayerService league.PlayerService
+	ratingStrategy rating.Strategy
 }
 
 func (m *matchService) CalculatePlayerChanges(repoLeaguePlayers []entity.LeaguePlayer, players []entity.Player) ([]entity.LeaguePlayer, []entity.MatchPlayer) {
 	winnerPlayers := getWinnerPlayers(players)
 	loserPlayers := getLoserPlayers(players)
 
-	winnerRepoLeaguePlayers := getRepoLeaguePlayers(winnerPlayers, repoLeaguePlayers)
-	loserRepoLeaguePlayers := getRepoLeaguePlayers(loserPlayers, repoLeaguePlayers)
+	winnerRepoLeaguePlayers := getParticipatingRepoLeaguePlayers(winnerPlayers, repoLeaguePlayers)
+	loserRepoLeaguePlayers := getParticipatingRepoLeaguePlayers(loserPlayers, repoLeaguePlayers)
 
 	winnerRatings := mapToRatings(winnerRepoLeaguePlayers)
 	loserRatings := mapToRatings(loserRepoLeaguePlayers)
@@ -31,8 +28,8 @@ func (m *matchService) CalculatePlayerChanges(repoLeaguePlayers []entity.LeagueP
 	hasWon := true
 	hasLost := !hasWon
 
-	adjustedWinnerLeaguePlayers := adjustLeaguePlayers(winnerRepoLeaguePlayers, ratingResult.WinnerRatings, hasWon)
-	adjustedLoserLeaguePlayers := adjustLeaguePlayers(loserRepoLeaguePlayers, ratingResult.LoserRatings, hasLost)
+	adjustedWinnerLeaguePlayers := adjustLeaguePlayers(winnerRepoLeaguePlayers, ratingResult.WinnerRatings)
+	adjustedLoserLeaguePlayers := adjustLeaguePlayers(loserRepoLeaguePlayers, ratingResult.LoserRatings)
 	adjustedLeaguePlayers := append(adjustedWinnerLeaguePlayers, adjustedLoserLeaguePlayers...)
 	mergedLeaguePlayers := mergeInAdjustedLeaguePlayers(adjustedLeaguePlayers, repoLeaguePlayers)
 
@@ -51,7 +48,7 @@ func getLoserPlayers(players []entity.Player) []entity.Player {
 	return players[(len(players) / 2):]
 }
 
-func getRepoLeaguePlayers(players []entity.Player, repoLeaguePlayers []entity.LeaguePlayer) []entity.LeaguePlayer {
+func getParticipatingRepoLeaguePlayers(players []entity.Player, repoLeaguePlayers []entity.LeaguePlayer) []entity.LeaguePlayer {
 	participatingRepoLeaguePlayers := make([]entity.LeaguePlayer, len(players))
 	for i := range players {
 		for j := range repoLeaguePlayers {
@@ -71,7 +68,7 @@ func mapToRatings(leaguePlayers []entity.LeaguePlayer) []int {
 	return ratings
 }
 
-func adjustLeaguePlayers(repoLeaguePlayers []entity.LeaguePlayer, adjustedRatings []int, hasWon bool) []entity.LeaguePlayer {
+func adjustLeaguePlayers(repoLeaguePlayers []entity.LeaguePlayer, adjustedRatings []int) []entity.LeaguePlayer {
 	adjustedRepoLeaguePlayers := make([]entity.LeaguePlayer, len(repoLeaguePlayers))
 	for i := range repoLeaguePlayers {
 		adjustedRepoLeaguePlayers[i] = repoLeaguePlayers[i]
@@ -108,12 +105,8 @@ func mergeInAdjustedLeaguePlayers(adjustedLeaguePlayers []entity.LeaguePlayer, r
 // NewService creates a service
 func NewService(
 	ratingStrategy rating.Strategy,
-	matchRepository entity.MatchRepository,
-	leaguePlayerService league.PlayerService,
 ) Service {
 	return &matchService{
-		ratingStrategy:      ratingStrategy,
-		matchRepository:     matchRepository,
-		leaguePlayerService: leaguePlayerService,
+		ratingStrategy: ratingStrategy,
 	}
 }
