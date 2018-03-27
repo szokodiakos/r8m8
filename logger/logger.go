@@ -2,6 +2,7 @@ package logger
 
 import (
 	"github.com/evalphobia/logrus_sentry"
+	colorable "github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
 )
 
@@ -9,6 +10,9 @@ var log = logrus.New()
 
 // Setup logger
 func Setup(sentryDSN string) {
+	log.Formatter = &logrus.TextFormatter{ForceColors: true}
+	log.Out = colorable.NewColorableStdout()
+
 	if sentryDSN != "" {
 		hook, err := logrus_sentry.NewSentryHook(sentryDSN, []logrus.Level{
 			logrus.PanicLevel,
