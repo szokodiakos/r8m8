@@ -1,7 +1,10 @@
 package entity
 
 import (
+	"database/sql"
+
 	"github.com/lib/pq"
+	"github.com/szokodiakos/r8m8/player/errors"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -46,7 +49,7 @@ func (p *playerRepositorySQL) Add(tr transaction.Transaction, player Player) (Pl
 	return p.GetByID(tr, createdID)
 }
 
-func (p *playerRepositorySQL) GetByID(tr transaction.Transaction, uniqueName string) (Player, error) {
+func (p *playerRepositorySQL) GetByID(tr transaction.Transaction, id string) (Player, error) {
 	repoPlayer := Player{}
 
 	query := `
@@ -60,7 +63,12 @@ func (p *playerRepositorySQL) GetByID(tr transaction.Transaction, uniqueName str
 	`
 
 	sqlTransaction := transaction.GetSQLTransaction(tr)
-	err := sqlTransaction.Get(&repoPlayer, query, uniqueName)
+	err := sqlTransaction.Get(&repoPlayer, query, id)
+	if err == sql.ErrNoRows {
+		return repoPlayer, &errors.PlayerNotFoundError{
+			ID: id,
+		}
+	}
 	return repoPlayer, err
 }
 
