@@ -67,8 +67,13 @@ func (u *undoMatchUseCase) Handle(input Input) (output Output, err error) {
 	return
 }
 
-// NewUndoMatchUseCase factory
-func NewUndoMatchUseCase(transactionService transaction.Service, leaguePlayerService league.PlayerService, matchRepository match.Repository, leagueRepository league.Repository) UseCase {
+// NewUseCase factory
+func NewUseCase(
+	transactionService transaction.Service,
+	leaguePlayerService league.PlayerService,
+	matchRepository match.Repository,
+	leagueRepository league.Repository,
+) UseCase {
 	return &undoMatchUseCase{
 		transactionService:  transactionService,
 		leaguePlayerService: leaguePlayerService,

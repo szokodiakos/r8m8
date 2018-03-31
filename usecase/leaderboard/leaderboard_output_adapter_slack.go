@@ -91,7 +91,7 @@ func getIcon(place int) string {
 	}
 }
 
-// NewLeaderboardOutputAdapterSlack factory
-func NewLeaderboardOutputAdapterSlack() LeaderboardOutputAdapter {
+// NewOutputAdapterSlack factory
+func NewOutputAdapterSlack() OutputAdapter {
 	return &leaderboardOutputAdapterSlack{}
 }

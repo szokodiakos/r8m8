@@ -7,7 +7,6 @@ import (
 	"github.com/szokodiakos/r8m8/league"
 	"github.com/szokodiakos/r8m8/logger"
 	"github.com/szokodiakos/r8m8/usecase/leaderboard"
-	"github.com/szokodiakos/r8m8/usecase/match/add"
 	"github.com/szokodiakos/r8m8/usecase/match/undo"
 
 	"github.com/szokodiakos/r8m8/rating"
@@ -16,6 +15,7 @@ import (
 	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/slack"
 	"github.com/szokodiakos/r8m8/transaction"
+	"github.com/szokodiakos/r8m8/usecase/match/add"
 
 	"github.com/labstack/echo"
 	_ "github.com/lib/pq"
@@ -69,22 +69,22 @@ func main() {
 	slackHTTPErrorHandlerMiddleware := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
 	slackGroup := server.Group("/slack", bodyParser, slackTokenVerifier, slackHTTPErrorHandlerMiddleware)
 
-	leaderboardInputAdapterSlack := leaderboard.NewLeaderboardInputAdapterSlack(slackService, leagueSlackService)
-	leaderboardOutputAdapterSlack := leaderboard.NewLeaderboardOutputAdapterSlack()
-	leaderboardUseCase := leaderboard.NewLeaderboardUseCase(transactionService, leagueRepository)
-	leaderboard.NewLeaderboardControllerHTTP(slackGroup, leaderboardInputAdapterSlack, leaderboardOutputAdapterSlack, leaderboardUseCase)
+	leaderboardInputAdapterSlack := leaderboard.NewInputAdapterSlack(slackService, leagueSlackService)
+	leaderboardOutputAdapterSlack := leaderboard.NewOutputAdapterSlack()
+	leaderboardUseCase := leaderboard.NewUseCase(transactionService, leagueRepository)
+	leaderboard.NewControllerHTTP(slackGroup, leaderboardInputAdapterSlack, leaderboardOutputAdapterSlack, leaderboardUseCase)
 
 	matchService := match.NewService(ratingStrategyElo)
 
-	addMatchInputAdapterSlack := add.NewAddMatchInputAdapterSlack(slackService, playerSlackService, leagueSlackService)
-	addMatchOutputAdapterSlack := add.NewAddMatchOutputAdapterSlack()
-	addMatchUseCase := add.NewAddMatchUseCase(transactionService, playerService, leagueService, leaguePlayerService, matchService, matchRepository, playerRepository, leagueRepository)
-	add.NewAddMatchControllerHTTP(slackGroup, addMatchInputAdapterSlack, addMatchOutputAdapterSlack, addMatchUseCase)
+	addMatchInputAdapterSlack := add.NewInputAdapterSlack(slackService, playerSlackService, leagueSlackService)
+	addMatchOutputAdapterSlack := add.NewOutputAdapterSlack()
+	addMatchUseCase := add.NewUseCase(transactionService, playerService, leagueService, leaguePlayerService, matchService, matchRepository, playerRepository, leagueRepository)
+	add.NewControllerHTTP(slackGroup, addMatchInputAdapterSlack, addMatchOutputAdapterSlack, addMatchUseCase)
 
-	undoMatchInputAdapterSlack := undo.NewUndoMatchInputAdapterSlack(slackService, playerSlackService)
-	undoMatchOutputAdapterSlack := undo.NewUndoMatchOutputAdapterSlack()
-	undoMatchUseCase := undo.NewUndoMatchUseCase(transactionService, leaguePlayerService, matchRepository, leagueRepository)
-	undo.NewUndoMatchControllerHTTP(slackGroup, undoMatchInputAdapterSlack, undoMatchOutputAdapterSlack, undoMatchUseCase)
+	undoMatchInputAdapterSlack := undo.NewInputAdapterSlack(slackService, playerSlackService)
+	undoMatchOutputAdapterSlack := undo.NewOutputAdapterSlack()
+	undoMatchUseCase := undo.NewUseCase(transactionService, leaguePlayerService, matchRepository, leagueRepository)
+	undo.NewControllerHTTP(slackGroup, undoMatchInputAdapterSlack, undoMatchOutputAdapterSlack, undoMatchUseCase)
 
 	port := viper.GetString("port")
 	logger.Get().Infof("Server starting on port %v.", port)

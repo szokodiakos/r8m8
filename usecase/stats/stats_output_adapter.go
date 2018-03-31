@@ -1,4 +1,4 @@
-package leaderboard
+package stats
 
 // OutputAdapter interface
 type OutputAdapter interface {

@@ -91,8 +91,8 @@ func (a *addMatchUseCase) Handle(input Input) (output Output, err error) {
 	return
 }
 
-// NewAddMatchUseCase factory
-func NewAddMatchUseCase(
+// NewUseCase factory
+func NewUseCase(
 	transactionService transaction.Service,
 	playerService player.Service,
 	leagueService league.Service,

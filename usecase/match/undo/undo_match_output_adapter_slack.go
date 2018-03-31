@@ -85,7 +85,7 @@ func getParticipatingLeaguePlayer(matchPlayer entity.MatchPlayer, leaguePlayers 
 	return entity.LeaguePlayer{}
 }
 
-// NewUndoMatchOutputAdapterSlack factory
-func NewUndoMatchOutputAdapterSlack() OutputAdapter {
+// NewOutputAdapterSlack factory
+func NewOutputAdapterSlack() OutputAdapter {
 	return &undoMatchOutputAdapterSlack{}
 }

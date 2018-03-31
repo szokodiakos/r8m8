@@ -34,8 +34,8 @@ func (c *ControllerHTTP) handleOutput(context echo.Context, output Output, err e
 	return context.JSON(http.StatusOK, response)
 }
 
-// NewUndoMatchControllerHTTP factory
-func NewUndoMatchControllerHTTP(
+// NewControllerHTTP factory
+func NewControllerHTTP(
 	routeGroup *echo.Group,
 	inputAdapter InputAdapter,
 	outputAdapter OutputAdapter,

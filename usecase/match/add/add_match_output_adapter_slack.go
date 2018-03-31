@@ -111,7 +111,7 @@ func getRatingChangeText(ratingChange int) string {
 	}
 }
 
-// NewAddMatchOutputAdapterSlack factory
-func NewAddMatchOutputAdapterSlack() OutputAdapter {
+// NewOutputAdapterSlack factory
+func NewOutputAdapterSlack() OutputAdapter {
 	return &addMatchOutputAdapterSlack{}
 }

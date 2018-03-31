@@ -31,8 +31,8 @@ func (g *leaderboardInputAdapterSlack) Handle(data interface{}) (Input, error) {
 	return input, nil
 }
 
-// NewLeaderboardInputAdapterSlack factory
-func NewLeaderboardInputAdapterSlack(slackService slack.Service, leagueSlackService league.SlackService) LeaderboardInputAdapter {
+// NewInputAdapterSlack factory
+func NewInputAdapterSlack(slackService slack.Service, leagueSlackService league.SlackService) InputAdapter {
 	return &leaderboardInputAdapterSlack{
 		slackService:       slackService,
 		leagueSlackService: leagueSlackService,

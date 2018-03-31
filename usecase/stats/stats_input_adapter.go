@@ -1,4 +1,4 @@
-package leaderboard
+package stats
 
 // InputAdapter interface
 type InputAdapter interface {

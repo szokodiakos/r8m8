@@ -31,8 +31,8 @@ func (a *undoMatchInputAdapterSlack) Handle(data interface{}) (Input, error) {
 	return input, err
 }
 
-// NewUndoMatchInputAdapterSlack factory
-func NewUndoMatchInputAdapterSlack(
+// NewInputAdapterSlack factory
+func NewInputAdapterSlack(
 	slackService slack.Service,
 	playerSlackService player.SlackService,
 ) InputAdapter {

@@ -1,4 +1,4 @@
-package add
+package stats
 
 import (
 	"net/http"
@@ -13,20 +13,16 @@ type ControllerHTTP struct {
 	useCase       UseCase
 }
 
-func (c *ControllerHTTP) postMatch(context echo.Context) error {
+func (g *ControllerHTTP) postsStats(context echo.Context) error {
 	body := context.Get("parsedBody").(string)
-	input, err := c.inputAdapter.Handle(body)
+	input, err := g.inputAdapter.Handle(body)
 	if err != nil {
-		return c.handleOutput(context, Output{}, err)
+		return err
 	}
 
-	output, err := c.useCase.Handle(input)
+	output, err := g.useCase.Handle(input)
 
-	return c.handleOutput(context, output, err)
-}
-
-func (c *ControllerHTTP) handleOutput(context echo.Context, output Output, err error) error {
-	response, err := c.outputAdapter.Handle(output, err)
+	response, err := g.outputAdapter.Handle(output, err)
 	if err != nil {
 		return err
 	}
@@ -46,6 +42,6 @@ func NewControllerHTTP(
 		outputAdapter: outputAdapter,
 		useCase:       useCase,
 	}
-	routeGroup.POST("/match/add", handler.postMatch)
+	routeGroup.POST("/stats", handler.postsStats)
 	return handler
 }

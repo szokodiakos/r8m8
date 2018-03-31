@@ -45,8 +45,8 @@ func (a *addMatchInputAdapterSlack) Handle(data interface{}) (Input, error) {
 	return input, err
 }
 
-// NewAddMatchInputAdapterSlack factory
-func NewAddMatchInputAdapterSlack(
+// NewInputAdapterSlack factory
+func NewInputAdapterSlack(
 	slackService slack.Service,
 	playerSlackService player.SlackService,
 	leagueSlackService league.SlackService,

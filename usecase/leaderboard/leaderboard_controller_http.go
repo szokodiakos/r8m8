@@ -6,23 +6,23 @@ import (
 	"github.com/labstack/echo"
 )
 
-// LeaderboardControllerHTTP struct
-type LeaderboardControllerHTTP struct {
-	inputAdapter  LeaderboardInputAdapter
-	outputAdapter LeaderboardOutputAdapter
+// ControllerHTTP struct
+type ControllerHTTP struct {
+	inputAdapter  InputAdapter
+	outputAdapter OutputAdapter
 	useCase       UseCase
 }
 
-func (g *LeaderboardControllerHTTP) postsStatsLeaderboard(context echo.Context) error {
+func (c *ControllerHTTP) postsStatsLeaderboard(context echo.Context) error {
 	body := context.Get("parsedBody").(string)
-	input, err := g.inputAdapter.Handle(body)
+	input, err := c.inputAdapter.Handle(body)
 	if err != nil {
 		return err
 	}
 
-	output, err := g.useCase.Handle(input)
+	output, err := c.useCase.Handle(input)
 
-	response, err := g.outputAdapter.Handle(output, err)
+	response, err := c.outputAdapter.Handle(output, err)
 	if err != nil {
 		return err
 	}
@@ -30,14 +30,14 @@ func (g *LeaderboardControllerHTTP) postsStatsLeaderboard(context echo.Context) 
 	return context.JSON(http.StatusOK, response)
 }
 
-// NewLeaderboardControllerHTTP factory
-func NewLeaderboardControllerHTTP(
+// NewControllerHTTP factory
+func NewControllerHTTP(
 	routeGroup *echo.Group,
-	inputAdapter LeaderboardInputAdapter,
-	outputAdapter LeaderboardOutputAdapter,
+	inputAdapter InputAdapter,
+	outputAdapter OutputAdapter,
 	useCase UseCase,
-) *LeaderboardControllerHTTP {
-	handler := &LeaderboardControllerHTTP{
+) *ControllerHTTP {
+	handler := &ControllerHTTP{
 		inputAdapter:  inputAdapter,
 		outputAdapter: outputAdapter,
 		useCase:       useCase,
