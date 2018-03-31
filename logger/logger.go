@@ -9,9 +9,13 @@ import (
 var log = logrus.New()
 
 // Setup logger
-func Setup(sentryDSN string) {
-	log.Formatter = &logrus.TextFormatter{ForceColors: true}
-	log.Out = colorable.NewColorableStdout()
+func Setup(sentryDSN string, logFormat string) {
+	if logFormat == "json" {
+		log.Formatter = &logrus.JSONFormatter{}
+	} else {
+		log.Formatter = &logrus.TextFormatter{ForceColors: true}
+		log.Out = colorable.NewColorableStdout()
+	}
 
 	if sentryDSN != "" {
 		hook, err := logrus_sentry.NewSentryHook(sentryDSN, []logrus.Level{

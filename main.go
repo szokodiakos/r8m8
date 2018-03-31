@@ -30,7 +30,8 @@ func main() {
 	config.Setup()
 
 	sentryDSN := viper.GetString("sentry_dsn")
-	logger.Setup(sentryDSN)
+	logFormat := viper.GetString("log_format")
+	logger.Setup(sentryDSN, logFormat)
 
 	sqlDialect := viper.GetString("sql_dialect")
 	sqlConnectionString := viper.GetString("sql_connection_string")
