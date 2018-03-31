@@ -6,10 +6,10 @@ import (
 
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
-	"github.com/szokodiakos/r8m8/league/leaderboard"
 	"github.com/szokodiakos/r8m8/logger"
-	"github.com/szokodiakos/r8m8/match/add"
-	"github.com/szokodiakos/r8m8/match/undo"
+	"github.com/szokodiakos/r8m8/usecase/leaderboard"
+	"github.com/szokodiakos/r8m8/usecase/match/add"
+	"github.com/szokodiakos/r8m8/usecase/match/undo"
 
 	"github.com/szokodiakos/r8m8/rating"
 
