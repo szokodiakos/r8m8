@@ -1,9 +1,10 @@
-package entity
+package player
 
 import (
 	"database/sql"
 
 	"github.com/lib/pq"
+	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/player/errors"
 	"github.com/szokodiakos/r8m8/transaction"
 )
@@ -11,8 +12,8 @@ import (
 type playerRepositorySQL struct {
 }
 
-func (p *playerRepositorySQL) GetMultipleByIDs(tr transaction.Transaction, ids []string) ([]Player, error) {
-	players := []Player{}
+func (p *playerRepositorySQL) GetMultipleByIDs(tr transaction.Transaction, ids []string) ([]entity.Player, error) {
+	players := []entity.Player{}
 
 	query := `
 		SELECT
@@ -29,7 +30,7 @@ func (p *playerRepositorySQL) GetMultipleByIDs(tr transaction.Transaction, ids [
 	return players, err
 }
 
-func (p *playerRepositorySQL) Add(tr transaction.Transaction, player Player) (Player, error) {
+func (p *playerRepositorySQL) Add(tr transaction.Transaction, player entity.Player) (entity.Player, error) {
 	var createdID string
 
 	query := `
@@ -43,14 +44,14 @@ func (p *playerRepositorySQL) Add(tr transaction.Transaction, player Player) (Pl
 	sqlTransaction := transaction.GetSQLTransaction(tr)
 	err := sqlTransaction.Get(&createdID, query, player.ID, player.DisplayName)
 	if err != nil {
-		return Player{}, err
+		return entity.Player{}, err
 	}
 
 	return p.GetByID(tr, createdID)
 }
 
-func (p *playerRepositorySQL) GetByID(tr transaction.Transaction, id string) (Player, error) {
-	repoPlayer := Player{}
+func (p *playerRepositorySQL) GetByID(tr transaction.Transaction, id string) (entity.Player, error) {
+	repoPlayer := entity.Player{}
 
 	query := `
 		SELECT 

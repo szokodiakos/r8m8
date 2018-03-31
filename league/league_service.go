@@ -3,6 +3,7 @@ package league
 import (
 	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league/errors"
+	"github.com/szokodiakos/r8m8/player"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -12,8 +13,8 @@ type Service interface {
 }
 
 type leagueService struct {
-	leagueRepository entity.LeagueRepository
-	playerRepository entity.PlayerRepository
+	leagueRepository LeagueRepository
+	playerRepository player.PlayerRepository
 	initialRating    int
 }
 
@@ -67,8 +68,8 @@ func (l *leagueService) createLeaguePlayers(repoPlayers []entity.Player) []entit
 
 // NewService factory
 func NewService(
-	leagueRepository entity.LeagueRepository,
-	playerRepository entity.PlayerRepository,
+	leagueRepository LeagueRepository,
+	playerRepository player.PlayerRepository,
 	initialRating int,
 ) Service {
 	return &leagueService{

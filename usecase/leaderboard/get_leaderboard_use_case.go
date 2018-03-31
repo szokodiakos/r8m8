@@ -1,7 +1,7 @@
 package leaderboard
 
 import (
-	"github.com/szokodiakos/r8m8/entity"
+	"github.com/szokodiakos/r8m8/league"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -12,7 +12,7 @@ type UseCase interface {
 
 type getLeaderboardUseCase struct {
 	transactionService transaction.Service
-	leagueRepository   entity.LeagueRepository
+	leagueRepository   league.LeagueRepository
 }
 
 func (g *getLeaderboardUseCase) Handle(input Input) (Output, error) {
@@ -41,7 +41,7 @@ func (g *getLeaderboardUseCase) Handle(input Input) (Output, error) {
 // NewGetLeaderboardUseCase factory
 func NewGetLeaderboardUseCase(
 	transactionService transaction.Service,
-	leagueRepository entity.LeagueRepository,
+	leagueRepository league.LeagueRepository,
 ) UseCase {
 	return &getLeaderboardUseCase{
 		transactionService: transactionService,

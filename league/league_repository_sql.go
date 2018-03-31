@@ -1,8 +1,9 @@
-package entity
+package league
 
 import (
 	"database/sql"
 
+	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league/errors"
 	"github.com/szokodiakos/r8m8/transaction"
 )
@@ -18,8 +19,8 @@ type leaguePlayerSQL struct {
 	Rating            int    `db:"rating"`
 }
 
-func (l *leagueRepositorySQL) GetByID(tr transaction.Transaction, id string) (League, error) {
-	league := League{}
+func (l *leagueRepositorySQL) GetByID(tr transaction.Transaction, id string) (entity.League, error) {
+	league := entity.League{}
 
 	query := `
 		SELECT
@@ -51,8 +52,8 @@ func (l *leagueRepositorySQL) GetByID(tr transaction.Transaction, id string) (Le
 	return league, nil
 }
 
-func getLeaguePlayersByLeagueID(tr transaction.Transaction, leagueID string) ([]LeaguePlayer, error) {
-	leaguePlayers := []LeaguePlayer{}
+func getLeaguePlayersByLeagueID(tr transaction.Transaction, leagueID string) ([]entity.LeaguePlayer, error) {
+	leaguePlayers := []entity.LeaguePlayer{}
 	leaguePlayersSQL := []leaguePlayerSQL{}
 
 	query := `
@@ -93,8 +94,8 @@ func getLeaguePlayersByLeagueID(tr transaction.Transaction, leagueID string) ([]
 	return leaguePlayers, nil
 }
 
-func mapToLeaguePlayers(leaguePlayersSQL []leaguePlayerSQL) []LeaguePlayer {
-	leaguePlayers := make([]LeaguePlayer, len(leaguePlayersSQL))
+func mapToLeaguePlayers(leaguePlayersSQL []leaguePlayerSQL) []entity.LeaguePlayer {
+	leaguePlayers := make([]entity.LeaguePlayer, len(leaguePlayersSQL))
 	for i := range leaguePlayersSQL {
 		playerID := leaguePlayersSQL[i].PlayerID
 		playerDisplayName := leaguePlayersSQL[i].PlayerDisplayName
@@ -102,21 +103,22 @@ func mapToLeaguePlayers(leaguePlayersSQL []leaguePlayerSQL) []LeaguePlayer {
 		matchCount := leaguePlayersSQL[i].MatchCount
 		winCount := leaguePlayersSQL[i].WinCount
 
-		leaguePlayers[i] = LeaguePlayer{
-			PlayerID:   playerID,
-			Rating:     rating,
-			matchCount: matchCount,
-			winCount:   winCount,
-			player: Player{
-				ID:          playerID,
-				DisplayName: playerDisplayName,
-			},
+		player := entity.Player{
+			ID:          playerID,
+			DisplayName: playerDisplayName,
 		}
+
+		leaguePlayer := entity.LeaguePlayer{
+			PlayerID: playerID,
+			Rating:   rating,
+		}
+
+		leaguePlayers[i] = entity.NewLeaguePlayer(leaguePlayer, player, winCount, matchCount)
 	}
 	return leaguePlayers
 }
 
-func (l *leagueRepositorySQL) Add(tr transaction.Transaction, league League) (League, error) {
+func (l *leagueRepositorySQL) Add(tr transaction.Transaction, league entity.League) (entity.League, error) {
 	query := `
 		INSERT INTO leagues
 			(id, display_name)
@@ -139,7 +141,7 @@ func (l *leagueRepositorySQL) Add(tr transaction.Transaction, league League) (Le
 	return l.GetByID(tr, league.ID)
 }
 
-func addLeaguePlayers(tr transaction.Transaction, leaguePlayers []LeaguePlayer, leagueID string) error {
+func addLeaguePlayers(tr transaction.Transaction, leaguePlayers []entity.LeaguePlayer, leagueID string) error {
 	for i := range leaguePlayers {
 		err := addLeaguePlayer(tr, leaguePlayers[i], leagueID)
 		if err != nil {
@@ -149,7 +151,7 @@ func addLeaguePlayers(tr transaction.Transaction, leaguePlayers []LeaguePlayer, 
 	return nil
 }
 
-func addLeaguePlayer(tr transaction.Transaction, leaguePlayer LeaguePlayer, leagueID string) error {
+func addLeaguePlayer(tr transaction.Transaction, leaguePlayer entity.LeaguePlayer, leagueID string) error {
 	query := `
 			INSERT INTO league_players
 				(player_id, league_id, rating)
@@ -166,7 +168,7 @@ func addLeaguePlayer(tr transaction.Transaction, leaguePlayer LeaguePlayer, leag
 	return err
 }
 
-func (l *leagueRepositorySQL) Update(tr transaction.Transaction, league League) error {
+func (l *leagueRepositorySQL) Update(tr transaction.Transaction, league entity.League) error {
 	err := addLeaguePlayers(tr, league.LeaguePlayers, league.ID)
 	return err
 }

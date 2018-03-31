@@ -1,8 +1,8 @@
 package undo
 
 import (
-	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
+	"github.com/szokodiakos/r8m8/match"
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
@@ -14,8 +14,8 @@ type UseCase interface {
 type undoMatchUseCase struct {
 	transactionService  transaction.Service
 	leaguePlayerService league.PlayerService
-	matchRepository     entity.MatchRepository
-	leagueRepository    entity.LeagueRepository
+	matchRepository     match.MatchRepository
+	leagueRepository    league.LeagueRepository
 }
 
 func (u *undoMatchUseCase) Handle(input Input) (output Output, err error) {
@@ -68,7 +68,7 @@ func (u *undoMatchUseCase) Handle(input Input) (output Output, err error) {
 }
 
 // NewUndoMatchUseCase factory
-func NewUndoMatchUseCase(transactionService transaction.Service, leaguePlayerService league.PlayerService, matchRepository entity.MatchRepository, leagueRepository entity.LeagueRepository) UseCase {
+func NewUndoMatchUseCase(transactionService transaction.Service, leaguePlayerService league.PlayerService, matchRepository match.MatchRepository, leagueRepository league.LeagueRepository) UseCase {
 	return &undoMatchUseCase{
 		transactionService:  transactionService,
 		leaguePlayerService: leaguePlayerService,

@@ -21,9 +21,9 @@ type addMatchUseCase struct {
 	leagueService       league.Service
 	leaguePlayerService league.PlayerService
 	matchService        match.Service
-	matchRepository     entity.MatchRepository
-	playerRepository    entity.PlayerRepository
-	leagueRepository    entity.LeagueRepository
+	matchRepository     match.MatchRepository
+	playerRepository    player.PlayerRepository
+	leagueRepository    league.LeagueRepository
 }
 
 func (a *addMatchUseCase) Handle(input Input) (output Output, err error) {
@@ -98,9 +98,9 @@ func NewAddMatchUseCase(
 	leagueService league.Service,
 	leaguePlayerService league.PlayerService,
 	matchService match.Service,
-	matchRepository entity.MatchRepository,
-	playerRepository entity.PlayerRepository,
-	leagueRepository entity.LeagueRepository,
+	matchRepository match.MatchRepository,
+	playerRepository player.PlayerRepository,
+	leagueRepository league.LeagueRepository,
 ) UseCase {
 	return &addMatchUseCase{
 		transactionService:  transactionService,

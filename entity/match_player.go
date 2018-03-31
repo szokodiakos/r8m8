@@ -12,3 +12,9 @@ type MatchPlayer struct {
 func (m MatchPlayer) LeaguePlayer() LeaguePlayer {
 	return m.leaguePlayer
 }
+
+// NewMatchPlayer factory
+func NewMatchPlayer(matchPlayer MatchPlayer, leaguePlayer LeaguePlayer) MatchPlayer {
+	matchPlayer.leaguePlayer = leaguePlayer
+	return matchPlayer
+}

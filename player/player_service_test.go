@@ -11,7 +11,7 @@ import (
 )
 
 func TestAddAnyMissingPlayersUnevenPlayers(t *testing.T) {
-	playerRepository := &entity.PlayerRepositoryMemory{}
+	playerRepository := &PlayerRepositoryMemory{}
 	playerService := NewService(playerRepository)
 	tr := transaction.Transaction{}
 	unevenPlayers := []entity.Player{
@@ -27,7 +27,7 @@ func TestAddAnyMissingPlayersUnevenPlayers(t *testing.T) {
 }
 
 func TestAddAnyMissingPlayersDuplicatedPlayers(t *testing.T) {
-	playerRepository := &entity.PlayerRepositoryMemory{}
+	playerRepository := &PlayerRepositoryMemory{}
 	playerService := NewService(playerRepository)
 	tr := transaction.Transaction{}
 	duplicatedPlayers := []entity.Player{
@@ -47,7 +47,7 @@ func TestAddAnyMissingPlayersNoMissingPlayers(t *testing.T) {
 		entity.Player{ID: "Two"},
 		entity.Player{ID: "Three"},
 	}
-	playerRepository := &entity.PlayerRepositoryMemory{Players: initialRepoPlayers}
+	playerRepository := &PlayerRepositoryMemory{Players: initialRepoPlayers}
 	playerService := NewService(playerRepository)
 	tr := transaction.Transaction{}
 	nonMissingPlayers := []entity.Player{
@@ -68,7 +68,7 @@ func TestAddAnyMissingPlayersWithMissingPlayers(t *testing.T) {
 		entity.Player{ID: "Two"},
 		entity.Player{ID: "Three"},
 	}
-	playerRepository := &entity.PlayerRepositoryMemory{Players: initialRepoPlayers}
+	playerRepository := &PlayerRepositoryMemory{Players: initialRepoPlayers}
 	playerService := NewService(playerRepository)
 	tr := transaction.Transaction{}
 	missingPlayers := []entity.Player{

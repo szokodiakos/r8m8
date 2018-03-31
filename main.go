@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/league"
 	"github.com/szokodiakos/r8m8/logger"
 	"github.com/szokodiakos/r8m8/usecase/leaderboard"
@@ -45,9 +44,9 @@ func main() {
 	database := sqlDB.NewSQLDB(db, sqlDialect)
 	transactionService := transaction.NewServiceSQL(database)
 
-	playerRepository := entity.NewPlayerRepositorySQL()
-	leagueRepository := entity.NewLeagueRepositorySQL()
-	matchRepository := entity.NewMatchRepositorySQL()
+	playerRepository := player.NewPlayerRepositorySQL()
+	leagueRepository := league.NewLeagueRepositorySQL()
+	matchRepository := match.NewMatchRepositorySQL()
 
 	ratingStrategyElo := rating.NewStrategyElo()
 

@@ -1,9 +1,10 @@
-package entity
+package match
 
 import (
 	"database/sql"
 	"time"
 
+	"github.com/szokodiakos/r8m8/entity"
 	"github.com/szokodiakos/r8m8/match/errors"
 	"github.com/szokodiakos/r8m8/transaction"
 )
@@ -27,7 +28,7 @@ type matchPlayerSQL struct {
 	HasWon             bool   `db:"has_won"`
 }
 
-func (m *matchRepositorySQL) Add(tr transaction.Transaction, match Match) (Match, error) {
+func (m *matchRepositorySQL) Add(tr transaction.Transaction, match entity.Match) (entity.Match, error) {
 	var createdID int64
 
 	query := `
@@ -52,7 +53,7 @@ func (m *matchRepositorySQL) Add(tr transaction.Transaction, match Match) (Match
 	return m.GetByID(tr, createdID)
 }
 
-func addMatchPlayers(tr transaction.Transaction, matchPlayers []MatchPlayer, matchID int64, leagueID string) error {
+func addMatchPlayers(tr transaction.Transaction, matchPlayers []entity.MatchPlayer, matchID int64, leagueID string) error {
 	for i := range matchPlayers {
 		err := addMatchPlayer(tr, matchPlayers[i], matchID, leagueID)
 		if err != nil {
@@ -62,7 +63,7 @@ func addMatchPlayers(tr transaction.Transaction, matchPlayers []MatchPlayer, mat
 	return nil
 }
 
-func addMatchPlayer(tr transaction.Transaction, matchPlayer MatchPlayer, matchID int64, leagueID string) error {
+func addMatchPlayer(tr transaction.Transaction, matchPlayer entity.MatchPlayer, matchID int64, leagueID string) error {
 	query := `
 			INSERT INTO match_players
 				(player_id, league_id, match_id, rating_change, has_won)
@@ -75,8 +76,8 @@ func addMatchPlayer(tr transaction.Transaction, matchPlayer MatchPlayer, matchID
 	return err
 }
 
-func (m *matchRepositorySQL) GetByID(tr transaction.Transaction, matchID int64) (Match, error) {
-	match := Match{}
+func (m *matchRepositorySQL) GetByID(tr transaction.Transaction, matchID int64) (entity.Match, error) {
+	match := entity.Match{}
 	matchSQL := matchSQL{}
 
 	query := `
@@ -115,21 +116,24 @@ func (m *matchRepositorySQL) GetByID(tr transaction.Transaction, matchID int64) 
 	return match, err
 }
 
-func mapToMatch(matchSQL matchSQL) Match {
-	return Match{
+func mapToMatch(matchSQL matchSQL) entity.Match {
+	match := entity.Match{
 		ID:               matchSQL.ID,
 		LeagueID:         matchSQL.LeagueID,
 		CreatedAt:        matchSQL.CreatedAt,
 		ReporterPlayerID: matchSQL.ReporterPlayerID,
-		reporterPlayer: Player{
-			ID:          matchSQL.ReporterPlayerID,
-			DisplayName: matchSQL.ReporterPlayerDisplayName,
-		},
 	}
+
+	reporterPlayer := entity.Player{
+		ID:          matchSQL.ReporterPlayerID,
+		DisplayName: matchSQL.ReporterPlayerDisplayName,
+	}
+
+	return entity.NewMatch(match, reporterPlayer)
 }
 
-func getMatchPlayersByMatchID(tr transaction.Transaction, matchID int64) ([]MatchPlayer, error) {
-	matchPlayers := []MatchPlayer{}
+func getMatchPlayersByMatchID(tr transaction.Transaction, matchID int64) ([]entity.MatchPlayer, error) {
+	matchPlayers := []entity.MatchPlayer{}
 	matchPlayersSQL := []matchPlayerSQL{}
 
 	query := `
@@ -162,8 +166,8 @@ func getMatchPlayersByMatchID(tr transaction.Transaction, matchID int64) ([]Matc
 	return matchPlayers, nil
 }
 
-func mapToMatchPlayers(matchPlayersSQL []matchPlayerSQL) []MatchPlayer {
-	matchPlayers := make([]MatchPlayer, len(matchPlayersSQL))
+func mapToMatchPlayers(matchPlayersSQL []matchPlayerSQL) []entity.MatchPlayer {
+	matchPlayers := make([]entity.MatchPlayer, len(matchPlayersSQL))
 	for i := range matchPlayersSQL {
 		playerID := matchPlayersSQL[i].PlayerID
 		playerDisplayName := matchPlayersSQL[i].PlayerDisplayName
@@ -171,25 +175,29 @@ func mapToMatchPlayers(matchPlayersSQL []matchPlayerSQL) []MatchPlayer {
 		ratingChange := matchPlayersSQL[i].RatingChange
 		hasWon := matchPlayersSQL[i].HasWon
 
-		matchPlayers[i] = MatchPlayer{
+		player := entity.Player{
+			ID:          playerID,
+			DisplayName: playerDisplayName,
+		}
+		leaguePlayer := entity.LeaguePlayer{
+			PlayerID: playerID,
+			Rating:   leaguePlayerRating,
+		}
+		leaguePlayer = entity.NewLeaguePlayer(leaguePlayer, player, 0, 0)
+
+		matchPlayer := entity.MatchPlayer{
 			PlayerID:     playerID,
 			HasWon:       hasWon,
 			RatingChange: ratingChange,
-			leaguePlayer: LeaguePlayer{
-				PlayerID: playerID,
-				Rating:   leaguePlayerRating,
-				player: Player{
-					ID:          playerID,
-					DisplayName: playerDisplayName,
-				},
-			},
 		}
+
+		matchPlayers[i] = entity.NewMatchPlayer(matchPlayer, leaguePlayer)
 	}
 	return matchPlayers
 }
 
-func (m *matchRepositorySQL) GetLatestByReporterPlayerID(tr transaction.Transaction, reporterPlayerID string) (Match, error) {
-	match := Match{}
+func (m *matchRepositorySQL) GetLatestByReporterPlayerID(tr transaction.Transaction, reporterPlayerID string) (entity.Match, error) {
+	match := entity.Match{}
 	matchSQL := matchSQL{}
 
 	query := `
@@ -231,7 +239,7 @@ func (m *matchRepositorySQL) GetLatestByReporterPlayerID(tr transaction.Transact
 	return match, err
 }
 
-func (m *matchRepositorySQL) Remove(tr transaction.Transaction, match Match) error {
+func (m *matchRepositorySQL) Remove(tr transaction.Transaction, match entity.Match) error {
 	query := `
 			DELETE FROM
 				matches m

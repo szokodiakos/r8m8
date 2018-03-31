@@ -23,3 +23,11 @@ func (l LeaguePlayer) MatchCount() int {
 func (l LeaguePlayer) Player() Player {
 	return l.player
 }
+
+// NewLeaguePlayer factory
+func NewLeaguePlayer(leaguePlayer LeaguePlayer, player Player, winCount int, matchCount int) LeaguePlayer {
+	leaguePlayer.player = player
+	leaguePlayer.winCount = winCount
+	leaguePlayer.matchCount = matchCount
+	return leaguePlayer
+}

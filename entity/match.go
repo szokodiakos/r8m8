@@ -40,3 +40,9 @@ func (m Match) getMatchPlayersByHasWon(hasWon bool) []MatchPlayer {
 	}
 	return matchPlayers
 }
+
+// NewMatch factory
+func NewMatch(match Match, reporterPlayer Player) Match {
+	match.reporterPlayer = reporterPlayer
+	return match
+}
