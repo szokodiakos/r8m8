@@ -31,5 +31,15 @@ func (l LeaguePlayers) Swap(i, j int) {
 	l[i], l[j] = l[j], l[i]
 }
 func (l LeaguePlayers) Less(i, j int) bool {
-	return l[i].Rating < l[j].Rating
+	if l[i].Rating != l[j].Rating {
+		return l[i].Rating < l[j].Rating
+	}
+
+	if l[i].winCount != l[j].winCount {
+		return l[i].winCount < l[j].winCount
+	}
+
+	iLoseCount := l[i].matchCount - l[i].winCount
+	jLoseCount := l[j].matchCount - l[j].winCount
+	return iLoseCount > jLoseCount
 }
