@@ -74,6 +74,6 @@ func (p *playerRepositorySQL) GetByID(tr transaction.Transaction, id string) (en
 }
 
 // NewPlayerRepositorySQL factory
-func NewPlayerRepositorySQL() PlayerRepository {
+func NewPlayerRepositorySQL() Repository {
 	return &playerRepositorySQL{}
 }

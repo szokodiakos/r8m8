@@ -12,7 +12,7 @@ type Service interface {
 }
 
 type playerService struct {
-	playerRepository PlayerRepository
+	playerRepository Repository
 }
 
 func (p *playerService) AddAnyMissingPlayers(tr transaction.Transaction, players []entity.Player) error {
@@ -106,7 +106,7 @@ func (p *playerService) addMultiple(tr transaction.Transaction, players []entity
 }
 
 // NewService factory
-func NewService(playerRepository PlayerRepository) Service {
+func NewService(playerRepository Repository) Service {
 	return &playerService{
 		playerRepository: playerRepository,
 	}

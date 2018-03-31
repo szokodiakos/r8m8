@@ -5,19 +5,19 @@ import (
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
-// PlayerRepositoryMemory struct
-type PlayerRepositoryMemory struct {
+// RepositoryMemory struct
+type RepositoryMemory struct {
 	Players []entity.Player
 }
 
 // Add func
-func (p *PlayerRepositoryMemory) Add(tr transaction.Transaction, player entity.Player) (entity.Player, error) {
+func (p *RepositoryMemory) Add(tr transaction.Transaction, player entity.Player) (entity.Player, error) {
 	p.Players = append(p.Players, player)
 	return player, nil
 }
 
 // GetMultipleByIDs func
-func (p *PlayerRepositoryMemory) GetMultipleByIDs(tr transaction.Transaction, ids []string) ([]entity.Player, error) {
+func (p *RepositoryMemory) GetMultipleByIDs(tr transaction.Transaction, ids []string) ([]entity.Player, error) {
 	players := []entity.Player{}
 	for i := range p.Players {
 		for j := range ids {
@@ -30,7 +30,7 @@ func (p *PlayerRepositoryMemory) GetMultipleByIDs(tr transaction.Transaction, id
 }
 
 // GetByID func
-func (p *PlayerRepositoryMemory) GetByID(tr transaction.Transaction, id string) (entity.Player, error) {
+func (p *RepositoryMemory) GetByID(tr transaction.Transaction, id string) (entity.Player, error) {
 	player := entity.Player{}
 	for i := range p.Players {
 		if p.Players[i].ID == id {

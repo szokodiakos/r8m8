@@ -14,7 +14,7 @@ type PlayerService interface {
 
 type leaguePlayerService struct {
 	playerService    player.Service
-	playerRepository player.PlayerRepository
+	playerRepository player.Repository
 	initialRating    int
 }
 
@@ -70,7 +70,7 @@ func isLeaguePlayerParticipatedInMatch(matchPlayer entity.MatchPlayer, leaguePla
 }
 
 // NewPlayerService factory
-func NewPlayerService(playerService player.Service, playerRepository player.PlayerRepository, initialRating int) PlayerService {
+func NewPlayerService(playerService player.Service, playerRepository player.Repository, initialRating int) PlayerService {
 	return &leaguePlayerService{
 		playerService:    playerService,
 		playerRepository: playerRepository,

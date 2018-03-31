@@ -253,6 +253,6 @@ func (m *matchRepositorySQL) Remove(tr transaction.Transaction, match entity.Mat
 }
 
 // NewMatchRepositorySQL factory
-func NewMatchRepositorySQL() MatchRepository {
+func NewMatchRepositorySQL() Repository {
 	return &matchRepositorySQL{}
 }

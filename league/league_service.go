@@ -13,8 +13,8 @@ type Service interface {
 }
 
 type leagueService struct {
-	leagueRepository LeagueRepository
-	playerRepository player.PlayerRepository
+	leagueRepository Repository
+	playerRepository player.Repository
 	initialRating    int
 }
 
@@ -68,8 +68,8 @@ func (l *leagueService) createLeaguePlayers(repoPlayers []entity.Player) []entit
 
 // NewService factory
 func NewService(
-	leagueRepository LeagueRepository,
-	playerRepository player.PlayerRepository,
+	leagueRepository Repository,
+	playerRepository player.Repository,
 	initialRating int,
 ) Service {
 	return &leagueService{

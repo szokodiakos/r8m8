@@ -12,7 +12,7 @@ type UseCase interface {
 
 type getLeaderboardUseCase struct {
 	transactionService transaction.Service
-	leagueRepository   league.LeagueRepository
+	leagueRepository   league.Repository
 }
 
 func (g *getLeaderboardUseCase) Handle(input Input) (Output, error) {
@@ -41,7 +41,7 @@ func (g *getLeaderboardUseCase) Handle(input Input) (Output, error) {
 // NewGetLeaderboardUseCase factory
 func NewGetLeaderboardUseCase(
 	transactionService transaction.Service,
-	leagueRepository league.LeagueRepository,
+	leagueRepository league.Repository,
 ) UseCase {
 	return &getLeaderboardUseCase{
 		transactionService: transactionService,

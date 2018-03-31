@@ -14,8 +14,8 @@ type UseCase interface {
 type undoMatchUseCase struct {
 	transactionService  transaction.Service
 	leaguePlayerService league.PlayerService
-	matchRepository     match.MatchRepository
-	leagueRepository    league.LeagueRepository
+	matchRepository     match.Repository
+	leagueRepository    league.Repository
 }
 
 func (u *undoMatchUseCase) Handle(input Input) (output Output, err error) {
@@ -68,7 +68,7 @@ func (u *undoMatchUseCase) Handle(input Input) (output Output, err error) {
 }
 
 // NewUndoMatchUseCase factory
-func NewUndoMatchUseCase(transactionService transaction.Service, leaguePlayerService league.PlayerService, matchRepository match.MatchRepository, leagueRepository league.LeagueRepository) UseCase {
+func NewUndoMatchUseCase(transactionService transaction.Service, leaguePlayerService league.PlayerService, matchRepository match.Repository, leagueRepository league.Repository) UseCase {
 	return &undoMatchUseCase{
 		transactionService:  transactionService,
 		leaguePlayerService: leaguePlayerService,

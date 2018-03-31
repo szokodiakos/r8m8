@@ -174,6 +174,6 @@ func (l *leagueRepositorySQL) Update(tr transaction.Transaction, league entity.L
 }
 
 // NewLeagueRepositorySQL factory
-func NewLeagueRepositorySQL() LeagueRepository {
+func NewLeagueRepositorySQL() Repository {
 	return &leagueRepositorySQL{}
 }
