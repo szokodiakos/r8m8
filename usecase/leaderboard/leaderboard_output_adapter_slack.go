@@ -9,10 +9,10 @@ import (
 	"github.com/szokodiakos/r8m8/slack"
 )
 
-type getLeaderboardOutputAdapterSlack struct {
+type leaderboardOutputAdapterSlack struct {
 }
 
-func (g *getLeaderboardOutputAdapterSlack) Handle(output Output, err error) (interface{}, error) {
+func (g *leaderboardOutputAdapterSlack) Handle(output Output, err error) (interface{}, error) {
 	if err != nil {
 		return getErrorMessageResponse(err)
 	}
@@ -91,7 +91,7 @@ func getIcon(place int) string {
 	}
 }
 
-// NewGetLeaderboardOutputAdapterSlack factory
-func NewGetLeaderboardOutputAdapterSlack() GetLeaderboardOutputAdapter {
-	return &getLeaderboardOutputAdapterSlack{}
+// NewLeaderboardOutputAdapterSlack factory
+func NewLeaderboardOutputAdapterSlack() LeaderboardOutputAdapter {
+	return &leaderboardOutputAdapterSlack{}
 }

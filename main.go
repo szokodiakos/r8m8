@@ -69,10 +69,10 @@ func main() {
 	slackHTTPErrorHandlerMiddleware := echoExtensions.ErrorHandlerMiddleware(slackErrorHandler)
 	slackGroup := server.Group("/slack", bodyParser, slackTokenVerifier, slackHTTPErrorHandlerMiddleware)
 
-	getLeaderboardInputAdapterSlack := leaderboard.NewGetLeaderboardInputAdapterSlack(slackService, leagueSlackService)
-	getLeaderboardOutputAdapterSlack := leaderboard.NewGetLeaderboardOutputAdapterSlack()
-	getLeaderboardUseCase := leaderboard.NewGetLeaderboardUseCase(transactionService, leagueRepository)
-	leaderboard.NewGetLeaderboardControllerHTTP(slackGroup, getLeaderboardInputAdapterSlack, getLeaderboardOutputAdapterSlack, getLeaderboardUseCase)
+	leaderboardInputAdapterSlack := leaderboard.NewLeaderboardInputAdapterSlack(slackService, leagueSlackService)
+	leaderboardOutputAdapterSlack := leaderboard.NewLeaderboardOutputAdapterSlack()
+	leaderboardUseCase := leaderboard.NewLeaderboardUseCase(transactionService, leagueRepository)
+	leaderboard.NewLeaderboardControllerHTTP(slackGroup, leaderboardInputAdapterSlack, leaderboardOutputAdapterSlack, leaderboardUseCase)
 
 	matchService := match.NewService(ratingStrategyElo)
 

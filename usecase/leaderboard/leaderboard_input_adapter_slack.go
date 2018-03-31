@@ -5,12 +5,12 @@ import (
 	"github.com/szokodiakos/r8m8/slack"
 )
 
-type getLeaderboardInputAdapterSlack struct {
+type leaderboardInputAdapterSlack struct {
 	slackService       slack.Service
 	leagueSlackService league.SlackService
 }
 
-func (g *getLeaderboardInputAdapterSlack) Handle(data interface{}) (Input, error) {
+func (g *leaderboardInputAdapterSlack) Handle(data interface{}) (Input, error) {
 	var input Input
 	values := data.(string)
 
@@ -31,9 +31,9 @@ func (g *getLeaderboardInputAdapterSlack) Handle(data interface{}) (Input, error
 	return input, nil
 }
 
-// NewGetLeaderboardInputAdapterSlack factory
-func NewGetLeaderboardInputAdapterSlack(slackService slack.Service, leagueSlackService league.SlackService) GetLeaderboardInputAdapter {
-	return &getLeaderboardInputAdapterSlack{
+// NewLeaderboardInputAdapterSlack factory
+func NewLeaderboardInputAdapterSlack(slackService slack.Service, leagueSlackService league.SlackService) LeaderboardInputAdapter {
+	return &leaderboardInputAdapterSlack{
 		slackService:       slackService,
 		leagueSlackService: leagueSlackService,
 	}

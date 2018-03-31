@@ -10,12 +10,12 @@ type UseCase interface {
 	Handle(input Input) (Output, error)
 }
 
-type getLeaderboardUseCase struct {
+type leaderboardUseCase struct {
 	transactionService transaction.Service
 	leagueRepository   league.Repository
 }
 
-func (g *getLeaderboardUseCase) Handle(input Input) (Output, error) {
+func (g *leaderboardUseCase) Handle(input Input) (Output, error) {
 	var output Output
 	league := input.League
 
@@ -38,12 +38,12 @@ func (g *getLeaderboardUseCase) Handle(input Input) (Output, error) {
 	return output, err
 }
 
-// NewGetLeaderboardUseCase factory
-func NewGetLeaderboardUseCase(
+// NewLeaderboardUseCase factory
+func NewLeaderboardUseCase(
 	transactionService transaction.Service,
 	leagueRepository league.Repository,
 ) UseCase {
-	return &getLeaderboardUseCase{
+	return &leaderboardUseCase{
 		transactionService: transactionService,
 		leagueRepository:   leagueRepository,
 	}

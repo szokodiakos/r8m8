@@ -6,14 +6,14 @@ import (
 	"github.com/labstack/echo"
 )
 
-// GetLeaderboardControllerHTTP struct
-type GetLeaderboardControllerHTTP struct {
-	inputAdapter  GetLeaderboardInputAdapter
-	outputAdapter GetLeaderboardOutputAdapter
+// LeaderboardControllerHTTP struct
+type LeaderboardControllerHTTP struct {
+	inputAdapter  LeaderboardInputAdapter
+	outputAdapter LeaderboardOutputAdapter
 	useCase       UseCase
 }
 
-func (g *GetLeaderboardControllerHTTP) postsStatsLeaderboard(context echo.Context) error {
+func (g *LeaderboardControllerHTTP) postsStatsLeaderboard(context echo.Context) error {
 	body := context.Get("parsedBody").(string)
 	input, err := g.inputAdapter.Handle(body)
 	if err != nil {
@@ -30,14 +30,14 @@ func (g *GetLeaderboardControllerHTTP) postsStatsLeaderboard(context echo.Contex
 	return context.JSON(http.StatusOK, response)
 }
 
-// NewGetLeaderboardControllerHTTP factory
-func NewGetLeaderboardControllerHTTP(
+// NewLeaderboardControllerHTTP factory
+func NewLeaderboardControllerHTTP(
 	routeGroup *echo.Group,
-	inputAdapter GetLeaderboardInputAdapter,
-	outputAdapter GetLeaderboardOutputAdapter,
+	inputAdapter LeaderboardInputAdapter,
+	outputAdapter LeaderboardOutputAdapter,
 	useCase UseCase,
-) *GetLeaderboardControllerHTTP {
-	handler := &GetLeaderboardControllerHTTP{
+) *LeaderboardControllerHTTP {
+	handler := &LeaderboardControllerHTTP{
 		inputAdapter:  inputAdapter,
 		outputAdapter: outputAdapter,
 		useCase:       useCase,
