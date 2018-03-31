@@ -10,8 +10,8 @@ type getLeaderboardInputAdapterSlack struct {
 	leagueSlackService league.SlackService
 }
 
-func (g *getLeaderboardInputAdapterSlack) Handle(data interface{}) (GetLeaderboardInput, error) {
-	var input GetLeaderboardInput
+func (g *getLeaderboardInputAdapterSlack) Handle(data interface{}) (Input, error) {
+	var input Input
 	values := data.(string)
 
 	requestValues, err := g.slackService.ParseRequestValues(values)
@@ -25,7 +25,7 @@ func (g *getLeaderboardInputAdapterSlack) Handle(data interface{}) (GetLeaderboa
 	channelName := requestValues.ChannelName
 	league := g.leagueSlackService.ToLeague(teamID, teamDomain, channelID, channelName)
 
-	input = GetLeaderboardInput{
+	input = Input{
 		League: league,
 	}
 	return input, nil

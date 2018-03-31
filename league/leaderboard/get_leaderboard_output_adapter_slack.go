@@ -12,7 +12,7 @@ import (
 type getLeaderboardOutputAdapterSlack struct {
 }
 
-func (g *getLeaderboardOutputAdapterSlack) Handle(output GetLeaderboardOutput, err error) (interface{}, error) {
+func (g *getLeaderboardOutputAdapterSlack) Handle(output Output, err error) (interface{}, error) {
 	if err != nil {
 		return getErrorMessageResponse(err)
 	}

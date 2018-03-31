@@ -2,7 +2,7 @@ package leaderboard
 
 import "github.com/szokodiakos/r8m8/entity"
 
-// GetLeaderboardInput struct
-type GetLeaderboardInput struct {
+// Input struct
+type Input struct {
 	League entity.League
 }

@@ -10,7 +10,7 @@ import (
 type GetLeaderboardControllerHTTP struct {
 	inputAdapter  GetLeaderboardInputAdapter
 	outputAdapter GetLeaderboardOutputAdapter
-	useCase       GetLeaderboardUseCase
+	useCase       UseCase
 }
 
 func (g *GetLeaderboardControllerHTTP) postsStatsLeaderboard(context echo.Context) error {
@@ -35,7 +35,7 @@ func NewGetLeaderboardControllerHTTP(
 	routeGroup *echo.Group,
 	inputAdapter GetLeaderboardInputAdapter,
 	outputAdapter GetLeaderboardOutputAdapter,
-	useCase GetLeaderboardUseCase,
+	useCase UseCase,
 ) *GetLeaderboardControllerHTTP {
 	handler := &GetLeaderboardControllerHTTP{
 		inputAdapter:  inputAdapter,

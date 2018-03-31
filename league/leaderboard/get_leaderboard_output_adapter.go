@@ -2,5 +2,5 @@ package leaderboard
 
 // GetLeaderboardOutputAdapter interface
 type GetLeaderboardOutputAdapter interface {
-	Handle(GetLeaderboardOutput, error) (interface{}, error)
+	Handle(Output, error) (interface{}, error)
 }

@@ -5,9 +5,9 @@ import (
 	"github.com/szokodiakos/r8m8/transaction"
 )
 
-// GetLeaderboardUseCase interface
-type GetLeaderboardUseCase interface {
-	Handle(input GetLeaderboardInput) (GetLeaderboardOutput, error)
+// UseCase interface
+type UseCase interface {
+	Handle(input Input) (Output, error)
 }
 
 type getLeaderboardUseCase struct {
@@ -15,8 +15,8 @@ type getLeaderboardUseCase struct {
 	leagueRepository   entity.LeagueRepository
 }
 
-func (g *getLeaderboardUseCase) Handle(input GetLeaderboardInput) (GetLeaderboardOutput, error) {
-	var output GetLeaderboardOutput
+func (g *getLeaderboardUseCase) Handle(input Input) (Output, error) {
+	var output Output
 	league := input.League
 
 	tr, err := g.transactionService.Start()
@@ -31,7 +31,7 @@ func (g *getLeaderboardUseCase) Handle(input GetLeaderboardInput) (GetLeaderboar
 
 	repoLeague.LeaguePlayers = repoLeague.GetTop10LeaguePlayers()
 
-	output = GetLeaderboardOutput{
+	output = Output{
 		League: repoLeague,
 	}
 	err = g.transactionService.Commit(tr)
@@ -42,7 +42,7 @@ func (g *getLeaderboardUseCase) Handle(input GetLeaderboardInput) (GetLeaderboar
 func NewGetLeaderboardUseCase(
 	transactionService transaction.Service,
 	leagueRepository entity.LeagueRepository,
-) GetLeaderboardUseCase {
+) UseCase {
 	return &getLeaderboardUseCase{
 		transactionService: transactionService,
 		leagueRepository:   leagueRepository,
