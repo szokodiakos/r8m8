@@ -65,3 +65,29 @@ func assertLeaguePlayersInOrder(t *testing.T, expectedLeaguePlayers []LeaguePlay
 		assert.Equal(t, expectedLeaguePlayers[i], actualLeaguePlayers[i])
 	}
 }
+
+func TestGetStatsByPlayerID(t *testing.T) {
+	league := League{
+		LeaguePlayers: []LeaguePlayer{
+			LeaguePlayer{PlayerID: "FooPlayer", Rating: 1400},
+			LeaguePlayer{PlayerID: "BarPlayer", Rating: 1500},
+		},
+	}
+
+	leagueStats, err := league.GetStatsByPlayerID("FooPlayer")
+	expectedLeaguePlayer := LeaguePlayer{PlayerID: "FooPlayer", Rating: 1400}
+
+	assert.Nil(t, err)
+	assert.Equal(t, expectedLeaguePlayer, leagueStats.LeaguePlayer)
+	assert.Equal(t, 2, leagueStats.Place)
+}
+
+func TestGetStatsByPlayerIDWithOutExistingPlayer(t *testing.T) {
+	league := League{
+		LeaguePlayers: []LeaguePlayer{},
+	}
+
+	_, err := league.GetStatsByPlayerID("FooPlayer")
+
+	assert.Error(t, err, `League Player with Unique Name "FooPlayer" Not Found.`)
+}
