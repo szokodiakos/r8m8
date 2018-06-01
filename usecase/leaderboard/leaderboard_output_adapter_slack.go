@@ -87,7 +87,7 @@ func getIcon(place int) string {
 	case 10:
 		return ":keycap_ten:"
 	default:
-		return ""
+		return fmt.Sprintf("%v", place)
 	}
 }
 

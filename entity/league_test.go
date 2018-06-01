@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetTop10LeaguePlayers(t *testing.T) {
+func TestGetTopLeaguePlayers(t *testing.T) {
 	league := League{
 		LeaguePlayers: []LeaguePlayer{
 			LeaguePlayer{PlayerID: "MediocrePlayer", Rating: 1800},
@@ -19,10 +19,10 @@ func TestGetTop10LeaguePlayers(t *testing.T) {
 		LeaguePlayer{PlayerID: "MediocrePlayer", Rating: 1800},
 		LeaguePlayer{PlayerID: "BadPlayer", Rating: 1500},
 	}
-	testGetTop10LeaguePlayers(t, expectedLeaguePlayers, league)
+	testGetTopLeaguePlayers(t, expectedLeaguePlayers, league)
 }
 
-func TestGetTop10LeaguePlayersWhenRatingsAreEqual(t *testing.T) {
+func TestGetTopLeaguePlayersWhenRatingsAreEqual(t *testing.T) {
 	league := League{
 		LeaguePlayers: []LeaguePlayer{
 			LeaguePlayer{PlayerID: "MediocrePlayer", Rating: 1500, winCount: 5},
@@ -35,10 +35,10 @@ func TestGetTop10LeaguePlayersWhenRatingsAreEqual(t *testing.T) {
 		LeaguePlayer{PlayerID: "MediocrePlayer", Rating: 1500, winCount: 5},
 		LeaguePlayer{PlayerID: "BadPlayer", Rating: 1500, winCount: 0},
 	}
-	testGetTop10LeaguePlayers(t, expectedLeaguePlayers, league)
+	testGetTopLeaguePlayers(t, expectedLeaguePlayers, league)
 }
 
-func TestGetTop10LeaguePlayersWhenRatingsAndWinCountsAreEqual(t *testing.T) {
+func TestGetTopLeaguePlayersWhenRatingsAndWinCountsAreEqual(t *testing.T) {
 	league := League{
 		LeaguePlayers: []LeaguePlayer{
 			LeaguePlayer{PlayerID: "MediocrePlayer", Rating: 1500, winCount: 10, matchCount: 20},
@@ -51,11 +51,11 @@ func TestGetTop10LeaguePlayersWhenRatingsAndWinCountsAreEqual(t *testing.T) {
 		LeaguePlayer{PlayerID: "MediocrePlayer", Rating: 1500, winCount: 10, matchCount: 20},
 		LeaguePlayer{PlayerID: "BadPlayer", Rating: 1500, winCount: 10, matchCount: 30},
 	}
-	testGetTop10LeaguePlayers(t, expectedLeaguePlayers, league)
+	testGetTopLeaguePlayers(t, expectedLeaguePlayers, league)
 }
 
-func testGetTop10LeaguePlayers(t *testing.T, expectedLeaguePlayers []LeaguePlayer, league League) {
-	orderedLeaguePlayers := league.GetTop10LeaguePlayers()
+func testGetTopLeaguePlayers(t *testing.T, expectedLeaguePlayers []LeaguePlayer, league League) {
+	orderedLeaguePlayers := league.GetTopLeaguePlayers()
 	assertLeaguePlayersInOrder(t, expectedLeaguePlayers, orderedLeaguePlayers)
 }
 

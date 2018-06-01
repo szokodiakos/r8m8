@@ -22,13 +22,9 @@ type League struct {
 	LeaguePlayers LeaguePlayers
 }
 
-// GetTop10LeaguePlayers func
-func (l League) GetTop10LeaguePlayers() LeaguePlayers {
+// GetTopLeaguePlayers func
+func (l League) GetTopLeaguePlayers() LeaguePlayers {
 	sortedLeaguePlayers := l.sortLeaguePlayers()
-
-	if len(sortedLeaguePlayers) > 10 {
-		return sortedLeaguePlayers[:10]
-	}
 	return sortedLeaguePlayers
 }
 

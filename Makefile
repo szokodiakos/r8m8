@@ -2,7 +2,7 @@ build:
 	go build
 
 test:
-	go test ./...
+	go test -timeout 30s ./...
 
 deps:
 	dep ensure

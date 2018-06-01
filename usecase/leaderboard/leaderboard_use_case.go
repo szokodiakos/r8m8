@@ -29,7 +29,7 @@ func (g *leaderboardUseCase) Handle(input Input) (Output, error) {
 		return output, g.transactionService.Rollback(tr, err)
 	}
 
-	repoLeague.LeaguePlayers = repoLeague.GetTop10LeaguePlayers()
+	repoLeague.LeaguePlayers = repoLeague.GetTopLeaguePlayers()
 
 	output = Output{
 		League: repoLeague,
