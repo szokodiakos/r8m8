@@ -40,7 +40,7 @@ func getLeagueNotFoundResponse() slack.MessageResponse {
 
 func getSuccessMessageResponse(league entity.League) slack.MessageResponse {
 	text := fmt.Sprintf(`
-:fire: TOP 10 Leaderboard for *%v* :fire:
+:fire: Leaderboard for *%v* :fire:
 
 %v
 	`, league.DisplayName, getPlayersStatsTexts(league.LeaguePlayers))
