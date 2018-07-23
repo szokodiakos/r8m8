@@ -13,7 +13,7 @@ func (s *strategyElo) Calculate(winnerRatings []int, loserRatings []int) Result 
 
 	adjustedLoserRatings := make([]int, len(loserRatings))
 	for i := range loserRatings {
-		adjustedLoserRatings[i] = calculateRating(loserRatings[i], loserRatings, !isWinner)
+		adjustedLoserRatings[i] = calculateRating(loserRatings[i], winnerRatings, !isWinner)
 	}
 
 	return Result{
